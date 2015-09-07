@@ -28,7 +28,6 @@
 ## webpack 的相关使用
 
 ## 参考教程：[webpack turtorial](http://webpack.github.io/docs/tutorials/getting-started/)
-
 ### 1.安装webpack  
 ####   $ npm install -g webpack
 
@@ -53,8 +52,57 @@
 * 执行下面的命令,编译entry.js 到bundle.js
 $ webpack ./entry.js bundle.js
 
-### 3.创建编译
-#### 在目录下面创建以下几个文件
+### 3.引入其他文件
+* 创建 一个新content.js
+```
+ module.exports = "It works from content.js";
+```
+
+* 修改 entry.js
+```
+  var content = require('./content.js');
+  document.write(content);
+  document.write('ok');
+```
+### 4.第一个加载器
+#### 我们想要加载一个css 文件， webpack 只能处理js, 所以如果我们处理css 文件，我们需要安装css-loader 去处理css文件，我们也需要style-loader 去应用这!些css 文件,比如我们先创建一个style.css 文件
+
+* style.css
+```
+ body{background: yellow;}
+```
+
+* entry.js
+
+```
+ //web pack 可以把css 文件编译成一串js 代码，然后脚本会在页面上动态插入style标签，然后把样式插入进去
+
+  require('./style.css');
+  var content = require('./content.js');
+  document.write(content);
+  document.write('ok');
+```
+
+### 5.`创建一个config 文件 webpack.config.js`
+```
+module.exports = {
+   entry: './entry.js',
+   output: {
+        path: __dirname,
+        filename: 'bundle.js'
+   },
+   module: {
+     loaders: [
+         {test: /\.css$/, loader: 'style!css'}
+     ]
+  }
+};
+```
+然后我们执行$ webpack 命令，webpack 命令会在当前目录去加载webpack.config.js 文件
+
+
+
+
 
 <!-- markdown end -->
 </div>
@@ -98,9 +146,64 @@ $ webpack ./entry.js bundle.js
 $ webpack ./entry.js bundle.js</li>
 </ul>
 
-<h3 id="3">3.创建编译</h3>
+<h3 id="3">3.引入其他文件</h3>
 
-<h4 id="">在目录下面创建以下几个文件</h4>
+<ul>
+<li>创建 一个新content.js</li>
+</ul>
+
+<pre><code> module.exports = "It works from content.js";
+</code></pre>
+
+<ul>
+<li>修改 entry.js</li>
+</ul>
+
+<pre><code>  var content = require('./content.js');
+  document.write(content);
+  document.write('ok');
+</code></pre>
+
+<h3 id="4">4.第一个加载器</h3>
+
+<h4 id="csswebpackjscsscssloadercssstyleloadercssstylecss">我们想要加载一个css 文件， webpack 只能处理js, 所以如果我们处理css 文件，我们需要安装css-loader 去处理css文件，我们也需要style-loader 去应用这!些css 文件,比如我们先创建一个style.css 文件</h4>
+
+<ul>
+<li>style.css</li>
+</ul>
+
+<pre><code> body{background: yellow;}
+</code></pre>
+
+<ul>
+<li>entry.js</li>
+</ul>
+
+<pre><code> //web pack 可以把css 文件编译成一串js 代码，然后脚本会在页面上动态插入style标签，然后把样式插入进去
+
+  require('./style.css');
+  var content = require('./content.js');
+  document.write(content);
+  document.write('ok');
+</code></pre>
+
+<h3 id="5configwebpackconfigjs">5.<code>创建一个config 文件 webpack.config.js</code></h3>
+
+<pre><code>module.exports = {
+   entry: './entry.js',
+   output: {
+        path: __dirname,
+        filename: 'bundle.js'
+   },
+   module: {
+     loaders: [
+         {test: /\.css$/, loader: 'style!css'}
+     ]
+  }
+};
+</code></pre>
+
+<p>然后我们执行$ webpack 命令，webpack 命令会在当前目录去加载webpack.config.js 文件</p>
 <!-- content end -->
 </div>
 <br>
