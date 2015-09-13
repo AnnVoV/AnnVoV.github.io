@@ -25,90 +25,480 @@
 	</div>
 <div id="md" style="display: none;">
 <!-- markdown -->
-## webpack 的相关使用(一)
+## webpack 的相关使用(二)
 
-## 参考教程：[webpack turtorial](http://webpack.github.io/docs/tutorials/getting-started/)
-### 1.安装webpack  
-####   $ npm install -g webpack
+### 参考教程
+[前端乱炖 webpack 相关教程](http://www.html-js.com/article/Webpack%203009)
 
-### 2.创建编译
-#### 在目录下面创建以下几个文件
+### webpack.config.js 相关配置命令：一般我们希望在工程目录下面的src 目录下的img,js,scss 生成到build 下面，我们先按步骤来：
+![](https://raw.githubusercontent.com/AnnVoV/AnnVoV.github.io/master/img/img1.png)
 
-* 创建 entry.js (切入点文件)
+#### 开始写
 ```
- document.write('It works');
-```
-* 创建 index.html
-```
- <html>
-    <head>
-        <meta charset="utf-8">
-    </head>
-    <body>
-        <script type="text/javascript" src="bundle.js" charset="utf-8"></script>
-    </body>
-</html>
-```
-* 执行下面的命令,编译entry.js 到bundle.js
-$ webpack ./entry.js bundle.js
+  var webpack = require('webpack'),
+         //利用ExtractTextPlugin 将scss文件编译生成css 文件
+         ExtractTextPlugin = require("extract-text-webpack-plugin"),
+          path = require('path');
 
-### 3.引入其他文件
-* 创建 一个新content.js
+  //module.exports 对象最常用的属性有如下几个:
+  // entry,output,module,plugins,devtool,resolve
+  
+  module.exports = {
+          //入口文件 要处理的文件内容 
+          entry: {
+				//键名对应真实文件路径
+              index: './src/index.js',
+              index2: './src/index2.js'
+           },
+          //处理后生成的文件位置
+          output: {
+          	path: './build/js',
+          	//这里的[name]对应上面entry 里面的键名
+          	filename: '[name].bundle.js',
+          	//这里的publicPath 对应css 文件中会用到的src路径，这里等会儿会详细阐述[1]
+          	publicPath: ''
+          },
+          //要使用到的加载器
+          module: {
+          	loaders: [
+          		//scss 文件编译为css文件
+          		{
+          			//test为正则表达式
+          			test:/\.scss/, 
+          			//使用sourceMap 方便内容定位
+          			loader: 
+          			ExtractTextPlugin.extract（'css?sourceMap!'+'sass?sourceMap!'）	
+          		}
+          	]
+          },
+          plugins: [
+          	//插件
+          	//它会把引用数量在2个及以上的文件统一打包到vendor.js 中
+          	//这样我们就不会重复引入我们使用的资源不过需要注意的是：
+          	//在页面上我们需要把公共引入的部分先在页面中引入
+          	//所以html页面中我们需要先引入vendor.js 文件
+          	new webpack.optimize.CommonsChunkPlugin({
+          		name: 'vendor',
+          		filename: 'vendor.js',
+          		//最少多少个引入我们就打包到vendor.js文件中
+          		minChunks: 2
+          	}),
+          	//通过使用ExtractTextPlugin插件，就可以使得js 中require的css 独立出来 这样require的scss文件不会放在js 文本里面而是单独的build到/build文件夹下面
+          	new ExtractTextPlugin(
+          		//注意这里生成的文件路径地址是相对于我们output中写的地址的，
+          		//因为我们上面写的output中的path 地址为：./build/js
+          		//所以如果我们想要生成的css文件在build下面，我们需要写生成路径为../css/[name].css
+            		'../css/[name].css',
+            		{allChunks: true},
+            		//这里有一个点还没有搞明白 这里的publicPath 好像不会影响到css文件的路径，反而output中的publicPath 属性会影响到css 文件中的url路径,我们可以做个测试
+            		{publicPath:'/'})
+          ],
+          devtool: 'sourcemap',
+          resolve: {
+          	extensions: ['','.js','.html'],
+          	alias:{
+          		//这里是一些我们的别名文件的配置。下面会进行举例说明
+          	}
+          }          
+   };
+
 ```
- module.exports = "It works from content.js";
+#### 假设我们在src 目录下面有个scss文件夹，下面有个test.scss 文件我们是这么写的
+
+test.scss 样式文件
+
+```
+	@import "./index.scss"
+	
+	.test {
+		color: #003366;
+	}
+	
+	.testImg {
+		width: 100px;
+		height: 100px;
+		background: url('../img/logo.png') no-repeat;
+	}
+	
 ```
 
-* 修改 entry.js
-```
-  var content = require('./content.js');
-  document.write(content);
-  document.write('ok');
-```
-### 4.第一个加载器
-#### 我们想要加载一个css 文件， webpack 只能处理js, 所以如果我们处理css 文件，我们需要安装css-loader 去处理css文件，我们也需要style-loader 去应用这!些css 文件,比如我们先创建一个style.css 文件
-
-* style.css
-```
- body{background: yellow;}
-```
-
-* entry.js
+index.scss 样式文件
 
 ```
- //web pack 可以把css 文件编译成一串js 代码，然后脚本会在页面上动态插入style标签，然后把样式插入进去
+	body {
+	 background: #ddd;
+	 color: orange;
+	}
+	
+	.m-logo {
+	 width: 200px;
+	 height: 196px;
+	 background: url('../img/logo.png');
+	}
 
-  require('./style.css');
-  var content = require('./content.js');
-  document.write(content);
-  document.write('ok');
+```
+#### 然后我们在test.js 里面require 这个scss 文件，因为我们使用了ExtractTextPlugin 所以scss文件编译后会生成到build/css下面
+
+```
+	//引入scss 文件 然后webpack 会编译scss文件
+	require('../scss/test.scss');
+	//这个jquery 我们直接通过npm 安装 直接npm install jquery --save
+	//因为我们的jquery 文件会在多个文件里面引入，所以它会打包到vendor.js文件中
+	var $ = require('jquery');
+	$(function(){
+		console.log('ready now...');
+	});
 ```
 
-### 5.`创建一个config 文件 webpack.config.js`
+#### 然后在test.html 中引入这个js 文件和公共部分的vendor.js 文件
+
 ```
-module.exports = {
-   entry: './entry.js',
-   output: {
-        path: __dirname,
-        filename: 'bundle.js'
-   },
-   module: {
-     loaders: [
-         {test: /\.css$/, loader: 'style!css'}
-     ]
+	<!doctype html>
+	<html lang="en">
+	<head>
+	    <meta charset="UTF-8">
+	    <title>test</title>
+	    <link href="../build/css/test.css" rel="stylesheet"/>
+	</head>
+	<body>
+	    <div>this is a test file.</div>
+	    <img src="../build/img/logo.png"/>
+	    <div>this is a test css file.</div>
+	    <div class="testImg"></div>
+	    <script src="../build/js/vendor.js"></script>
+	    <script src="../build/js/test.bundle.js"></script>
+	</body>
+	</html>	
+```
+
+#### 假设我们在webpack.config.js 文件中修改output 属性中的publicPath 假设修改为：'/src/'那么我们写在test.scss 文件中的background 的url路径是会基于publicPath 为baseUrl 添加的，比如如果我们：
+
+#### webpack.config.js 中这么写：
+
+```
+	module.exports = {
+		output: {
+			path: './build/js',
+          //这里的[name]对应上面entry 里面的键名
+          filename: '[name].bundle.js',
+          publicPath: '/src/'
+		}
+	};
+```
+
+#### test.scss 文件中这么写
+
+```
+	@import "./index.css";
+
+	.test {
+	  color: #003366;
+	}
+	
+	.testImg {
+	  width: 100px;
+	  height: 100px;
+	  /* 图片路径地址 */
+	  background: url('../img/logo.png') no-repeat;
+	}
+```
+#### 那么我们生成的build/css/test.css 文件中生成的css,会是下面这样的，注意看下面的background的url路径：
+
+```
+	body {
+	  background: #ddd;
+	  color: orange; }
+	
+	.m-logo {
+	  width: 200px;
+	  height: 196px;
+	  background: url(/src../img/logo.png); }
+	
+	/*# sourceMappingURL=index.css.map */
+	@charset "UTF-8";
+	.test {
+	  color: #003366; }
+	
+	.testImg {
+	  width: 100px;
+	  height: 100px;
+	  /* 图片路径地址 */
+	  background: url(/src/../img/logo.png) no-repeat; }
+	
+	/*# sourceMappingURL=test.css.map*/
+```
+#### 所以我们一定要配置好publicPath 属性的路径的内容，不然它会影响到build后生成的文件路径的地址
+
+#### ps:补充：webpack -p 会生成编译后的压缩版本
+	
+#### package.json文件的相关写法：
+
+```
+{
+  "name": "webpack-test",
+  "version": "1.0.0",
+  "description": "webpack test",
+  "main": "index.js",
+  "scripts": {
+   // 这个start 属性意味着当我们使用
+   // npm start 命令的时候去执行webpack-dev-server --hot --inline --port 8089 --host 127.0.0.1 这个命令，加上--host的原因是当我用了vpn 代理以后有可能打不开
+    "start": "webpack-dev-server --hot --inline --port 8089 --host 127.0.0.1",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ann",
+  "license": "ISC",
+  "dependencies": {
+    "css-loader": "~0.17.0",
+    "extract-text-webpack-plugin": "~0.8.2",
+    "file-loader": "~0.8.4",
+    "jquery": "~2.1.4",
+    "node-sass": "^3.3.2",
+    "path": "~0.11.14",
+    "sass-loader": "^2.0.1",
+    "style-loader": "~0.12.3",
+    "url-loader": "~0.5.6",
+    "webpack": "~1.12.1",
+    "webpack-dev-server": "^1.10.1"
   }
-};
+}
 ```
-然后我们执行$ webpack 命令，webpack 命令会在当前目录去加载webpack.config.js 文件
-
-
-
-
 
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
 <!-- content -->
+<h2 id="webpack">webpack 的相关使用(二)</h2>
 
+<h3 id="">参考教程</h3>
+
+<p><a href="http://www.html-js.com/article/Webpack%203009">前端乱炖 webpack 相关教程</a></p>
+
+<h3 id="webpackconfigjssrcimgjsscssbuild">webpack.config.js 相关配置命令：一般我们希望在工程目录下面的src 目录下的img,js,scss 生成到build 下面，我们先按步骤来：</h3>
+
+<p><img src="https://raw.githubusercontent.com/AnnVoV/AnnVoV.github.io/master/img/img1.png" alt="" title=""></p>
+
+<h4 id="">开始写</h4>
+
+<pre><code>  var webpack = require('webpack'),
+         //利用ExtractTextPlugin 将scss文件编译生成css 文件
+         ExtractTextPlugin = require("extract-text-webpack-plugin"),
+          path = require('path');
+
+  //module.exports 对象最常用的属性有如下几个:
+  // entry,output,module,plugins,devtool,resolve
+
+  module.exports = {
+          //入口文件 要处理的文件内容 
+          entry: {
+                //键名对应真实文件路径
+              index: './src/index.js',
+              index2: './src/index2.js'
+           },
+          //处理后生成的文件位置
+          output: {
+              path: './build/js',
+              //这里的[name]对应上面entry 里面的键名
+              filename: '[name].bundle.js',
+              //这里的publicPath 对应css 文件中会用到的src路径，这里等会儿会详细阐述[1]
+              publicPath: ''
+          },
+          //要使用到的加载器
+          module: {
+              loaders: [
+                  //scss 文件编译为css文件
+                  {
+                      //test为正则表达式
+                      test:/\.scss/, 
+                      //使用sourceMap 方便内容定位
+                      loader: 
+                      ExtractTextPlugin.extract（'css?sourceMap!'+'sass?sourceMap!'）   
+                  }
+              ]
+          },
+          plugins: [
+              //插件
+              //它会把引用数量在2个及以上的文件统一打包到vendor.js 中
+              //这样我们就不会重复引入我们使用的资源不过需要注意的是：
+              //在页面上我们需要把公共引入的部分先在页面中引入
+              //所以html页面中我们需要先引入vendor.js 文件
+              new webpack.optimize.CommonsChunkPlugin({
+                  name: 'vendor',
+                  filename: 'vendor.js',
+                  //最少多少个引入我们就打包到vendor.js文件中
+                  minChunks: 2
+              }),
+              //通过使用ExtractTextPlugin插件，就可以使得js 中require的css 独立出来 这样require的scss文件不会放在js 文本里面而是单独的build到/build文件夹下面
+              new ExtractTextPlugin(
+                  //注意这里生成的文件路径地址是相对于我们output中写的地址的，
+                  //因为我们上面写的output中的path 地址为：./build/js
+                  //所以如果我们想要生成的css文件在build下面，我们需要写生成路径为../css/[name].css
+                    '../css/[name].css',
+                    {allChunks: true},
+                    //这里有一个点还没有搞明白 这里的publicPath 好像不会影响到css文件的路径，反而output中的publicPath 属性会影响到css 文件中的url路径,我们可以做个测试
+                    {publicPath:'/'})
+          ],
+          devtool: 'sourcemap',
+          resolve: {
+              extensions: ['','.js','.html'],
+              alias:{
+                  //这里是一些我们的别名文件的配置。下面会进行举例说明
+              }
+          }          
+   };
+</code></pre>
+
+<h4 id="srcscsstestscss">假设我们在src 目录下面有个scss文件夹，下面有个test.scss 文件我们是这么写的</h4>
+
+<p>test.scss 样式文件</p>
+
+<pre><code>    @import "./index.scss"
+
+    .test {
+        color: #003366;
+    }
+
+    .testImg {
+        width: 100px;
+        height: 100px;
+        background: url('../img/logo.png') no-repeat;
+    }
+</code></pre>
+
+<p>index.scss 样式文件</p>
+
+<pre><code>    body {
+     background: #ddd;
+     color: orange;
+    }
+
+    .m-logo {
+     width: 200px;
+     height: 196px;
+     background: url('../img/logo.png');
+    }
+</code></pre>
+
+<h4 id="testjsrequirescssextracttextpluginscssbuildcss">然后我们在test.js 里面require 这个scss 文件，因为我们使用了ExtractTextPlugin 所以scss文件编译后会生成到build/css下面</h4>
+
+<pre><code>    //引入scss 文件 然后webpack 会编译scss文件
+    require('../scss/test.scss');
+    //这个jquery 我们直接通过npm 安装 直接npm install jquery --save
+    //因为我们的jquery 文件会在多个文件里面引入，所以它会打包到vendor.js文件中
+    var $ = require('jquery');
+    $(function(){
+        console.log('ready now...');
+    });
+</code></pre>
+
+<h4 id="testhtmljsvendorjs">然后在test.html 中引入这个js 文件和公共部分的vendor.js 文件</h4>
+
+<pre><code>    &lt;!doctype html&gt;
+    &lt;html lang="en"&gt;
+    &lt;head&gt;
+        &lt;meta charset="UTF-8"&gt;
+        &lt;title&gt;test&lt;/title&gt;
+        &lt;link href="../build/css/test.css" rel="stylesheet"/&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;div&gt;this is a test file.&lt;/div&gt;
+        &lt;img src="../build/img/logo.png"/&gt;
+        &lt;div&gt;this is a test css file.&lt;/div&gt;
+        &lt;div class="testImg"&gt;&lt;/div&gt;
+        &lt;script src="../build/js/vendor.js"&gt;&lt;/script&gt;
+        &lt;script src="../build/js/test.bundle.js"&gt;&lt;/script&gt;
+    &lt;/body&gt;
+    &lt;/html&gt; 
+</code></pre>
+
+<h4 id="webpackconfigjsoutputpublicpathsrctestscssbackgroundurlpublicpathbaseurl">假设我们在webpack.config.js 文件中修改output 属性中的publicPath 假设修改为：'/src/'那么我们写在test.scss 文件中的background 的url路径是会基于publicPath 为baseUrl 添加的，比如如果我们：</h4>
+
+<h4 id="webpackconfigjs">webpack.config.js 中这么写：</h4>
+
+<pre><code>    module.exports = {
+        output: {
+            path: './build/js',
+          //这里的[name]对应上面entry 里面的键名
+          filename: '[name].bundle.js',
+          publicPath: '/src/'
+        }
+    };
+</code></pre>
+
+<h4 id="testscss">test.scss 文件中这么写</h4>
+
+<pre><code>    @import "./index.css";
+
+    .test {
+      color: #003366;
+    }
+
+    .testImg {
+      width: 100px;
+      height: 100px;
+      /* 图片路径地址 */
+      background: url('../img/logo.png') no-repeat;
+    }
+</code></pre>
+
+<h4 id="buildcsstestcsscssbackgroundurl">那么我们生成的build/css/test.css 文件中生成的css,会是下面这样的，注意看下面的background的url路径：</h4>
+
+<pre><code>    body {
+      background: #ddd;
+      color: orange; }
+
+    .m-logo {
+      width: 200px;
+      height: 196px;
+      background: url(/src../img/logo.png); }
+
+    /*# sourceMappingURL=index.css.map */
+    @charset "UTF-8";
+    .test {
+      color: #003366; }
+
+    .testImg {
+      width: 100px;
+      height: 100px;
+      /* 图片路径地址 */
+      background: url(/src/../img/logo.png) no-repeat; }
+
+    /*# sourceMappingURL=test.css.map*/
+</code></pre>
+
+<h4 id="publicpathbuild">所以我们一定要配置好publicPath 属性的路径的内容，不然它会影响到build后生成的文件路径的地址</h4>
+
+<h4 id="pswebpackp">ps:补充：webpack -p 会生成编译后的压缩版本</h4>
+
+<h4 id="packagejson">package.json文件的相关写法：</h4>
+
+<pre><code>{
+  "name": "webpack-test",
+  "version": "1.0.0",
+  "description": "webpack test",
+  "main": "index.js",
+  "scripts": {
+   // 这个start 属性意味着当我们使用
+   // npm start 命令的时候去执行webpack-dev-server --hot --inline --port 8089 --host 127.0.0.1 这个命令，加上--host的原因是当我用了vpn 代理以后有可能打不开
+    "start": "webpack-dev-server --hot --inline --port 8089 --host 127.0.0.1",
+    "test": "echo \"Error: no test specified\" &amp;&amp; exit 1"
+  },
+  "author": "ann",
+  "license": "ISC",
+  "dependencies": {
+    "css-loader": "~0.17.0",
+    "extract-text-webpack-plugin": "~0.8.2",
+    "file-loader": "~0.8.4",
+    "jquery": "~2.1.4",
+    "node-sass": "^3.3.2",
+    "path": "~0.11.14",
+    "sass-loader": "^2.0.1",
+    "style-loader": "~0.12.3",
+    "url-loader": "~0.5.6",
+    "webpack": "~1.12.1",
+    "webpack-dev-server": "^1.10.1"
+  }
+}
+</code></pre>
 <!-- content end -->
 </div>
 <br>
