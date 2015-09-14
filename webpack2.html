@@ -19,9 +19,9 @@
     	</ul>
     </div>
 	<div class="wrap-header">
-			<h1>
-            <a href="/" id="title"></a>
-			</h1>
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
 	</div>
 <div id="md" style="display: none;">
 <!-- markdown -->
@@ -38,7 +38,9 @@
   var webpack = require('webpack'),
          //利用ExtractTextPlugin 将scss文件编译生成css 文件
          ExtractTextPlugin = require("extract-text-webpack-plugin"),
-          path = require('path');
+         path = require('path'),
+         //配置lib文件夹的地址，作为我们下面引入lib资源的baseUrl
+         libDir = path.join(__dirname + '/src/js/comm');
 
   //module.exports 对象最常用的属性有如下几个:
   // entry,output,module,plugins,devtool,resolve
@@ -97,12 +99,15 @@
           resolve: {
           	extensions: ['','.js','.html'],
           	alias:{
-          		//这里是一些我们的别名文件的配置。下面会进行举例说明
-          	}
+          		//这里是一些我们的文件的别名设置，下面会进行举例说明
+                       //我们引入一个自己写的公共的验证模块
+                       //这样我们在Js里面直接require('checkModule'); 就可以了
+          	       checkModule:  libDir + '/check.js'
+                }
           }          
    };
-
 ```
+
 #### 假设我们在src 目录下面有个scss文件夹，下面有个test.scss 文件我们是这么写的
 
 test.scss 样式文件
@@ -121,7 +126,6 @@ test.scss 样式文件
 	}
 	
 ```
-
 index.scss 样式文件
 
 ```
@@ -282,7 +286,9 @@ index.scss 样式文件
 <pre><code>  var webpack = require('webpack'),
          //利用ExtractTextPlugin 将scss文件编译生成css 文件
          ExtractTextPlugin = require("extract-text-webpack-plugin"),
-          path = require('path');
+         path = require('path'),
+         //配置lib文件夹的地址，作为我们下面引入lib资源的baseUrl
+         libDir = path.join(__dirname + '/src/js/comm');
 
   //module.exports 对象最常用的属性有如下几个:
   // entry,output,module,plugins,devtool,resolve
@@ -341,8 +347,11 @@ index.scss 样式文件
           resolve: {
               extensions: ['','.js','.html'],
               alias:{
-                  //这里是一些我们的别名文件的配置。下面会进行举例说明
-              }
+                  //这里是一些我们的文件的别名设置，下面会进行举例说明
+                       //我们引入一个自己写的公共的验证模块
+                       //这样我们在Js里面直接require('checkModule'); 就可以了
+                     checkModule:  libDir + '/check.js'
+                }
           }          
    };
 </code></pre>
@@ -424,10 +433,7 @@ index.scss 样式文件
     };
 </code></pre>
 
-<h4 id="testscss">
-    test.scss 文件中这么写，build 时，webpack 后会自动把用到的
-    img 文件放置到build目录下面
-</h4>
+<h4 id="testscss">test.scss 文件中这么写</h4>
 
 <pre><code>    @import "./index.css";
 
@@ -536,23 +542,17 @@ $(document).ready(function() {
         dataType: "json",
         success: function(data) {
             $("#title").html(data.name);
-            var pages = [];
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
             //path
             var path = "webpack2.html";
             //path end
             var now = 0;
-            for (var i = 0; i < data.pages.length; ++i)
-                if (path == data.pages[i].path) {
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
                     now = i;
-                    pages.push({"select": true, "path": data.pages[i].path, "title": data.pages[i].title});
-                }
-                else {
-                    pages.push({"select": false, "path": data.pages[i].path, "title": data.pages[i].title});
-                }
-            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
-            var pagesHtml = pagesTemplate.render({"pages": pages});
-            $("#pages").append(pagesHtml);
-            var post = data.pages[now];
+            var post = data.posts[now];
             var tmp = post.tags.split(" ");
             var tags = [];
             for (var i = 0; i < tmp.length; ++i)
