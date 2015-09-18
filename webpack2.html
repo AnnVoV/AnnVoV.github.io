@@ -58,7 +58,8 @@
           	//这里的[name]对应上面entry 里面的键名
           	filename: '[name].bundle.js',
           	//这里的publicPath 对应css 文件中会用到的src路径，这里等会儿会详细阐述[1]
-          	publicPath: ''
+               // 这里的publicPath 必须要设置，不然的话hot modules 不能做到自动刷新（为什么会这样的原因我不知道。。。）
+          	publicPath: '/build'
           },
           //要使用到的加载器
           module: {
@@ -306,7 +307,8 @@ index.scss 样式文件
               //这里的[name]对应上面entry 里面的键名
               filename: '[name].bundle.js',
               //这里的publicPath 对应css 文件中会用到的src路径，这里等会儿会详细阐述[1]
-              publicPath: ''
+               // 这里的publicPath 必须要设置，不然的话hot modules 不能做到自动刷新（为什么会这样的原因我不知道。。。）
+              publicPath: '/build'
           },
           //要使用到的加载器
           module: {
@@ -436,6 +438,7 @@ index.scss 样式文件
 <h4 id="testscss">test.scss 文件中这么写</h4>
 
 <pre><code>    @import "./index.css";
+
     .test {
       color: #003366;
     }
