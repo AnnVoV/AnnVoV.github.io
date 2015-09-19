@@ -25,12 +25,193 @@
 	</div>
 <div id="md" style="display: none;">
 <!-- markdown -->
+## webpack hot module相关使用的奇怪点
+
+### 1.遇到的问题是： 
+    我们在使用webpack 的时候有时候并不能按照我们的需求自动刷新，比如，当我们修改了css 文件或者js文件，我们通过webpack-dev-server 开启的服务器并没有帮助我们实现自动刷新功能，但是出现没有刷新与可以刷新也是有一定的规律寻的。
+
+### 2.我一开始设计的文件目录结构是如下图所示的：
+![](https://raw.githubusercontent.com/AnnVoV/AnnVoV.github.io/master/img/img4.png)
+
+    我希望我通过webpack build 出来的文件都在build 文件夹下面，并且上面再嵌套一层对应的文件夹，但是我发现这种 output 的目录结构不会使得webpack-dev-server 自动刷新。
+
+
+### 3.重新修改文件目录结构：
+![](https://raw.githubusercontent.com/AnnVoV/AnnVoV.github.io/master/img/img5.png)   
+     
+     如果我重新设置我 build 文件夹下面的目录结构，设置为如下图所示的结构，并不为js文件设置对应的文件夹，会发现这样的时候我的 webpack-dev-server 是可以实现自动刷新的，当然有一点要注意的，我们的 output 的 publicPath 是一定要进行设置的。
+     
+     
+### 4.参考一下目前较为正确的webpack.config.js 的写法，但是为什么会导致这样的原因我还没有查明：
+
+```
+	///执行webpack -p 得到的build文件是经过压缩的
+var webpack = require('webpack'),
+//利用ExtractTextPlugin 生成css 文件夹
+    ExtractTextPlugin = require("extract-text-webpack-plugin"),
+    path = require('path'),
+    libDir = path.join(__dirname, 'public/js/comm');
+
+module.exports = {
+    context: __dirname+'/public',
+    entry: {
+        index: './js/app.js'
+    },
+    output: {
+        //这个output的path是相对于根目录的
+        path: 'build/',
+        //这里的[name] 对应 entry 里面的键
+        filename: '[name].bundle.js',
+        /* 指资源文件的部署路径 我们的项目的html部署在b.alibaba-inc.com/path/to/project/index.html
+         * 我们的js有可能部署在CDN上，比如b.alibaba-inc.com/assets/下
+         * 那么这里的publicPath应该是'/assets'
+         * 这里的publicPath 会影响css中图片引用路径
+         */
+        publicPath: 'build/'
+    },
+    module: {
+        loaders: [
+            {
+                //scss 文件编译并且生成css 文件块而不是直接Include到js文件里面
+                test: /\.scss$/, loader: ExtractTextPlugin.extract(
+                'css?sourceMap!' +
+                'autoprefixer!' +
+                'sass?sourceMap!'
+                )
+            },
+            {
+                //css 中图片资源的src和url
+                //file-loader 后面的参数会根据 ?name=[path][name].[ext]来拷贝对应的文件夹
+                //这个参数后面的路径也是基于output 里面写的路径来写的
+                test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
+                loader: "file-loader?name=./img/[name].[ext]"
+            }
+        ]
+    },
+    plugins: [
+        //插件
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'vendor',
+            filename: 'vendor.js',
+            minChunks: 2
+        }),
+        //通过使用ExtractTextPlugin插件，就可以使得js 中require的css 独立出来
+        new ExtractTextPlugin(
+            './css/[name].css',
+            {allChunks: true},
+            {publicPath:''})
+    ],
+    devtool: "sourcemap",
+    resolve: {
+        extensions: ['', '.js', '.html'],
+        alias: {
+            jquery: libDir + '/jquery.min.js',
+            angular: libDir + '/angular.js',
+            route: libDir + '/angular-route.js',
+            bootstrap: libDir + '/bootstrap.min.js'
+        }
+    }
+};
+
+```
+
+
 
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
 <!-- content -->
+<h2 id="webpackhotmodule">webpack hot module相关使用的奇怪点</h2>
 
+<h3 id="1">1.遇到的问题是：</h3>
+
+<pre><code>我们在使用webpack 的时候有时候并不能按照我们的需求自动刷新，比如，当我们修改了css 文件或者js文件，我们通过webpack-dev-server 开启的服务器并没有帮助我们实现自动刷新功能，但是出现没有刷新与可以刷新也是有一定的规律寻的。
+</code></pre>
+
+<h3 id="2">2.我一开始设计的文件目录结构是如下图所示的：</h3>
+
+<p><img src="https://raw.githubusercontent.com/AnnVoV/AnnVoV.github.io/master/img/img4.png" alt="" title=""></p>
+
+<pre><code>我希望我通过webpack build 出来的文件都在build 文件夹下面，并且上面再嵌套一层对应的文件夹，但是我发现这种 output 的目录结构不会使得webpack-dev-server 自动刷新。
+</code></pre>
+
+<h3 id="3">3.重新修改文件目录结构：</h3>
+
+<p><img src="https://raw.githubusercontent.com/AnnVoV/AnnVoV.github.io/master/img/img5.png" alt="" title="">   </p>
+
+<pre><code> 如果我重新设置我 build 文件夹下面的目录结构，设置为如下图所示的结构，并不为js文件设置对应的文件夹，会发现这样的时候我的 webpack-dev-server 是可以实现自动刷新的，当然有一点要注意的，我们的 output 的 publicPath 是一定要进行设置的。
+</code></pre>
+
+<h3 id="4webpackconfigjs">4.参考一下目前较为正确的webpack.config.js 的写法，但是为什么会导致这样的原因我还没有查明：</h3>
+
+<pre><code>    ///执行webpack -p 得到的build文件是经过压缩的
+var webpack = require('webpack'),
+//利用ExtractTextPlugin 生成css 文件夹
+    ExtractTextPlugin = require("extract-text-webpack-plugin"),
+    path = require('path'),
+    libDir = path.join(__dirname, 'public/js/comm');
+
+module.exports = {
+    context: __dirname+'/public',
+    entry: {
+        index: './js/app.js'
+    },
+    output: {
+        //这个output的path是相对于根目录的
+        path: 'build/',
+        //这里的[name] 对应 entry 里面的键
+        filename: '[name].bundle.js',
+        /* 指资源文件的部署路径 我们的项目的html部署在b.alibaba-inc.com/path/to/project/index.html
+         * 我们的js有可能部署在CDN上，比如b.alibaba-inc.com/assets/下
+         * 那么这里的publicPath应该是'/assets'
+         * 这里的publicPath 会影响css中图片引用路径
+         */
+        publicPath: 'build/'
+    },
+    module: {
+        loaders: [
+            {
+                //scss 文件编译并且生成css 文件块而不是直接Include到js文件里面
+                test: /\.scss$/, loader: ExtractTextPlugin.extract(
+                'css?sourceMap!' +
+                'autoprefixer!' +
+                'sass?sourceMap!'
+                )
+            },
+            {
+                //css 中图片资源的src和url
+                //file-loader 后面的参数会根据 ?name=[path][name].[ext]来拷贝对应的文件夹
+                //这个参数后面的路径也是基于output 里面写的路径来写的
+                test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
+                loader: "file-loader?name=./img/[name].[ext]"
+            }
+        ]
+    },
+    plugins: [
+        //插件
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'vendor',
+            filename: 'vendor.js',
+            minChunks: 2
+        }),
+        //通过使用ExtractTextPlugin插件，就可以使得js 中require的css 独立出来
+        new ExtractTextPlugin(
+            './css/[name].css',
+            {allChunks: true},
+            {publicPath:''})
+    ],
+    devtool: "sourcemap",
+    resolve: {
+        extensions: ['', '.js', '.html'],
+        alias: {
+            jquery: libDir + '/jquery.min.js',
+            angular: libDir + '/angular.js',
+            route: libDir + '/angular-route.js',
+            bootstrap: libDir + '/bootstrap.min.js'
+        }
+    }
+};
+</code></pre>
 <!-- content end -->
 </div>
 <br>
