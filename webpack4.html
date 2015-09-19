@@ -1,0 +1,500 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## webpack hot module 奇怪点解决办法
+
+## 1. 问题回顾
+ &nbsp; &nbsp; &nbsp; &nbsp;之前遇到的情况是我们在webpack.config.js 中output 里面配置的publicPath 会影响到我们hot modules 对文件的监听，如果写的不对会导致autorefresh 并没有生效。 github 上有对于这个问题的说明，意思是我们在webpack.config.js 中output里面设置的publicpath 的指向可能不对，所以如果我们如果在开发过程中，想要实现实时刷新，我们可以设置output 的publicPath 为绝对路径，比如我写的：
+
+```
+/* webpack.config.js 文件的相关配置 */
+   var webpack = require('webpack'),
+   //利用ExtractTextPlugin 生成css 文件夹
+    ExtractTextPlugin = require("extract-text-webpack-plugin"),
+    path = require('path'),
+    libDir = path.join(__dirname, 'public/js/comm');
+
+    module.exports = {
+        context: __dirname + '/public',
+        entry: {
+              index: './js/app.js'
+         },
+         output: {
+             //这个output的path是相对于根目录的
+              path: 'build/js',
+             //这里的[name] 对应 entry 里面的键
+              filename: '[name].bundle.js',
+            //这里我们的publicPath 设置为绝对路径，实现autorefresh
+              publicPath: 'http://10.183.12.78:8088/build/'
+         }
+   };
+```
+
+## 2.引发了另一个问题
+&nbsp; &nbsp; &nbsp; &nbsp; 因为我们不希望我们的css 文件是写在js里面的，而是希望直接被打包到build 文件夹目录下面的，所以我们引入了extract-text-webpack-plugin 这个loader 帮助我们实现了css 文件的块状载入。
+&nbsp; &nbsp; &nbsp; &nbsp;我们会发现我们在css 里面不可避免的会引入图片，会写到url('../img/test.png')， 如果需要url 正确的引入，我们需要用到file-loader 模块，所以我们在我们的webpack.config.js 中会引入file-loader 模块
+```
+   module.exports = {
+          context: __dirname + '/public',
+          entry: {
+              index: './js/app.js'
+           },
+          output: {
+               //这个output的path是相对于根目录的
+               path: 'build/js',
+               //这里的[name] 对应 entry 里面的键
+                filename: '[name].bundle.js', 
+                publicPath: 'http://10.183.12.78:8088/build/'
+          },
+         module: {
+            loaders: [ 
+                 {
+                     .... 处理sass 的相关loader  ...
+                 },
+                {
+                 test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.eot$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
+                 loader: 'file-loader?name=../img/[name].[ext]'
+                }
+              ]
+         }
+   };
+
+``` 
+
+## 注意：
+&nbsp;&nbsp;&nbsp;&nbsp; 我们使用file-loader 的时候，我们使用了参数?name=../img/[name].[ext] 这样它会把css里面用到的相关的url() 资源文件拷贝到../img/[name].[ext]下面，这里的.. 是相对于谁而言呢？
+  
+## 切记：file-loader后面的name参数是基于谁的？
+&nbsp;&nbsp;&nbsp;&nbsp; 这里的../的参考位置是基于我们在output 里面设置的path而言的，即对于我上面写的webpack.config.js 来说即是相对于build/js 路径而言的。所以我的url() 引用到的相关资源会被拷贝到build/img 下面。
+
+## 因为设置output的publicPath 引发的问题：
+&nbsp;&nbsp;&nbsp;&nbsp; 我们知道当我们设置了publicPath 以后，会影响我们scss文件编译后生成的css 文件的url() 中的路径。举个例子：
+
+scss 文件里面我们是像下面这么写的：
+index.scss 文件
+```
+     .test {
+            width: 20px;
+            height: 20px;
+            background: url('../img/test.png');
+      }
+```
+
+因为我们设置了output 的publicpath ，所以我们会发现，我们编译出的css 文件会变成：
+index.css 文件
+```
+   .test {
+        width: 20px;
+        height: 20px;
+        background: url(http://10.183.12.78:8088/build/../img/test.png); 
+   }
+
+```
+我们会发现我们的background 的url 是publicPath 拼接上我们的scss中的url的，我们publicPath 必须这么写，那么我们的css 文件中的url的路径就会不对，如何处理呢？
+
+## 3.修复publicPath 问题：
+我们对scss 文件进行编译我们用到了下面这段相关loader 的配置：
+
+```
+...
+   loaders: [
+            {
+                //scss 文件编译并且生成css 文件块而不是直接Include到js文件里面
+                test: /\.scss$/, loader: ExtractTextPlugin.extract(
+                'css?sourceMap!' +
+                'autoprefixer!' +
+                'sass?sourceMap!'
+                ,
+                {
+                    //我们通过在这里设置publicPath 来覆盖之前我们在output中写的publicPath
+                    //我们在output 中设置的publicPath 会影响我们的hot-module的监听
+                    publicPath: ''
+                }
+            )
+            },
+```
+
+我们通过在loader 的后面加上一段{option: 配置} 来实现我们对publicPath 的覆盖，此处，我们设置了publicPath:'', 这样我们的css 文件里面的url 的路径就是background: url('../img/test.png') 就是我们希望使用的url 路径了。
+
+## 4. 最终完整的值得参考的webpack.config.js 文件：
+
+```
+     ///执行webpack -p 得到的build文件是经过压缩的
+var webpack = require('webpack'),
+//利用ExtractTextPlugin 生成css 文件夹
+    ExtractTextPlugin = require("extract-text-webpack-plugin"),
+    path = require('path'),
+    libDir = path.join(__dirname, 'public/js/comm');
+
+module.exports = {
+    context: __dirname + '/public',
+    entry: {
+        index: './js/app.js'
+    },
+    output: {
+        //这个output的path是相对于根目录的
+        path: 'build/js',
+        //这里的[name] 对应 entry 里面的键
+        filename: '[name].bundle.js',
+        /* 指资源文件的部署路径 我们的项目的html部署在b.alibaba-inc.com/path/to/project/index.html
+         * 我们的js有可能部署在CDN上，比如b.alibaba-inc.com/assets/下
+         * 那么这里的publicPath应该是'/assets'
+         * 这里的publicPath 会影响css中图片引用路径
+         */
+        publicPath: 'http://10.183.12.78:8088/build/'
+    },
+    module: {
+        loaders: [
+            {
+                //scss 文件编译并且生成css 文件块而不是直接Include到js文件里面
+                test: /\.scss$/, loader: ExtractTextPlugin.extract(
+                'css?sourceMap!' +
+                'autoprefixer!' +
+                'sass?sourceMap!'
+                ,
+                {
+                    //我们通过在这里设置publicPath 来覆盖之前我们在output中写的publicPath
+                    //我们在output 中设置的publicPath 会影响我们的hot-module的监听
+                    publicPath: ''
+                }
+            )
+            },
+            {
+                //css 中图片资源的src和url
+                //file-loader 后面的参数会根据 ?name=[path][name].[ext]来拷贝对应的文件夹
+                //这个参数后面的路径也是基于output 里面写的路径来写的
+                test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.eot$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
+                //这个路径是基于js文件的路径去写的
+                loader: "file-loader?name=../img/[name].[ext]"
+            }
+        ]
+    },
+    plugins: [
+        //插件
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'vendor',
+            filename: 'vendor.js',
+            minChunks: 2
+        }),
+        //通过使用ExtractTextPlugin插件，就可以使得js 中require的css 独立出来
+        new ExtractTextPlugin(
+            '../css/[name].css',
+            {
+                allChunks: true
+            }
+        )
+    ],
+    devtool: "sourcemap",
+    resolve: {
+        extensions: ['', '.js', '.html'],
+        alias: {
+            jquery: libDir + '/jquery.min.js',
+            angular: libDir + '/angular.js',
+            route: libDir + '/angular-route.js',
+            bootstrap: libDir + '/bootstrap.min.js'
+        }
+    }
+};
+
+```
+
+
+
+
+    
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="webpackhotmodule">webpack hot module 奇怪点解决办法</h2>
+
+<h2 id="1">1. 问题回顾</h2>
+
+<p>&nbsp; &nbsp; &nbsp; &nbsp;之前遇到的情况是我们在webpack.config.js 中output 里面配置的publicPath 会影响到我们hot modules 对文件的监听，如果写的不对会导致autorefresh 并没有生效。 github 上有对于这个问题的说明，意思是我们在webpack.config.js 中output里面设置的publicpath 的指向可能不对，所以如果我们如果在开发过程中，想要实现实时刷新，我们可以设置output 的publicPath 为绝对路径，比如我写的：</p>
+
+<pre><code>/* webpack.config.js 文件的相关配置 */
+   var webpack = require('webpack'),
+   //利用ExtractTextPlugin 生成css 文件夹
+    ExtractTextPlugin = require("extract-text-webpack-plugin"),
+    path = require('path'),
+    libDir = path.join(__dirname, 'public/js/comm');
+
+    module.exports = {
+        context: __dirname + '/public',
+        entry: {
+              index: './js/app.js'
+         },
+         output: {
+             //这个output的path是相对于根目录的
+              path: 'build/js',
+             //这里的[name] 对应 entry 里面的键
+              filename: '[name].bundle.js',
+            //这里我们的publicPath 设置为绝对路径，实现autorefresh
+              publicPath: 'http://10.183.12.78:8088/build/'
+         }
+   };
+</code></pre>
+
+<h2 id="2">2.引发了另一个问题</h2>
+
+<p>&nbsp; &nbsp; &nbsp; &nbsp; 因为我们不希望我们的css 文件是写在js里面的，而是希望直接被打包到build 文件夹目录下面的，所以我们引入了extract-text-webpack-plugin 这个loader 帮助我们实现了css 文件的块状载入。
+&nbsp; &nbsp; &nbsp; &nbsp;我们会发现我们在css 里面不可避免的会引入图片，会写到url('../img/test.png')， 如果需要url 正确的引入，我们需要用到file-loader 模块，所以我们在我们的webpack.config.js 中会引入file-loader 模块</p>
+
+<pre><code>   module.exports = {
+          context: __dirname + '/public',
+          entry: {
+              index: './js/app.js'
+           },
+          output: {
+               //这个output的path是相对于根目录的
+               path: 'build/js',
+               //这里的[name] 对应 entry 里面的键
+                filename: '[name].bundle.js', 
+                publicPath: 'http://10.183.12.78:8088/build/'
+          },
+         module: {
+            loaders: [ 
+                 {
+                     .... 处理sass 的相关loader  ...
+                 },
+                {
+                 test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.eot$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
+                 loader: 'file-loader?name=../img/[name].[ext]'
+                }
+              ]
+         }
+   };
+</code></pre>
+
+<h2 id="">注意：</h2>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; 我们使用file-loader 的时候，我们使用了参数?name=../img/[name].[ext] 这样它会把css里面用到的相关的url() 资源文件拷贝到../img/[name].[ext]下面，这里的.. 是相对于谁而言呢？</p>
+
+<h2 id="fileloadername">切记：file-loader后面的name参数是基于谁的？</h2>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; 这里的../的参考位置是基于我们在output 里面设置的path而言的，即对于我上面写的webpack.config.js 来说即是相对于build/js 路径而言的。所以我的url() 引用到的相关资源会被拷贝到build/img 下面。</p>
+
+<h2 id="outputpublicpath">因为设置output的publicPath 引发的问题：</h2>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; 我们知道当我们设置了publicPath 以后，会影响我们scss文件编译后生成的css 文件的url() 中的路径。举个例子：</p>
+
+<p>scss 文件里面我们是像下面这么写的：
+index.scss 文件</p>
+
+<pre><code>     .test {
+            width: 20px;
+            height: 20px;
+            background: url('../img/test.png');
+      }
+</code></pre>
+
+<p>因为我们设置了output 的publicpath ，所以我们会发现，我们编译出的css 文件会变成：
+index.css 文件</p>
+
+<pre><code>   .test {
+        width: 20px;
+        height: 20px;
+        background: url(http://10.183.12.78:8088/build/../img/test.png); 
+   }
+</code></pre>
+
+<p>我们会发现我们的background 的url 是publicPath 拼接上我们的scss中的url的，我们publicPath 必须这么写，那么我们的css 文件中的url的路径就会不对，如何处理呢？</p>
+
+<h2 id="3publicpath">3.修复publicPath 问题：</h2>
+
+<p>我们对scss 文件进行编译我们用到了下面这段相关loader 的配置：</p>
+
+<pre><code>...
+   loaders: [
+            {
+                //scss 文件编译并且生成css 文件块而不是直接Include到js文件里面
+                test: /\.scss$/, loader: ExtractTextPlugin.extract(
+                'css?sourceMap!' +
+                'autoprefixer!' +
+                'sass?sourceMap!'
+                ,
+                {
+                    //我们通过在这里设置publicPath 来覆盖之前我们在output中写的publicPath
+                    //我们在output 中设置的publicPath 会影响我们的hot-module的监听
+                    publicPath: ''
+                }
+            )
+            },
+</code></pre>
+
+<p>我们通过在loader 的后面加上一段{option: 配置} 来实现我们对publicPath 的覆盖，此处，我们设置了publicPath:'', 这样我们的css 文件里面的url 的路径就是background: url('../img/test.png') 就是我们希望使用的url 路径了。</p>
+
+<h2 id="4webpackconfigjs">4. 最终完整的值得参考的webpack.config.js 文件：</h2>
+
+<pre><code>     ///执行webpack -p 得到的build文件是经过压缩的
+var webpack = require('webpack'),
+//利用ExtractTextPlugin 生成css 文件夹
+    ExtractTextPlugin = require("extract-text-webpack-plugin"),
+    path = require('path'),
+    libDir = path.join(__dirname, 'public/js/comm');
+
+module.exports = {
+    context: __dirname + '/public',
+    entry: {
+        index: './js/app.js'
+    },
+    output: {
+        //这个output的path是相对于根目录的
+        path: 'build/js',
+        //这里的[name] 对应 entry 里面的键
+        filename: '[name].bundle.js',
+        /* 指资源文件的部署路径 我们的项目的html部署在b.alibaba-inc.com/path/to/project/index.html
+         * 我们的js有可能部署在CDN上，比如b.alibaba-inc.com/assets/下
+         * 那么这里的publicPath应该是'/assets'
+         * 这里的publicPath 会影响css中图片引用路径
+         */
+        publicPath: 'http://10.183.12.78:8088/build/'
+    },
+    module: {
+        loaders: [
+            {
+                //scss 文件编译并且生成css 文件块而不是直接Include到js文件里面
+                test: /\.scss$/, loader: ExtractTextPlugin.extract(
+                'css?sourceMap!' +
+                'autoprefixer!' +
+                'sass?sourceMap!'
+                ,
+                {
+                    //我们通过在这里设置publicPath 来覆盖之前我们在output中写的publicPath
+                    //我们在output 中设置的publicPath 会影响我们的hot-module的监听
+                    publicPath: ''
+                }
+            )
+            },
+            {
+                //css 中图片资源的src和url
+                //file-loader 后面的参数会根据 ?name=[path][name].[ext]来拷贝对应的文件夹
+                //这个参数后面的路径也是基于output 里面写的路径来写的
+                test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.eot$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
+                //这个路径是基于js文件的路径去写的
+                loader: "file-loader?name=../img/[name].[ext]"
+            }
+        ]
+    },
+    plugins: [
+        //插件
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'vendor',
+            filename: 'vendor.js',
+            minChunks: 2
+        }),
+        //通过使用ExtractTextPlugin插件，就可以使得js 中require的css 独立出来
+        new ExtractTextPlugin(
+            '../css/[name].css',
+            {
+                allChunks: true
+            }
+        )
+    ],
+    devtool: "sourcemap",
+    resolve: {
+        extensions: ['', '.js', '.html'],
+        alias: {
+            jquery: libDir + '/jquery.min.js',
+            angular: libDir + '/angular.js',
+            route: libDir + '/angular-route.js',
+            bootstrap: libDir + '/bootstrap.min.js'
+        }
+    }
+};
+</code></pre>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "webpack4.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
