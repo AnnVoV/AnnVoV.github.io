@@ -45,7 +45,7 @@
 ### 4.参考一下目前较为正确的webpack.config.js 的写法，但是为什么会导致这样的原因我还没有查明：
 
 ```
-	///执行webpack -p 得到的build文件是经过压缩的
+///执行webpack -p 得到的build文件是经过压缩的
 var webpack = require('webpack'),
 //利用ExtractTextPlugin 生成css 文件夹
     ExtractTextPlugin = require("extract-text-webpack-plugin"),
@@ -59,7 +59,7 @@ module.exports = {
     },
     output: {
         //这个output的path是相对于根目录的
-        path: 'build/',
+        path: 'build',
         //这里的[name] 对应 entry 里面的键
         filename: '[name].bundle.js',
         /* 指资源文件的部署路径 我们的项目的html部署在b.alibaba-inc.com/path/to/project/index.html
@@ -84,7 +84,7 @@ module.exports = {
                 //file-loader 后面的参数会根据 ?name=[path][name].[ext]来拷贝对应的文件夹
                 //这个参数后面的路径也是基于output 里面写的路径来写的
                 test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
-                loader: "file-loader?name=./img/[name].[ext]"
+                loader: "file-loader?name=img/[name].[ext]"
             }
         ]
     },
@@ -112,9 +112,10 @@ module.exports = {
         }
     }
 };
-
 ```
 
+文件目录结构设计请参照下图：
+![](https://raw.githubusercontent.com/AnnVoV/AnnVoV.github.io/master/img/img6.png)
 
 
 <!-- markdown end -->
@@ -144,7 +145,7 @@ module.exports = {
 
 <h3 id="4webpackconfigjs">4.参考一下目前较为正确的webpack.config.js 的写法，但是为什么会导致这样的原因我还没有查明：</h3>
 
-<pre><code>    ///执行webpack -p 得到的build文件是经过压缩的
+<pre><code>///执行webpack -p 得到的build文件是经过压缩的
 var webpack = require('webpack'),
 //利用ExtractTextPlugin 生成css 文件夹
     ExtractTextPlugin = require("extract-text-webpack-plugin"),
@@ -158,7 +159,7 @@ module.exports = {
     },
     output: {
         //这个output的path是相对于根目录的
-        path: 'build/',
+        path: 'build',
         //这里的[name] 对应 entry 里面的键
         filename: '[name].bundle.js',
         /* 指资源文件的部署路径 我们的项目的html部署在b.alibaba-inc.com/path/to/project/index.html
@@ -183,7 +184,7 @@ module.exports = {
                 //file-loader 后面的参数会根据 ?name=[path][name].[ext]来拷贝对应的文件夹
                 //这个参数后面的路径也是基于output 里面写的路径来写的
                 test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
-                loader: "file-loader?name=./img/[name].[ext]"
+                loader: "file-loader?name=img/[name].[ext]"
             }
         ]
     },
@@ -212,6 +213,9 @@ module.exports = {
     }
 };
 </code></pre>
+
+<p>文件目录结构设计请参照下图：
+<img src="https://raw.githubusercontent.com/AnnVoV/AnnVoV.github.io/master/img/img6.png" alt="" title=""></p>
 <!-- content end -->
 </div>
 <br>
