@@ -45,7 +45,7 @@
 ### 4.参考一下目前较为正确的webpack.config.js 的写法，但是为什么会导致这样的原因我还没有查明：
 
 ```
-///执行webpack -p 得到的build文件是经过压缩的
+//执行webpack -p 得到的build文件是经过压缩的
 var webpack = require('webpack'),
 //利用ExtractTextPlugin 生成css 文件夹
     ExtractTextPlugin = require("extract-text-webpack-plugin"),
@@ -67,7 +67,7 @@ module.exports = {
          * 那么这里的publicPath应该是'/assets'
          * 这里的publicPath 会影响css中图片引用路径
          */
-        publicPath: 'build/'
+        publicPath: '../'
     },
     module: {
         loaders: [
@@ -83,7 +83,7 @@ module.exports = {
                 //css 中图片资源的src和url
                 //file-loader 后面的参数会根据 ?name=[path][name].[ext]来拷贝对应的文件夹
                 //这个参数后面的路径也是基于output 里面写的路径来写的
-                test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
+                test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.eot$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
                 loader: "file-loader?name=img/[name].[ext]"
             }
         ]
@@ -98,8 +98,8 @@ module.exports = {
         //通过使用ExtractTextPlugin插件，就可以使得js 中require的css 独立出来
         new ExtractTextPlugin(
             './css/[name].css',
-            {allChunks: true},
-            {publicPath:''})
+            {allChunks: true}
+            )
     ],
     devtool: "sourcemap",
     resolve: {
@@ -112,6 +112,7 @@ module.exports = {
         }
     }
 };
+
 ```
 
 文件目录结构设计请参照下图：
@@ -145,7 +146,7 @@ module.exports = {
 
 <h3 id="4webpackconfigjs">4.参考一下目前较为正确的webpack.config.js 的写法，但是为什么会导致这样的原因我还没有查明：</h3>
 
-<pre><code>///执行webpack -p 得到的build文件是经过压缩的
+<pre><code>//执行webpack -p 得到的build文件是经过压缩的
 var webpack = require('webpack'),
 //利用ExtractTextPlugin 生成css 文件夹
     ExtractTextPlugin = require("extract-text-webpack-plugin"),
@@ -167,7 +168,7 @@ module.exports = {
          * 那么这里的publicPath应该是'/assets'
          * 这里的publicPath 会影响css中图片引用路径
          */
-        publicPath: 'build/'
+        publicPath: '../'
     },
     module: {
         loaders: [
@@ -183,7 +184,7 @@ module.exports = {
                 //css 中图片资源的src和url
                 //file-loader 后面的参数会根据 ?name=[path][name].[ext]来拷贝对应的文件夹
                 //这个参数后面的路径也是基于output 里面写的路径来写的
-                test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
+                test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.eot$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
                 loader: "file-loader?name=img/[name].[ext]"
             }
         ]
@@ -198,8 +199,8 @@ module.exports = {
         //通过使用ExtractTextPlugin插件，就可以使得js 中require的css 独立出来
         new ExtractTextPlugin(
             './css/[name].css',
-            {allChunks: true},
-            {publicPath:''})
+            {allChunks: true}
+            )
     ],
     devtool: "sourcemap",
     resolve: {
