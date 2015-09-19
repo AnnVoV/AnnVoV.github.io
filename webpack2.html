@@ -33,6 +33,17 @@
 ### webpack.config.js 相关配置命令：一般我们希望在工程目录下面的src 目录下的img,js,scss 生成到build 下面，我们先按步骤来：
 ![](https://raw.githubusercontent.com/AnnVoV/AnnVoV.github.io/master/img/img1.png)
 
+
+### 有关配置文件的几个注意点：
+*  &nbsp;&nbsp;&nbsp;&nbsp;我们会用到ExtractTextPlugin 来帮助我们将css 文件打包为块文件而非直接与js文件打包到一起
+
+*   &nbsp;&nbsp;&nbsp;&nbsp;output  生成相关文件的输出地址，会影响到后面一系列文件的输出地址，基本上后面的相关配置路径都是基于output来的，且ouput 所配置的输出路径的地址不是基于context:__dirname 来的，而是我们设置的绝对路径
+
+*   &nbsp;&nbsp;&nbsp;&nbsp;ouput 里面生成的js最好不要再嵌套一层js文件夹，不然会影响hot module replacement 模块的使用，js与css的更改都不会带动刷新，具体参考 [webpack hot module 使用的奇怪点](http://annvov.github.io/webpack3.html)
+
+*   &nbsp;&nbsp;&nbsp;&nbsp;我们一般会使用sass 去编写我们的css 文件，当我们使用sass/css 的时候我们需要去引用相关的img 文件，这时候不要忘记我们需要去使用file-loader 模块进行对文件的加载，最终较好的 webpack.config.js 文件是写在 [参考](http://annvov.github.io/webpack3.html) 这里的。
+
+
 #### 开始写
 ```
   var webpack = require('webpack'),
@@ -46,6 +57,7 @@
   // entry,output,module,plugins,devtool,resolve
   
   module.exports = {
+  			context: __dirname,
           //入口文件 要处理的文件内容 
           entry: {
 				//键名对应真实文件路径
@@ -71,7 +83,16 @@
           			//使用sourceMap 方便内容定位
           			loader: 
           			ExtractTextPlugin.extract（'css?sourceMap!'+'sass?sourceMap!'）	
-          		}
+          		},
+
+                //注意这里需要注意： 图片等外部资源的加载需要使用到file-loader 不然我们css 里面写的url('xxx') 是无法正确加载的
+                //file-loader 的使用有一点需要注意的地方，具体可以参见file-loader 的github 地址
+                //在loader: file-loader 的后面我们加上了?name = [path][name][ext]的参数，它的作用是基于我们上面的output 地址拷贝我们用到的 img 文件到我们参数上写的对应的位置，这样Build 里面会自动生成我们的img文件夹而不需要我们手动更新文件夹的内容
+                {
+                		test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
+                loader: "file-loader?name=./img/[name].[ext]"
+                }       
+
           	]
           },
           plugins: [
@@ -267,7 +288,6 @@ index.scss 样式文件
   }
 }
 ```
-
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
@@ -282,6 +302,15 @@ index.scss 样式文件
 
 <p><img src="https://raw.githubusercontent.com/AnnVoV/AnnVoV.github.io/master/img/img1.png" alt="" title=""></p>
 
+<h3 id="">有关配置文件的几个注意点：</h3>
+
+<ul>
+<li><p>&nbsp;&nbsp;&nbsp;&nbsp;我们会用到ExtractTextPlugin 来帮助我们将css 文件打包为块文件而非直接与js文件打包到一起</p></li>
+<li><p>&nbsp;&nbsp;&nbsp;&nbsp;output  生成相关文件的输出地址，会影响到后面一系列文件的输出地址，基本上后面的相关配置路径都是基于output来的，且ouput 所配置的输出路径的地址不是基于context:__dirname 来的，而是我们设置的绝对路径</p></li>
+<li><p>&nbsp;&nbsp;&nbsp;&nbsp;ouput 里面生成的js最好不要再嵌套一层js文件夹，不然会影响hot module replacement 模块的使用，js与css的更改都不会带动刷新，具体参考 <a href="http://annvov.github.io/webpack3.html">webpack hot module 使用的奇怪点</a></p></li>
+<li><p>&nbsp;&nbsp;&nbsp;&nbsp;我们一般会使用sass 去编写我们的css 文件，当我们使用sass/css 的时候我们需要去引用相关的img 文件，这时候不要忘记我们需要去使用file-loader 模块进行对文件的加载，最终较好的 webpack.config.js 文件是写在 <a href="http://annvov.github.io/webpack3.html">参考</a> 这里的。</p></li>
+</ul>
+
 <h4 id="">开始写</h4>
 
 <pre><code>  var webpack = require('webpack'),
@@ -295,6 +324,7 @@ index.scss 样式文件
   // entry,output,module,plugins,devtool,resolve
 
   module.exports = {
+              context: __dirname,
           //入口文件 要处理的文件内容 
           entry: {
                 //键名对应真实文件路径
@@ -320,7 +350,16 @@ index.scss 样式文件
                       //使用sourceMap 方便内容定位
                       loader: 
                       ExtractTextPlugin.extract（'css?sourceMap!'+'sass?sourceMap!'）   
-                  }
+                  },
+
+                //注意这里需要注意： 图片等外部资源的加载需要使用到file-loader 不然我们css 里面写的url('xxx') 是无法正确加载的
+                //file-loader 的使用有一点需要注意的地方，具体可以参见file-loader 的github 地址
+                //在loader: file-loader 的后面我们加上了?name = [path][name][ext]的参数，它的作用是基于我们上面的output 地址拷贝我们用到的 img 文件到我们参数上写的对应的位置，这样Build 里面会自动生成我们的img文件夹而不需要我们手动更新文件夹的内容
+                {
+                        test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
+                loader: "file-loader?name=./img/[name].[ext]"
+                }       
+
               ]
           },
           plugins: [
