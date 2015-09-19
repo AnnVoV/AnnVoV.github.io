@@ -25,160 +25,17 @@
 	</div>
 <div id="md" style="display: none;">
 <!-- markdown -->
-## webpack 的相关使用
 
-## 参考教程：
-* [webpack turtorial](http://webpack.github.io/docs/tutorials/getting-started/)
+## JavaScript Source Map 详解  具体参见阮一峰的网络日志, 以后补上感想
 
-* [webpack how to](https://github.com/petehunt/webpack-howto)
-### 1.安装webpack  
-####   $ npm install -g webpack
-
-### 2.创建编译
-#### 在目录下面创建以下几个文件
-
-* 创建 entry.js (切入点文件)
-```
- document.write('It works');
-```
-* 创建 index.html
-```
- <html>
-    <head>
-        <meta charset="utf-8">
-    </head>
-    <body>
-        <script type="text/javascript" src="bundle.js" charset="utf-8"></script>
-    </body>
-</html>
-```
-* 执行下面的命令,编译entry.js 到bundle.js
-$ webpack ./entry.js bundle.js
-
-### 3.引入其他文件
-* 创建 一个新content.js
-```
- module.exports = "It works from content.js";
-```
-
-* 修改 entry.js
-```
-  var content = require('./content.js');
-  document.write(content);
-  document.write('ok');
-```
-### 4.第一个加载器
-#### 我们想要加载一个css 文件， webpack 只能处理js, 所以如果我们处理css 文件，我们需要安装css-loader 去处理css文件，我们也需要style-loader 去应用这!些css 文件,比如我们先创建一个style.css 文件
-
-* style.css
-```
- body{background: yellow;}
-```
-
-* entry.js
-
-```
- //web pack 可以把css 文件编译成一串js 代码，然后脚本会在页面上动态插入style标签，然后把样式插入进去
-
-  require('./style.css');
-  var content = require('./content.js');
-  document.write(content);
-  document.write('ok');
-```
-
-### 5.`创建一个config 文件 webpack.config.js`
-```
-module.exports = {
-   entry: './entry.js',
-   output: {
-        path: __dirname,
-        filename: 'bundle.js'
-   },
-   module: {
-     loaders: [
-         {test: /\.css$/, loader: 'style!css'}
-     ]
-  }
-};
-```
-然后我们执行$ webpack 命令，webpack 命令会在当前目录去加载webpack.config.js 文件
-
-### 6.全局安装webpack-dev-server
-```
-   sudo npm install -g webpack-dev-server -g
-```
-然后执行这个命令，就会开启一个服务,端口号默认为：8080，这个会绑定一个express server 到localhost:8080,给你提供一个静态服务。
-
-```
-   $ webpack-dev-server 
-```
-
-### 7.如何调用webpack
-* $ webpack  生成bundle.js文件在开发环境下
-* $ webpack -p   生成压缩文件在生产环境下
-* $ webpack --watch  
-* $ webpack -d 去加载source maps 文件
-
-
-### 8.编译到js语言
-webpack 相当于是一个装载机，如果我们需要webpack 去做一些编译的工作的话，我们需要安装一些loader, 比如我们需要提供对ES6的支持，那么我们需要安装ES6 相关的loader.
-
-首先我们需要npm install 对应loader ,比如es6我们需要安装 npm install babel-loader --save, 然后配置到webpack.config.js 文件中：
-
-```
-   //webpack.config.js
-   module.exports = {
-      entry: './main.js',
-      output: {
-          filename: 'bundle.js'
-      },
-     //要加载的模块
-     module: {
-        loaders:[
-          //这里test 是一个正则表达式， 后面的loader 表示的是正则匹配的内容对应使用的加载器
-             {test: /\.js$/, loader:'babel-loader'}
-        ]
-      }
-   };
-```
-
-### 8.如果想要require('文件名')而不需要加具体的后缀的话，比如我们在文件中直接require('index') 而非require('index.coffee'); 则我们需要添加resolve.extensions 参数，去指定webpack 去搜索哪些对应的文件：
-```
-  module.exports = {
-        entry: './main.js',
-        output: {
-             filename: 'bundle.js'
-        },
-        module: {
-              loaders: [
-                   {test:/\.js$/, loader:'babel-loader'}
-              ]
-        },
-        resolve: {
-            // you can now require('file') instead of require('file.coffee')
-             extensions: ['', '.js', '.json', '.coffee'] 
-        }
-  };
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+## [参考链接](http://www.ruanyifeng.com/blog/2013/01/javascript_source_map.html)
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
 <!-- content -->
+<h2 id="javascriptsourcemap">JavaScript Source Map 详解  具体参见阮一峰的网络日志, 以后补上感想</h2>
 
+<h2 id="httpwwwruanyifengcomblog201301javascript_source_maphtml"><a href="http://www.ruanyifeng.com/blog/2013/01/javascript_source_map.html">参考链接</a></h2>
 <!-- content end -->
 </div>
 <br>
