@@ -25,31 +25,208 @@
 	</div>
 <div id="md" style="display: none;">
 <!-- markdown -->
-## angular js ——事件学习
+参考文章：
+[angularjs pretty url](https://scotch.io/quick-tips/pretty-urls-in-angularjs-removing-the-hashtag)
 
-## 1.angularjs 事件的发送有两种方式
+&nbsp;&nbsp;&nbsp;&nbsp;默认的，angularJs 会给route url 添加上标签
+比如：  
 
-&nbsp;&nbsp;&nbsp;&nbsp;$scope.$boradcast 和 $scope.$emit
+*  http:// example.com/
+*  http:// example.com/#/about
+*  http:// example.com/#/contact
 
-&nbsp;&nbsp;&nbsp;&nbsp;$scope.$boradcast( ‘传递的事件名 ‘，’传递的值’);
-//$broadcast 是向着下层，即son层进行传播的
+<b>&nbsp;&nbsp;&nbsp;&nbsp;我们可以很容易地设置更加干净的url 比如去掉中间的# 号，我们需要进行两步操作：</b>
 
-&nbsp;&nbsp;&nbsp;&nbsp;$scope.$emite(‘传递的事件名’， ‘传递的值’)
-//$emit 是向着上层，即parent层进行传播的
+<b>&nbsp;&nbsp;&nbsp;&nbsp;1.注册配置$locationProvider</b>
 
-## 2.angularjs 接收事件的方式只有一种，就是通过使用$on
+<b>&nbsp;&nbsp;&nbsp;&nbsp;2.为我们的link 设置基础的base 路由地址</b>
+
+&nbsp;&nbsp;&nbsp;&nbsp;第一步：一般，我们会使用angular的$locationProvider,并且设置它的html5Mode 为true:
+
 ```
-     app.controller('myctrl', ['$scope',  function($scope){
-            $scope.$on( '事件名'， function( e,d ){
-                  //console.log( ' 接收到相关的事件并且进行处理 ' );
+     app.config([‘$routeProvider’, ‘$locationProvider’,  function( $routeProvider, $locationProvider){
+     //设置html5Mode 为true
+     //use the html5 history api
+    (1)$locationProvider.html5Mode(true)
+     //对 $locationProvider.html5Mode 进行配置
+}]);
+
+     (2)设置links 基于的base  我们要在<head></head> 之间进行配置,去设置其基于的路由
+      <!doctype html>
+            <head>
+               <meta charset=“utf-8">
+               <!— 基于谁作为基础的路由 -->
+               <base href=“/“>
+             </head>
+        </html>
+```
+
+举个实例：比如我们的路由是http://localhost/home 页面下面有三个链接
+```
+<a> index.html</a>
+<a> index1.html</a>
+<a> index2.html</a>
+```
+
+假设我们在home/index.html 下面的<head>里面设置我们的base 为:
+```
+   <head>
+        <base href=“/home"></base>
+   </head>
+```
+我们在a标签上设置:
+```
+   <a href=“/index”>index.html</a>
+   <a href=“/index1”>index1.html</a>
+   <a href=“/index2”>index2.html</a>
+```
+这样我们跳转的实际链接是：
+
+http://localhost/home/index  
+http://localhost/home/index1  
+http://localhost/home/index2
+
+<b>下面给出一个完整的参考实例：</b>
+
+html 页面
+```
+  <head>
+      <base href="/home"></base>
+  </head>
+```
+
+testapp.js 
+```
+var app = angular.module('homeapp',['ngRoute','homeControllers']);
+
+app.config(['$routeProvider', '$locationProvider',
+    function($routeProvider, $locationProvider){
+        $locationProvider.html5Mode(true).hashPrefix('!');
+
+        $routeProvider
+            .when('/', {
+                //模板路径
+                templateUrl: '../partials/index.html',
+                //控制器
+                controller: 'indexCtrl'
+            })
+            .when('/index1', {
+                templateUrl: '../partials/index1.html',
+                controller: 'index1Ctrl'
+            })
+            .when('/index2', {
+                templateUrl: '../partials/index2.html',
+                controller: 'index2Ctrl'
             });
-     }]);
+    }
+]);
 ```
+
+
+
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
 <!-- content -->
+<p>参考文章：
+<a href="https://scotch.io/quick-tips/pretty-urls-in-angularjs-removing-the-hashtag">angularjs pretty url</a></p>
 
+<p>&nbsp;&nbsp;&nbsp;&nbsp;默认的，angularJs 会给route url 添加上标签
+比如：  </p>
+
+<ul>
+<li>http:// example.com/</li>
+<li>http:// example.com/#/about</li>
+<li>http:// example.com/#/contact</li>
+</ul>
+
+<p><b>&nbsp;&nbsp;&nbsp;&nbsp;我们可以很容易地设置更加干净的url 比如去掉中间的# 号，我们需要进行两步操作：</b></p>
+
+<p><b>&nbsp;&nbsp;&nbsp;&nbsp;1.注册配置$locationProvider</b></p>
+
+<p><b>&nbsp;&nbsp;&nbsp;&nbsp;2.为我们的link 设置基础的base 路由地址</b></p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;第一步：一般，我们会使用angular的$locationProvider,并且设置它的html5Mode 为true:</p>
+
+<pre><code>     app.config([‘$routeProvider’, ‘$locationProvider’,  function( $routeProvider, $locationProvider){
+     //设置html5Mode 为true
+     //use the html5 history api
+    (1)$locationProvider.html5Mode(true)
+     //对 $locationProvider.html5Mode 进行配置
+}]);
+
+     (2)设置links 基于的base  我们要在&lt;head&gt;&lt;/head&gt; 之间进行配置,去设置其基于的路由
+      &lt;!doctype html&gt;
+            &lt;head&gt;
+               &lt;meta charset=“utf-8"&gt;
+               &lt;!— 基于谁作为基础的路由 --&gt;
+               &lt;base href=“/“&gt;
+             &lt;/head&gt;
+        &lt;/html&gt;
+</code></pre>
+
+<p>举个实例：比如我们的路由是http://localhost/home 页面下面有三个链接</p>
+
+<pre><code>&lt;a&gt; index.html&lt;/a&gt;
+&lt;a&gt; index1.html&lt;/a&gt;
+&lt;a&gt; index2.html&lt;/a&gt;
+</code></pre>
+
+<p>假设我们在home/index.html 下面的里面设置我们的base 为:</p>
+
+<pre><code>   &lt;head&gt;
+        &lt;base href=“/home"&gt;&lt;/base&gt;
+   &lt;/head&gt;
+</code></pre>
+
+<p>我们在a标签上设置:</p>
+
+<pre><code>   &lt;a href=“/index”&gt;index.html&lt;/a&gt;
+   &lt;a href=“/index1”&gt;index1.html&lt;/a&gt;
+   &lt;a href=“/index2”&gt;index2.html&lt;/a&gt;
+</code></pre>
+
+<p>这样我们跳转的实际链接是：</p>
+
+<p>http://localhost/home/index <br>
+http://localhost/home/index1 <br>
+http://localhost/home/index2</p>
+
+<p><b>下面给出一个完整的参考实例：</b></p>
+
+<p>html 页面</p>
+
+<pre><code>  &lt;head&gt;
+      &lt;base href="/home"&gt;&lt;/base&gt;
+  &lt;/head&gt;
+</code></pre>
+
+<p>testapp.js </p>
+
+<pre><code>var app = angular.module('homeapp',['ngRoute','homeControllers']);
+
+app.config(['$routeProvider', '$locationProvider',
+    function($routeProvider, $locationProvider){
+        $locationProvider.html5Mode(true).hashPrefix('!');
+
+        $routeProvider
+            .when('/', {
+                //模板路径
+                templateUrl: '../partials/index.html',
+                //控制器
+                controller: 'indexCtrl'
+            })
+            .when('/index1', {
+                templateUrl: '../partials/index1.html',
+                controller: 'index1Ctrl'
+            })
+            .when('/index2', {
+                templateUrl: '../partials/index2.html',
+                controller: 'index2Ctrl'
+            });
+    }
+]);
+</code></pre>
 <!-- content end -->
 </div>
 <br>
