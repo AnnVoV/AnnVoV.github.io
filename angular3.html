@@ -1,0 +1,231 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## angularJs 动态数据控制
+
+### angulaJs  动态数据绑定 增加、删除与编辑
+
+实例：假设我们绑定数组到scope上 $scope.items = [];然后我们有对数组的增加和删除如何处理呢？
+
+#### 增加item 的demo:
+
+```
+	var newData = {
+		id:'',
+		value: '',
+		info: ''
+	};
+	
+	//给绑定的数组增加一项
+	$scope.items.push(newData);
+
+```
+
+
+#### 删除item 的demo:  
+
+假设情境是:有好几条列表 列表项中有个删除按钮，如何删除绑定的数组项目  
+html:
+
+```	
+	<ul>
+		<li ng-repeat="item in items">
+			<span>{{item.id}}<span>
+			<span>{{item.id}}<span>
+			<!-- 
+				一定要注意给a 标签加上href="javascript:''" 这样才能避免页面
+				点击后的刷新
+			 -->
+			 <!-- 这里参数传递item -->
+			<a href="javascript:''" ng-click="delete(item)">删除</a>
+		</li>
+	</ul>	
+```
+js:
+
+```
+    ...
+    $scope.delete = function(item){
+    		//js 里面数组的删除使用splice
+    		//splice(拼接) MDN  href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice"
+			var index = $scope.items.indexOf(item);
+			$scope.items.splice($scope.items.indexOf(item), 1);
+    		
+```
+#### 编辑item的demo:
+注意： 对于编辑项目，我们一般是在item 那一项上加上一个span 在加上一个input,然后我们通过 ng-hide 和 ng-show 去控制一个布尔型的变量来控制是否处于编辑状态
+
+html:
+
+```
+<tr>
+	<td>
+		<span ng-hide="isEditing">{{item.info}}</span>
+		<input type="text" value="{{item.info}}" ng-show="isEditing"/>
+	</td>
+</tr>
+```
+
+ 
+ 
+    	
+  
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="angularjs">angularJs 动态数据控制</h2>
+
+<h3 id="angulajs">angulaJs  动态数据绑定 增加、删除与编辑</h3>
+
+<p>实例：假设我们绑定数组到scope上 $scope.items = [];然后我们有对数组的增加和删除如何处理呢？</p>
+
+<h4 id="itemdemo">增加item 的demo:</h4>
+
+<pre><code>    var newData = {
+        id:'',
+        value: '',
+        info: ''
+    };
+
+    //给绑定的数组增加一项
+    $scope.items.push(newData);
+</code></pre>
+
+<h4 id="itemdemo">删除item 的demo:</h4>
+
+<p>假设情境是:有好几条列表 列表项中有个删除按钮，如何删除绑定的数组项目 <br>
+html:</p>
+
+<pre><code class="    ">    &lt;ul&gt;
+        &lt;li ng-repeat="item in items"&gt;
+            &lt;span&gt;{{item.id}}&lt;span&gt;
+            &lt;span&gt;{{item.id}}&lt;span&gt;
+            &lt;!-- 
+                一定要注意给a 标签加上href="javascript:''" 这样才能避免页面
+                点击后的刷新
+             --&gt;
+             &lt;!-- 这里参数传递item --&gt;
+            &lt;a href="javascript:''" ng-click="delete(item)"&gt;删除&lt;/a&gt;
+        &lt;/li&gt;
+    &lt;/ul&gt;   
+</code></pre>
+
+<p>js:</p>
+
+<pre><code>    ...
+    $scope.delete = function(item){
+            //js 里面数组的删除使用splice
+            //splice(拼接) MDN  href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice"
+            var index = $scope.items.indexOf(item);
+            $scope.items.splice($scope.items.indexOf(item), 1);
+</code></pre>
+
+<h4 id="itemdemo">编辑item的demo:</h4>
+
+<p>注意： 对于编辑项目，我们一般是在item 那一项上加上一个span 在加上一个input,然后我们通过 ng-hide 和 ng-show 去控制一个布尔型的变量来控制是否处于编辑状态</p>
+
+<p>html:</p>
+
+<pre><code>&lt;tr&gt;
+    &lt;td&gt;
+        &lt;span ng-hide="isEditing"&gt;{{item.info}}&lt;/span&gt;
+        &lt;input type="text" value="{{item.info}}" ng-show="isEditing"/&gt;
+    &lt;/td&gt;
+&lt;/tr&gt;
+</code></pre>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "angular3.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
