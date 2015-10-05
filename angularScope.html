@@ -1,0 +1,218 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## AngularJs Isolated Scope
+
+## AngularJs 学习值得参考的博客
+[Leeme Technology](http://lin-xi.diandian.com/)
+
+
+## AngularJs 的 @ 与 = 的使用
+
+### 本文参考文献：
+[AngularJS Sticky Notes Pt 2 – Isolated Scope](http://onehungrymind.com/angularjs-sticky-notes-pt-2-isolated-scope/)
+
+
+
+例子:
+
+html:
+
+```
+	<input type="text" ng-model="title">
+	<!-- bindToThisThing =  -->
+	<pane  bi-title="title" title="{{title}}" exp-Title="updateTitle(newTitle)"></pane>
+```
+
+pane directive:
+
+```
+	template: '<div style="border: 1px solid black;">'+
+		'<div>biTitle:<input type="text" ng-model="biTitle"/></div>'+
+		'<div>title:<input type="text" ng-model="title"/></div>',
+	scope: {
+		/* 绑定到的隔离区域的关键字： ‘=|&|@ 父级’ */
+		bi-title:'=title',
+		title:'@title'
+	}
+```
+
+### @ 的使用 => Attributes
+&nbsp;&nbsp;&nbsp;&nbsp; @ 是一个单向数据绑定，你可以把你的隔离区里面的scope(即自定义命令里面的scope为隔离区scope)绑定到父级的DOM的属性值。所以当我们使用@ 的时候我们要绑定的要有{{}} 双括号。    因为我们绑定的是计算出来的值，所以我们在隔离区域里面的修改并不会影响到父级元素的值.可以尝试修改title文本框中的值查看效果。  [在线效果查看](http://jsfiddle.net/iweinfuld/7g3QM/3/)
+
+### = 的使用 => Binding 
+&nbsp;&nbsp;&nbsp;&nbsp; = 是一个双向数据绑定，我们子隔离区域所作出的修改会影响到父级元素的值。并且我们绑定的是属性不是对应的属性值所以不用加上{{}}[在线效果查看](http://jsfiddle.net/iweinfuld/7g3QM/3/)
+
+
+### & 的使用 => Expressions
+&nbsp;&nbsp;&nbsp;&nbsp; & 用于绑定一个函数表达式,你可以把你隔离区域里面的scope绑定到父级的scope的函数上了。
+
+
+```
+  module.controller('testCtrl',['$scope', function($scope){
+  				$scope.updateTitle = function(newTitle){
+  					$scope.title = newTitle;
+  				};
+  			}])
+  		 .directive('pane', function(){
+  		 	return {
+  		 		expTitle: '&'
+  		 	};
+  		 })
+```
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="angularjsisolatedscope">AngularJs Isolated Scope</h2>
+
+<h2 id="angularjs">AngularJs 学习值得参考的博客</h2>
+
+<p><a href="http://lin-xi.diandian.com/">Leeme Technology</a></p>
+
+<h2 id="angularjs">AngularJs 的 @ 与 = 的使用</h2>
+
+<h3 id="">本文参考文献：</h3>
+
+<p><a href="http://onehungrymind.com/angularjs-sticky-notes-pt-2-isolated-scope/">AngularJS Sticky Notes Pt 2 – Isolated Scope</a></p>
+
+<p>例子:</p>
+
+<p>html:</p>
+
+<pre><code>    &lt;input type="text" ng-model="title"&gt;
+    &lt;!-- bindToThisThing =  --&gt;
+    &lt;pane  bi-title="title" title="{{title}}" exp-Title="updateTitle(newTitle)"&gt;&lt;/pane&gt;
+</code></pre>
+
+<p>pane directive:</p>
+
+<pre><code>    template: '&lt;div style="border: 1px solid black;"&gt;'+
+        '&lt;div&gt;biTitle:&lt;input type="text" ng-model="biTitle"/&gt;&lt;/div&gt;'+
+        '&lt;div&gt;title:&lt;input type="text" ng-model="title"/&gt;&lt;/div&gt;',
+    scope: {
+        /* 绑定到的隔离区域的关键字： ‘=|&amp;|@ 父级’ */
+        bi-title:'=title',
+        title:'@title'
+    }
+</code></pre>
+
+<h3 id="attributes">@ 的使用 =&gt; Attributes</h3>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; @ 是一个单向数据绑定，你可以把你的隔离区里面的scope(即自定义命令里面的scope为隔离区scope)绑定到父级的DOM的属性值。所以当我们使用@ 的时候我们要绑定的要有{{}} 双括号。    因为我们绑定的是计算出来的值，所以我们在隔离区域里面的修改并不会影响到父级元素的值.可以尝试修改title文本框中的值查看效果。  <a href="http://jsfiddle.net/iweinfuld/7g3QM/3/">在线效果查看</a></p>
+
+<h3 id="binding">= 的使用 =&gt; Binding</h3>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; = 是一个双向数据绑定，我们子隔离区域所作出的修改会影响到父级元素的值。并且我们绑定的是属性不是对应的属性值所以不用加上{{}}<a href="http://jsfiddle.net/iweinfuld/7g3QM/3/">在线效果查看</a></p>
+
+<h3 id="expressions">&amp; 的使用 =&gt; Expressions</h3>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; &amp; 用于绑定一个函数表达式,你可以把你隔离区域里面的scope绑定到父级的scope的函数上了。</p>
+
+<pre><code>  module.controller('testCtrl',['$scope', function($scope){
+                  $scope.updateTitle = function(newTitle){
+                      $scope.title = newTitle;
+                  };
+              }])
+           .directive('pane', function(){
+              return {
+                  expTitle: '&amp;'
+              };
+           })
+</code></pre>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "angularScope.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
