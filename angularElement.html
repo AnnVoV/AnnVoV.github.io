@@ -1,0 +1,169 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## AngularJs 之 element.find
+
+### element.find
+
+&nbsp;&nbsp;&nbsp;&nbsp; element.find 方法只能适用于通过tag标签来获取元素
+
+
+### angular.element(dom元素)
+
+&nbsp;&nbsp;&nbsp;&nbsp; 我们通过angular.element(dom)来包裹一个dom结构的元素，然后得到一个jqlite 元素
+
+### 例子：
+&nbsp;&nbsp;&nbsp;&nbsp; 假设我们有一个自定义命令```<pane title="{{title}}">{{text}}</pane>``` 然后我们想要给这个自定义命令的template其实是一个提示板，带有一个class='cancel'的按钮和一个class='ok'的按钮，那么我们如何获取这个cancel 按钮并为它绑定事件呢？
+
+
+js：
+
+```
+	.directive('pane', function(){
+		return {
+			restrict:'E',
+			template: '<div>...<button class='cancel'></button></div>',
+			link: function($scope, element, attrs){
+				//element 就是我们自定义元素 并且事件是冒泡的
+				//我们如何在class="cancel" 身上绑定事件
+				var dom_cancel = document.getElementByClassName('cancel');
+				
+				angular.element(dom_cancel).on('click', function(){
+					alert('cancel click!');
+				});
+			}
+		};
+	})
+
+```
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="angularjselementfind">AngularJs 之 element.find</h2>
+
+<h3 id="elementfind">element.find</h3>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; element.find 方法只能适用于通过tag标签来获取元素</p>
+
+<h3 id="angularelementdom">angular.element(dom元素)</h3>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; 我们通过angular.element(dom)来包裹一个dom结构的元素，然后得到一个jqlite 元素</p>
+
+<h3 id="">例子：</h3>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; 假设我们有一个自定义命令<code>&lt;pane title="{{title}}"&gt;{{text}}&lt;/pane&gt;</code> 然后我们想要给这个自定义命令的template其实是一个提示板，带有一个class='cancel'的按钮和一个class='ok'的按钮，那么我们如何获取这个cancel 按钮并为它绑定事件呢？</p>
+
+<p>js：</p>
+
+<pre><code>    .directive('pane', function(){
+        return {
+            restrict:'E',
+            template: '&lt;div&gt;...&lt;button class='cancel'&gt;&lt;/button&gt;&lt;/div&gt;',
+            link: function($scope, element, attrs){
+                //element 就是我们自定义元素 并且事件是冒泡的
+                //我们如何在class="cancel" 身上绑定事件
+                var dom_cancel = document.getElementByClassName('cancel');
+
+                angular.element(dom_cancel).on('click', function(){
+                    alert('cancel click!');
+                });
+            }
+        };
+    })
+</code></pre>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "angularElement.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
