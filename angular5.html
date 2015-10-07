@@ -95,11 +95,17 @@
 &nbsp;&nbsp;&nbsp;&nbsp; 2.我们用link属性来操作dom元素：
 function link(scope, element, attr){...} 注意：element is the jqLite-wrapped element that this directive matches.
 
+
+```
+   <div add-book-button>增加</div>
+```
+
 ```
 	module.directive('addBookButton', ['Book', function(Book){
 		return {
 			restrict: 'A',
 			link: function(scope, element, attrs){
+                              //不知道为什么这里一定要用Bind来绑定事件，用on不可以
 				element.bind('click', function(){
 					 Book.addBook( { title: "Star Wars", author: "George Lucas" } );					 
 				})
@@ -208,10 +214,14 @@ function link(scope, element, attr){...} 注意：element is the jqLite-wrapped 
 <p>&nbsp;&nbsp;&nbsp;&nbsp; 2.我们用link属性来操作dom元素：
 function link(scope, element, attr){...} 注意：element is the jqLite-wrapped element that this directive matches.</p>
 
+<pre><code>   &lt;div add-book-button&gt;增加&lt;/div&gt;
+</code></pre>
+
 <pre><code>    module.directive('addBookButton', ['Book', function(Book){
         return {
             restrict: 'A',
             link: function(scope, element, attrs){
+                              //不知道为什么这里一定要用Bind来绑定事件，用on不可以
                 element.bind('click', function(){
                      Book.addBook( { title: "Star Wars", author: "George Lucas" } );                     
                 })
