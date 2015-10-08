@@ -27,78 +27,12 @@
 <!-- markdown -->
 ## AngularJs Isolated Scope
 
-## AngularJs 学习值得参考的博客
-[Leeme Technology](http://lin-xi.diandian.com/)
-
-
-## `AngularJs 的 @ 与 = 与 & 的使用`
-
-### 本文参考文献：
-[AngularJS Sticky Notes Pt 2 – Isolated Scope](http://onehungrymind.com/angularjs-sticky-notes-pt-2-isolated-scope/)
-
-
-例子:
-
-html:
-
-```
-	<input type="text" ng-model="title">
-	<!-- bindToThisThing =  -->
-	<pane  bi-title="title" title="{{title}}" exp-Title="updateTitle(newTitle)">   </pane>
-```
-
-pane directive:
-
-```
-	template: '<div style="border: 1px solid black;">'+
-		'<div>biTitle:<input type="text" ng-model="biTitle"/></div>'+
-		'<div>title:<input type="text" ng-model="title"/></div>',
-	scope: {
-		/* 绑定到的隔离区域的关键字： ‘=|&|@ 父级’ */
-		bi-title:'=title',
-		title:'@title'
-	}
-```
-
-
-
 
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
 <!-- content -->
 <h2 id="angularjsisolatedscope">AngularJs Isolated Scope</h2>
-
-<h2 id="angularjs">AngularJs 学习值得参考的博客</h2>
-
-<p><a href="http://lin-xi.diandian.com/">Leeme Technology</a></p>
-
-<h2 id="angularjs"><code>AngularJs 的 @ 与 = 与 &amp; 的使用</code></h2>
-
-<h3 id="">本文参考文献：</h3>
-
-<p><a href="http://onehungrymind.com/angularjs-sticky-notes-pt-2-isolated-scope/">AngularJS Sticky Notes Pt 2 – Isolated Scope</a></p>
-
-<p>例子:</p>
-
-<p>html:</p>
-
-<pre><code>    &lt;input type="text" ng-model="title"&gt;
-    &lt;!-- bindToThisThing =  --&gt;
-    &lt;pane  bi-title="title" title="{{title}}" exp-Title="updateTitle(newTitle)"&gt;   &lt;/pane&gt;
-</code></pre>
-
-<p>pane directive:</p>
-
-<pre><code>    template: '&lt;div style="border: 1px solid black;"&gt;'+
-        '&lt;div&gt;biTitle:&lt;input type="text" ng-model="biTitle"/&gt;&lt;/div&gt;'+
-        '&lt;div&gt;title:&lt;input type="text" ng-model="title"/&gt;&lt;/div&gt;',
-    scope: {
-        /* 绑定到的隔离区域的关键字： ‘=|&amp;|@ 父级’ */
-        bi-title:'=title',
-        title:'@title'
-    }
-</code></pre>
 <!-- content end -->
 </div>
 <br>
