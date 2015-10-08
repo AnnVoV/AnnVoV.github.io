@@ -1,0 +1,228 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## AngularJs 之 directive中的require 使用过程中的注意点
+
+&nbsp;&nbsp;&nbsp;&nbsp;前提：我在使用directive的时候，尝试使用require option，但是不知道为什么总会报这个错误<b>“Error Missing required controller”</b>, 后来才发现出错的原因。追究根本原因是阅读api 的不仔细！
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;[directive 中 require option api 原文地址](https://docs.angularjs.org/guide/directive) ,原文中是这么写的：<b>" The ^ prefix means that this directive searches for the controller on its parents (without the ^ prefix, the directive would look for the controller on just its own element)."</b>   
+
+ 这里有两个关键点我一直没有注意:
+
+*  &nbsp;&nbsp;&nbsp;&nbsp;1.on its parents, 是向上查找父亲级别的directive,不是查找同一层级别的 directive.
+
+*   &nbsp;&nbsp;&nbsp;&nbsp;2.searches for the controller, 我们最终require使用的是引入的directive上的controller,所以我们的父级别的directive上的controller一定要去定义
+
+demo: 
+
+```
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link href="./css/g.css" rel="stylesheet"/>
+    <script src="./lib/angular-1.2.7/angular.min.js" type="text/javascript"></script>
+</head>
+<body>
+    <div ng-app="testApp">
+        <div test-dir>
+            <input type="text" ng-model="test">
+            <test-tag></test-tag>
+        </div>
+    </div>
+
+    <script>
+        var testApp = angular.module('testApp', []);
+
+        testApp
+                .directive('testDir', function(){
+                    return {
+                        restrict: 'A',
+                        controller: function($scope){
+                            $scope.test = 'Hello World!!!';
+                        }
+                    }
+                })
+                .directive('testTag', function(){
+                    return {
+                        restrict: 'E',
+                        /* require 的意思是引入父级指令的controller */
+                        require: '^testDir',
+                        template: '<div>Oh my god!</div>'+
+                                '<div><input type="text" ng-model="haha"></div>',
+                        link: function($scope, elem, attrs, controller){
+                            console.log($scope.test);
+                            $scope.haha = $scope.test;
+                        }
+                    };
+                });
+    </script>
+</body>
+</html>	
+```
+
+这样我们scope.haha 上的文本框中显示的值也是"Hello World!!"
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="angularjsdirectiverequire">AngularJs 之 directive中的require 使用过程中的注意点</h2>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;前提：我在使用directive的时候，尝试使用require option，但是不知道为什么总会报这个错误<b>“Error Missing required controller”</b>, 后来才发现出错的原因。追究根本原因是阅读api 的不仔细！</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://docs.angularjs.org/guide/directive">directive 中 require option api 原文地址</a> ,原文中是这么写的：<b>" The ^ prefix means that this directive searches for the controller on its parents (without the ^ prefix, the directive would look for the controller on just its own element)."</b>   </p>
+
+<p>这里有两个关键点我一直没有注意:</p>
+
+<ul>
+<li><p>&nbsp;&nbsp;&nbsp;&nbsp;1.on its parents, 是向上查找父亲级别的directive,不是查找同一层级别的 directive.</p></li>
+<li><p>&nbsp;&nbsp;&nbsp;&nbsp;2.searches for the controller, 我们最终require使用的是引入的directive上的controller,所以我们的父级别的directive上的controller一定要去定义</p></li>
+</ul>
+
+<p>demo: </p>
+
+<pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Document&lt;/title&gt;
+    &lt;link href="./css/g.css" rel="stylesheet"/&gt;
+    &lt;script src="./lib/angular-1.2.7/angular.min.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div ng-app="testApp"&gt;
+        &lt;div test-dir&gt;
+            &lt;input type="text" ng-model="test"&gt;
+            &lt;test-tag&gt;&lt;/test-tag&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;script&gt;
+        var testApp = angular.module('testApp', []);
+
+        testApp
+                .directive('testDir', function(){
+                    return {
+                        restrict: 'A',
+                        controller: function($scope){
+                            $scope.test = 'Hello World!!!';
+                        }
+                    }
+                })
+                .directive('testTag', function(){
+                    return {
+                        restrict: 'E',
+                        /* require 的意思是引入父级指令的controller */
+                        require: '^testDir',
+                        template: '&lt;div&gt;Oh my god!&lt;/div&gt;'+
+                                '&lt;div&gt;&lt;input type="text" ng-model="haha"&gt;&lt;/div&gt;',
+                        link: function($scope, elem, attrs, controller){
+                            console.log($scope.test);
+                            $scope.haha = $scope.test;
+                        }
+                    };
+                });
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;    
+</code></pre>
+
+<p>这样我们scope.haha 上的文本框中显示的值也是"Hello World!!"</p>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "angularRequire.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
