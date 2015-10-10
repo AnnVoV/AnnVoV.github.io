@@ -1,0 +1,192 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## flex 布局回顾
+
+### 1.felx 布局是什么？
+&nbsp;&nbsp;&nbsp;&nbsp; flex是flexible box 的缩写，意为“弹性布局”，用来为盒状模型提供最大的灵活性。任何一个容器都可以指定为flex布局。
+```
+	.box {
+		display: flex;
+	}
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp; 行内元素也可以使用flex布局。
+```
+	.box {
+		display: inline-flex;
+	}
+```
+### 2.容器container的属性
+&nbsp;&nbsp;&nbsp;&nbsp;以下6个属性设置在容器上：  
+
+* flex-direction: row | row-reverse | column | column-reverse
+
+* flex-wrap: flex-wrap 定义了如果一条主线排不下所有的item, item如何换行 nowrap | wrap | wrap-reverse
+
+* flex-flow: 是flex-direction 和 flex-wrap属性的简写形式，默认值为row nowrap flex-flow:<flex-direction>||<flex-wrap>
+
+* justify-content: 定义了项目在主轴上的对齐方式 flex-start(左对齐) flex-end（右对齐） center(居中) space-between(两端对齐，项目间的间隔相等)
+
+* align-items 项目在交叉轴上如何对齐
+
+* align-content 定义多根轴线的对齐方式
+
+### 3.项目item的属性
+&nbsp;&nbsp;&nbsp;&nbsp;以下6个属性设置在项目上：
+
+* order 定义项目的排列顺序 数值越小排列越靠前
+
+* flex-grow 定义项目的放大比例，默认为0 即如果存在剩余空间，也不放大。如果所有项目的flex-grow 属性都为1，则他们将等分剩余空间，如果一个项目的flex为2，其他项目都为1，则前者占据的剩余空间比其他项多一倍。
+
+* flex-shrink 定义了项目的缩小比例，默认为1，即如果空间不足，该项目将缩小，如果所有项目的flex-shrink属性都为1，则当空间不足时，都将等比例缩小。如果一个项目的flex-shrink属性为0，其他项目都为1，则当空间不足时候，前者不缩小。
+
+* flex-basis 定义了在分配多余空间之前，项目占据的主轴空间（main size）。它的默认值为auto ,即项目的本来大小。
+
+* `flex felx 属性是 flex-grow flex-shrink 和 flex-basis的简写，默认值为0 1 auto 后面两个属性可选。`
+
+* align-self 允许单个项目有与其他项目不一样的对齐方式，可以覆盖align-items属性，默认值为auto,表示继承父元素的align-items属性。如果没有父元素，则等同于stretch.
+
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="flex">flex 布局回顾</h2>
+
+<h3 id="1felx">1.felx 布局是什么？</h3>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; flex是flexible box 的缩写，意为“弹性布局”，用来为盒状模型提供最大的灵活性。任何一个容器都可以指定为flex布局。</p>
+
+<pre><code>    .box {
+        display: flex;
+    }
+</code></pre>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; 行内元素也可以使用flex布局。</p>
+
+<pre><code>    .box {
+        display: inline-flex;
+    }
+</code></pre>
+
+<h3 id="2container">2.容器container的属性</h3>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;以下6个属性设置在容器上：  </p>
+
+<ul>
+<li><p>flex-direction: row | row-reverse | column | column-reverse</p></li>
+<li><p>flex-wrap: flex-wrap 定义了如果一条主线排不下所有的item, item如何换行 nowrap | wrap | wrap-reverse</p></li>
+<li><p>flex-flow: 是flex-direction 和 flex-wrap属性的简写形式，默认值为row nowrap flex-flow:<flex-direction>||<flex-wrap></flex-wrap></flex-direction></p></li>
+<li><p>justify-content: 定义了项目在主轴上的对齐方式 flex-start(左对齐) flex-end（右对齐） center(居中) space-between(两端对齐，项目间的间隔相等)</p></li>
+<li><p>align-items 项目在交叉轴上如何对齐</p></li>
+<li><p>align-content 定义多根轴线的对齐方式</p></li>
+</ul>
+
+<h3 id="3item">3.项目item的属性</h3>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;以下6个属性设置在项目上：</p>
+
+<ul>
+<li><p>order 定义项目的排列顺序 数值越小排列越靠前</p></li>
+<li><p>flex-grow 定义项目的放大比例，默认为0 即如果存在剩余空间，也不放大。如果所有项目的flex-grow 属性都为1，则他们将等分剩余空间，如果一个项目的flex为2，其他项目都为1，则前者占据的剩余空间比其他项多一倍。</p></li>
+<li><p>flex-shrink 定义了项目的缩小比例，默认为1，即如果空间不足，该项目将缩小，如果所有项目的flex-shrink属性都为1，则当空间不足时，都将等比例缩小。如果一个项目的flex-shrink属性为0，其他项目都为1，则当空间不足时候，前者不缩小。</p></li>
+<li><p>flex-basis 定义了在分配多余空间之前，项目占据的主轴空间（main size）。它的默认值为auto ,即项目的本来大小。</p></li>
+<li><p><code>flex felx 属性是 flex-grow flex-shrink 和 flex-basis的简写，默认值为0 1 auto 后面两个属性可选。</code></p></li>
+<li><p>align-self 允许单个项目有与其他项目不一样的对齐方式，可以覆盖align-items属性，默认值为auto,表示继承父元素的align-items属性。如果没有父元素，则等同于stretch.</p></li>
+</ul>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "flex.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
