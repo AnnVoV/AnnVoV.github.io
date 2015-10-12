@@ -55,28 +55,6 @@ pane directive:
     }
 ```
 
-### `@ 的使用 => Attributes`
-&nbsp;&nbsp;&nbsp;&nbsp; @ 是一个单向数据绑定，你可以把你的隔离区里面的scope(即自定义命令里面的scope为隔离区scope)绑定到父级的DOM的属性值。所以当我们使用@ 的时候我们要绑定的要有{{}} 双括号。    因为我们绑定的是计算出来的值，所以我们在隔离区域里面的修改并不会影响到父级元素的值.可以尝试修改title文本框中的值查看效果。  [在线效果查看](http://jsfiddle.net/iweinfuld/7g3QM/3/)
-
-### `= 的使用 => Binding `
-&nbsp;&nbsp;&nbsp;&nbsp; = 是一个双向数据绑定，我们子隔离区域所作出的修改会影响到父级元素的值。并且我们绑定的是属性不是对应的属性值所以不用加上{{}}[在线效果查看](http://jsfiddle.net/iweinfuld/7g3QM/3/)
-
-
-### &amp; `的使用 => Expressions`
-&nbsp;&nbsp;&nbsp;&nbsp; &amp; 用于绑定一个函数表达式,你可以把你隔离区域里面的scope绑定到父级的scope的函数上了。
-
-```
-  module.controller('testCtrl',['$scope', function($scope){
-                  $scope.updateTitle = function(newTitle){
-                      $scope.title = newTitle;
-                  };
-              }])
-           .directive('pane', function(){
-               return {
-                   expTitle: '&'
-               };
-           })
-```
 
 <!-- markdown end -->
 </div>
@@ -108,30 +86,6 @@ html:</p>
         bi-title:'=title',
         title:'@title'
     }
-</code></pre>
-
-<h3 id="attributes"><code>@ 的使用 =&gt; Attributes</code></h3>
-
-<p>&nbsp;&nbsp;&nbsp;&nbsp; @ 是一个单向数据绑定，你可以把你的隔离区里面的scope(即自定义命令里面的scope为隔离区scope)绑定到父级的DOM的属性值。所以当我们使用@ 的时候我们要绑定的要有{{}} 双括号。    因为我们绑定的是计算出来的值，所以我们在隔离区域里面的修改并不会影响到父级元素的值.可以尝试修改title文本框中的值查看效果。  <a href="http://jsfiddle.net/iweinfuld/7g3QM/3/">在线效果查看</a></p>
-
-<h3 id="binding"><code>= 的使用 =&gt; Binding</code></h3>
-
-<p>&nbsp;&nbsp;&nbsp;&nbsp; = 是一个双向数据绑定，我们子隔离区域所作出的修改会影响到父级元素的值。并且我们绑定的是属性不是对应的属性值所以不用加上{{}}<a href="http://jsfiddle.net/iweinfuld/7g3QM/3/">在线效果查看</a></p>
-
-<h3 id="ampexpressions">&amp; <code>的使用 =&gt; Expressions</code></h3>
-
-<p>&nbsp;&nbsp;&nbsp;&nbsp; &amp; 用于绑定一个函数表达式,你可以把你隔离区域里面的scope绑定到父级的scope的函数上了。</p>
-
-<pre><code>  module.controller('testCtrl',['$scope', function($scope){
-                  $scope.updateTitle = function(newTitle){
-                      $scope.title = newTitle;
-                  };
-              }])
-           .directive('pane', function(){
-               return {
-                   expTitle: '&amp;'
-               };
-           })
 </code></pre>
 <!-- content end -->
 </div>
