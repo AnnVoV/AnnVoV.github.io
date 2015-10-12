@@ -39,6 +39,19 @@ html:
    <input type="text" ng-model="title">
    <pane  bi-title="title" title="{{title}}" exp-Title="updateTitle(newTitle)"> </pane>
 ```
+
+pane directive:
+
+```
+   template: '<div style="border: 1px solid black;">'+
+        '<div>biTitle:<input type="text" ng-model="biTitle"/></div>'+
+        '<div>title:<input type="text" ng-model="title"/></div>',
+    scope: {
+        /* 绑定到的隔离区域的关键字： ‘=|&|@ 父级’ */
+        bi-title:'=title',
+        title:'@title'
+    }
+```
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
@@ -57,6 +70,18 @@ html:
 
 <pre><code>   &lt;input type="text" ng-model="title"&gt;
    &lt;pane  bi-title="title" title="{{title}}" exp-Title="updateTitle(newTitle)"&gt; &lt;/pane&gt;
+</code></pre>
+
+<p>pane directive:</p>
+
+<pre><code>   template: '&lt;div style="border: 1px solid black;"&gt;'+
+        '&lt;div&gt;biTitle:&lt;input type="text" ng-model="biTitle"/&gt;&lt;/div&gt;'+
+        '&lt;div&gt;title:&lt;input type="text" ng-model="title"/&gt;&lt;/div&gt;',
+    scope: {
+        /* 绑定到的隔离区域的关键字： ‘=|&amp;|@ 父级’ */
+        bi-title:'=title',
+        title:'@title'
+    }
 </code></pre>
 <!-- content end -->
 </div>
