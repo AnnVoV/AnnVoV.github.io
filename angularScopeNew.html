@@ -42,12 +42,12 @@ html:
 
 pane directive:
 
+ 绑定到的隔离区域的关键字： ‘=  |  &amp;  |  @  父级’ 
 ```
-   template: '<div style="border: 1px solid black;">'+
-        '<div>biTitle:<input type="text" ng-model="biTitle"/></div>'+
-        '<div>title:<input type="text" ng-model="title"/></div>',
-    scope: {
-        /* 绑定到的隔离区域的关键字： ‘=|&|@ 父级’ */
+   template: '<div style="border: 1px solid black;">
+        <div>biTitle:<input type="text" ng-model="biTitle"/></div>
+        <div>title:<input type="text" ng-model="title"/></div>
+    scope: {       
         bi-title:'=title',
         title:'@title'
     }
@@ -74,11 +74,12 @@ pane directive:
 
 <p>pane directive:</p>
 
-<pre><code>   template: '&lt;div style="border: 1px solid black;"&gt;'+
-        '&lt;div&gt;biTitle:&lt;input type="text" ng-model="biTitle"/&gt;&lt;/div&gt;'+
-        '&lt;div&gt;title:&lt;input type="text" ng-model="title"/&gt;&lt;/div&gt;',
-    scope: {
-        /* 绑定到的隔离区域的关键字： ‘=|&amp;|@ 父级’ */
+<p>绑定到的隔离区域的关键字： ‘=  |  &amp;  |  @  父级’ </p>
+
+<pre><code>   template: '&lt;div style="border: 1px solid black;"&gt;
+        &lt;div&gt;biTitle:&lt;input type="text" ng-model="biTitle"/&gt;&lt;/div&gt;
+        &lt;div&gt;title:&lt;input type="text" ng-model="title"/&gt;&lt;/div&gt;
+    scope: {       
         bi-title:'=title',
         title:'@title'
     }
