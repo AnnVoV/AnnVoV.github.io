@@ -44,6 +44,17 @@ pane directive:
 
  绑定到的隔离区域的关键字我们使用@ 或者 = 或者 &amp;
 
+```
+  template: '<div style="border: 1px solid black;">'+
+        '<div>biTitle:<input type="text" ng-model="biTitle"/></div>'+
+        '<div>title:<input type="text" ng-model="title"/></div>',
+
+scope: {
+        bi-title:'=title',
+        title:'@title'
+}
+
+```
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
@@ -67,6 +78,16 @@ pane directive:
 <p>pane directive:</p>
 
 <p>绑定到的隔离区域的关键字我们使用@ 或者 = 或者 &amp;</p>
+
+<pre><code>  template: '&lt;div style="border: 1px solid black;"&gt;'+
+        '&lt;div&gt;biTitle:&lt;input type="text" ng-model="biTitle"/&gt;&lt;/div&gt;'+
+        '&lt;div&gt;title:&lt;input type="text" ng-model="title"/&gt;&lt;/div&gt;',
+
+scope: {
+        bi-title:'=title',
+        title:'@title'
+}
+</code></pre>
 <!-- content end -->
 </div>
 <br>
