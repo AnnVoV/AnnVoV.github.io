@@ -1,0 +1,464 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## Angular.js directives difference between controller and link （翻译）
+
+
+<b>[原文参考链接](http://jasonmore.net/angular-js-directives-difference-controller-link/)</b>
+
+&nbsp;&nbsp;&nbsp;&nbsp; Angular directives 是思想的黑洞，其中一个我们经常犹豫的点在“我们应该把我们的code放在哪里，'controller'还是'link'中?
+
+&nbsp;&nbsp;&nbsp;&nbsp;<b>简短的回答是：‘link’</b>
+
+&nbsp;&nbsp;&nbsp;&nbsp;长一点的答案是：询问你自己“想要什么时候运行自己的代码？”
+
+* 想在编译之前执行？ - Controller
+* 想在编译之后执行？ - Link
+
+&nbsp;&nbsp;&nbsp;&nbsp;下面看一个例子：
+
+html:   
+
+``` <example-directive><example-directive>
+```
+
+js:
+
+```
+	var app = angular.module('testApp', []);
+	
+	app
+	.controller('testController', ['$scope', function($scope){
+		$scope.name = 'First';
+	}])
+	.directive('exampleDirective', function(){
+		return {
+			template: '<div> Hello {{name}}! </div>',
+			controller: ['$scope', function($scope){
+				$scope.name = $scope.name + 'Second';
+			}],
+			link: function(scope, el, attr){
+				scope.name = scope.name + 'Third';
+			}
+		};
+	});
+```
+这样最终显示出来的内容是什么呢？   
+最终显示出来的内容是: Hello First Second Third!   
+
+
+那么在属性link中写与在controller中写有什么不同呢？  
+
+* 1.controller中的$scope是依赖注入，所以我们需要先注入这个模块再写上注入的参数；link中只是一个按照指定顺序的参数，所以其参数写成scope或者$scope都可以。
+
+* 2.link 和 controller 属性中传递的scope默认传递的都是来自父级的scope
+
+* 3.我们所说的link 实际上是 post-link 方法(post: 有终点的意思)
+
+
+下面看一个有children 的 parent 的执行过程：
+
+```
+parent (compile)
+	..child 1 (compile)
+	....child 1 a (compile)
+	....child 1 b (compile)
+	..child 2 (compile)
+	....child 2 a (compile)
+	....child 2 b (compile)
+	
+parent (controller)
+parent (pre-link)
+	..child 1 (controller)
+	..child 1 (pre-link)
+		....child 1 a (controller)
+		....child 1 a (pre-link)
+	   ....child 1 a (post-link)
+		....child 1 b (controller)
+		....child 1 b (pre-link)
+		....child 1 b (post-link)
+	..child 1 (post-link)
+	..child 2 (controller)
+    ..child 2 (pre-link)
+      ....child 2 a (controller)
+      ....child 2 a (pre-link)
+      ....child 2 a (post-link)
+      ....child 2 b (controller)
+		....child 2 b (pre-link)
+		....child 2 b (post-link)
+    ..child 2 (post-link)
+parent (post-link)
+
+```
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;从上面这段过程中我们可以看出child directive的controller 和 link 的执行都在parent directive 之前,但是parent的controller执行均在child的相关指令之前，所以我们看下面这个demo然后设想一下结果：
+
+
+
+```
+var app = angular.module('plunker', []);
+
+app.controller('MainCtrl', function($scope, $element) {
+});
+
+app.directive('exampleDirective', function() {
+  return {
+    restrict: 'E',
+    template: '<child-directive></child-directive>',
+    controller: function($scope, $element){
+      // this will not work, since the child directives link 
+      // function was not yet run
+      $element.find('pre').text('hi there!');
+    },
+    link: function(scope, el){
+      // the logic really belongs in link, as the child directive
+      // uncomment this line to fix the problem
+      // el.find('pre').text('hi there!')
+    }
+  }
+});
+
+app.directive('childDirective', function() {
+  return {
+    restrict:  'E',
+    template: '<h1>bar</h1>',
+    replace: true,
+    link: function($scope, $element, attr){
+      // some awesome jquery pluggin which replaces things and bits
+      $element.replaceWith(angular.element('<pre>' +  $element.text() + '</pre>'));
+    }
+  }
+});
+
+```
+
+所以我们可以知道 `parent的controller中此时$element.find('pre') 会是undefined`,因为此时还没有执行到childDirective中，所以上述代码得到的最终结果是bar, 如果我们想要实现最终结果显示我们应该把替换的那段话放在link中，这样我们最终得到的结果就是hi there!
+
+&nbsp;&nbsp;&nbsp;&nbsp;那么既然我们的link是最后执行的，我们为什么还要使用controller部分呢? 因为我们可以做一些我们需要的神奇的东西，像是在一个directives中使用其他directives的controller（通过在directive中配置require关键字）。我们看下面这个例子：
+
+```
+ <!doctype html>
+ <html ng-app="testApp">
+ 	<head>
+ 		<script src="angular.js"></script>
+ 	</head>
+ 	
+ 	<body  ng-controller="MainCtrl">
+ 		<example-directive></example-directive>
+ 		
+ 		<script>
+ 			var app = angular.module('testApp', []);
+ 			
+ 			app
+            .controller('MainCtrl', function () {
+
+            })
+            .directive('exampleDirective', function(){
+                return {
+                    restrict: 'E',
+                    template: '<child-directive></child-directive>',
+                    controller: function($scope, $element){
+                        this.testVariable = 'Awesome Content Lives here!';
+                    }
+                };
+            })
+            .directive('childDirective', function(){
+               return {
+                    restrict: 'E',
+                    template: '<h1>bar</h1>',
+                    replace: true,
+                    require: '^exampleDirective',
+                    link: function($scope, $elem, attrs, exampleDirectiveCtrl){
+                        $elem.replaceWith(angular.element('<pre>' +  exampleDirectiveCtrl.testVariable + '</pre>'));
+                    }
+               }
+            });
+ 		</script>
+ 	</body>
+ </html>
+```
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="angularjsdirectivesdifferencebetweencontrollerandlink">Angular.js directives difference between controller and link （翻译）</h2>
+
+<p><b><a href="http://jasonmore.net/angular-js-directives-difference-controller-link/">原文参考链接</a></b></p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; Angular directives 是思想的黑洞，其中一个我们经常犹豫的点在“我们应该把我们的code放在哪里，'controller'还是'link'中?</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;<b>简短的回答是：‘link’</b></p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;长一点的答案是：询问你自己“想要什么时候运行自己的代码？”</p>
+
+<ul>
+<li>想在编译之前执行？ - Controller</li>
+<li>想在编译之后执行？ - Link</li>
+</ul>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;下面看一个例子：</p>
+
+<p>html:   </p>
+
+<pre><code class=" <example-directive><example-directive>">```
+
+js:
+</code></pre>
+
+<pre><code>var app = angular.module('testApp', []);
+
+app
+.controller('testController', ['$scope', function($scope){
+    $scope.name = 'First';
+}])
+.directive('exampleDirective', function(){
+    return {
+        template: '&lt;div&gt; Hello {{name}}! &lt;/div&gt;',
+        controller: ['$scope', function($scope){
+            $scope.name = $scope.name + 'Second';
+        }],
+        link: function(scope, el, attr){
+            scope.name = scope.name + 'Third';
+        }
+    };
+});
+</code></pre>
+
+<pre><code>这样最终显示出来的内容是什么呢？   
+最终显示出来的内容是: Hello First Second Third!   
+
+
+那么在属性link中写与在controller中写有什么不同呢？  
+
+* 1.controller中的$scope是依赖注入，所以我们需要先注入这个模块再写上注入的参数；link中只是一个按照指定顺序的参数，所以其参数写成scope或者$scope都可以。
+
+* 2.link 和 controller 属性中传递的scope默认传递的都是来自父级的scope
+
+* 3.我们所说的link 实际上是 post-link 方法(post: 有终点的意思)
+
+
+下面看一个有children 的 parent 的执行过程：
+</code></pre>
+
+<p>parent (compile)
+    ..child 1 (compile)
+    ....child 1 a (compile)
+    ....child 1 b (compile)
+    ..child 2 (compile)
+    ....child 2 a (compile)
+    ....child 2 b (compile)</p>
+
+<p>parent (controller)
+parent (pre-link)
+    ..child 1 (controller)
+    ..child 1 (pre-link)
+        ....child 1 a (controller)
+        ....child 1 a (pre-link)
+       ....child 1 a (post-link)
+        ....child 1 b (controller)
+        ....child 1 b (pre-link)
+        ....child 1 b (post-link)
+    ..child 1 (post-link)
+    ..child 2 (controller)
+    ..child 2 (pre-link)
+      ....child 2 a (controller)
+      ....child 2 a (pre-link)
+      ....child 2 a (post-link)
+      ....child 2 b (controller)
+        ....child 2 b (pre-link)
+        ....child 2 b (post-link)
+    ..child 2 (post-link)
+parent (post-link)</p>
+
+<pre><code>&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;从上面这段过程中我们可以看出child directive的controller 和 link 的执行都在parent directive 之前,但是parent的controller执行均在child的相关指令之前，所以我们看下面这个demo然后设想一下结果：
+</code></pre>
+
+<p>var app = angular.module('plunker', []);</p>
+
+<p>app.controller('MainCtrl', function($scope, $element) {
+});</p>
+
+<p>app.directive('exampleDirective', function() {
+  return {
+    restrict: 'E',
+    template: '<child-directive></child-directive>',
+    controller: function($scope, $element){
+      // this will not work, since the child directives link 
+      // function was not yet run
+      $element.find('pre').text('hi there!');
+    },
+    link: function(scope, el){
+      // the logic really belongs in link, as the child directive
+      // uncomment this line to fix the problem
+      // el.find('pre').text('hi there!')
+    }
+  }
+});</p>
+
+<p>app.directive('childDirective', function() {
+  return {
+    restrict:  'E',
+    template: '</p><h1>bar</h1>',
+    replace: true,
+    link: function($scope, $element, attr){
+      // some awesome jquery pluggin which replaces things and bits
+      $element.replaceWith(angular.element('<pre>' +  $element.text() + '</pre>'));
+    }
+  }
+});<p></p>
+
+<pre><code>所以我们可以知道 `parent的controller中此时$element.find('pre') 会是undefined`,因为此时还没有执行到childDirective中，所以上述代码得到的最终结果是bar, 如果我们想要实现最终结果显示我们应该把替换的那段话放在link中，这样我们最终得到的结果就是hi there!
+
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;那么既然我们的link是最后执行的，我们为什么还要使用controller部分呢? 因为我们可以做一些我们需要的神奇的东西，像是在一个directives中使用其他directives的controller（通过在directive中配置require关键字）。我们看下面这个例子：
+</code></pre>
+
+<p>
+ 
+     
+         <script src="angular.js"></script>
+     </p>
+
+<pre><code> &lt;body  ng-controller="MainCtrl"&gt;
+     &lt;example-directive&gt;&lt;/example-directive&gt;
+
+     &lt;script&gt;
+         var app = angular.module('testApp', []);
+
+         app
+        .controller('MainCtrl', function () {
+
+        })
+        .directive('exampleDirective', function(){
+            return {
+                restrict: 'E',
+                template: '&lt;child-directive&gt;&lt;/child-directive&gt;',
+                controller: function($scope, $element){
+                    this.testVariable = 'Awesome Content Lives here!';
+                }
+            };
+        })
+        .directive('childDirective', function(){
+           return {
+                restrict: 'E',
+                template: '&lt;h1&gt;bar&lt;/h1&gt;',
+                replace: true,
+                require: '^exampleDirective',
+                link: function($scope, $elem, attrs, exampleDirectiveCtrl){
+                    $elem.replaceWith(angular.element('&lt;pre&gt;' +  exampleDirectiveCtrl.testVariable + '&lt;/pre&gt;'));
+                }
+           }
+        });
+     &lt;/script&gt;
+ &lt;/body&gt;
+</code></pre>
+
+<p>
+```</p>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "angularDifference.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
