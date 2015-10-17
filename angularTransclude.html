@@ -25,12 +25,11 @@
 	</div>
 <div id="md" style="display: none;">
 <!-- markdown -->
-## AngularJs 之 ngTransclude
+## AngularJs 之 ngTransclude的使用
 
-### ngTransclude 的使用
+### ngTransclude 用法
 
 &nbsp;&nbsp;&nbsp;&nbsp;我们在自定义命令中使用ngTransclude来指明要插入的位置，插入的内容为自定义命令中间的dom 结构，举个例子：
-
 html 模板:
 
 ```
@@ -40,7 +39,6 @@ html 模板:
 		<pane  title="{{title}}">{{text}}</pane>
 	</div>
 ```
-
 
 js 脚本控制:
 
@@ -54,12 +52,14 @@ js 脚本控制:
 				'</div>',
 			scope: {
 				title: '@'
-			}
+			},
+                       /* 注意这个transclude:true 的配置项一定不能忘记  */
+                        transclude: true
 		};
 	});
 
 ```
-&nbsp;&nbsp;&nbsp;&nbsp; 这时候，我们的<pane title="{{title}}"></pane>中间的{{text}}这部分内容就会插入到 `<ng-transclude>` 的位置上
+&nbsp;&nbsp;&nbsp;&nbsp; 这时候，我们的<pane title="{{title}}"></pane>中间的{{text}}这部分内容就会插入到 `<ng-transclude>` 的位置上,所以ng-transclude起着占位的作用。
 
 
 
@@ -68,13 +68,12 @@ js 脚本控制:
 </div>
 <div class="entry" id="main">
 <!-- content -->
-<h2 id="angularjsngtransclude">AngularJs 之 ngTransclude</h2>
+<h2 id="angularjsngtransclude">AngularJs 之 ngTransclude的使用</h2>
 
-<h3 id="ngtransclude">ngTransclude 的使用</h3>
+<h3 id="ngtransclude">ngTransclude 用法</h3>
 
-<p>&nbsp;&nbsp;&nbsp;&nbsp;我们在自定义命令中使用ngTransclude来指明要插入的位置，插入的内容为自定义命令中间的dom 结构，举个例子：</p>
-
-<p>html 模板:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;我们在自定义命令中使用ngTransclude来指明要插入的位置，插入的内容为自定义命令中间的dom 结构，举个例子：
+html 模板:</p>
 
 <pre><code>    &lt;div ng-controller="testCtrl"&gt;
         &lt;input ng-model="title"/&gt;
@@ -94,12 +93,14 @@ js 脚本控制:
                 '&lt;/div&gt;',
             scope: {
                 title: '@'
-            }
+            },
+                       /* 注意这个transclude:true 的配置项一定不能忘记  */
+                        transclude: true
         };
     });
 </code></pre>
 
-<p>&nbsp;&nbsp;&nbsp;&nbsp; 这时候，我们的<pane title="{{title}}"></pane>中间的{{text}}这部分内容就会插入到 <code>&lt;ng-transclude&gt;</code> 的位置上</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp; 这时候，我们的<pane title="{{title}}"></pane>中间的{{text}}这部分内容就会插入到 <code>&lt;ng-transclude&gt;</code> 的位置上,所以ng-transclude起着占位的作用。</p>
 <!-- content end -->
 </div>
 <br>
