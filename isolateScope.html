@@ -27,11 +27,11 @@
 <!-- markdown -->
 ## Isolate Scopes Explained
 
-### Angular 隔离作用域详解
+## Angular 隔离作用域详解:
 
 ### Directive Scopes 分类
 
-#### 1.no scope (默认情况，即不设置scope属性或者scope:false) 
+### 1.no scope (默认情况，即不设置scope属性或者scope:false) 
 
 &nbsp;&nbsp;&nbsp;&nbsp; 默认情况下，directives 分享任何在其上的scope.即与父级共用scope,像下面这种情况：
 
@@ -58,7 +58,7 @@
 [在线查看实例](http://codepen.io/Chevex/pen/ncrhL)
 
 
-#### 2.建立自己的scope但是继承自父级scope
+### 2.建立自己的scope但是继承自父级scope
 
 &nbsp;&nbsp;&nbsp;&nbsp; 上面第一种情况基本是不符合我们的一般设置的，因为我们并不希望我们的自定义命令会污染controller的变量。我们不希望我们directive 中的scope污染到父级scope, 因此我们会设置scope:true 属性。
 
@@ -195,26 +195,17 @@ js:
 ```
 
 
-
-
-
-
-
-
-
-
-
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
 <!-- content -->
 <h2 id="isolatescopesexplained">Isolate Scopes Explained</h2>
 
-<h3 id="angular">Angular 隔离作用域详解</h3>
+<h2 id="angular">Angular 隔离作用域详解:</h2>
 
 <h3 id="directivescopes">Directive Scopes 分类</h3>
 
-<h4 id="1noscopescopescopefalse">1.no scope (默认情况，即不设置scope属性或者scope:false)</h4>
+<h3 id="1noscopescopescopefalse">1.no scope (默认情况，即不设置scope属性或者scope:false)</h3>
 
 <p>&nbsp;&nbsp;&nbsp;&nbsp; 默认情况下，directives 分享任何在其上的scope.即与父级共用scope,像下面这种情况：</p>
 
@@ -238,7 +229,7 @@ js:
 <p>&nbsp;&nbsp;&nbsp;&nbsp;在上面的例子里，myDirective 自定义命令将会共享包围在directive 周围的controller中的作用域。不对scope属性赋值等同于我们设置scope:false。上面这个例子我们可以发现，我们在input 中对foo值的修改会直接影响到父级scope中的foo值。
 <a href="http://codepen.io/Chevex/pen/ncrhL">在线查看实例</a></p>
 
-<h4 id="2scopescope">2.建立自己的scope但是继承自父级scope</h4>
+<h3 id="2scopescope">2.建立自己的scope但是继承自父级scope</h3>
 
 <p>&nbsp;&nbsp;&nbsp;&nbsp; 上面第一种情况基本是不符合我们的一般设置的，因为我们并不希望我们的自定义命令会污染controller的变量。我们不希望我们directive 中的scope污染到父级scope, 因此我们会设置scope:true 属性。</p>
 
