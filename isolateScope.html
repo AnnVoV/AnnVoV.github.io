@@ -1,0 +1,439 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## Isolate Scopes Explained
+
+### Angular 隔离作用域详解
+
+### Directive Scopes 分类
+
+#### 1.no scope (默认情况，即不设置scope属性或者scope:false) 
+
+&nbsp;&nbsp;&nbsp;&nbsp; 默认情况下，directives 分享任何在其上的scope.即与父级共用scope,像下面这种情况：
+
+```
+	<div ng-controller = 'mainController'>
+		<my-directive></my-directive>
+	</div>
+	
+```
+```
+	app.controller('mainController', function($scope){
+		$scope.foo = 'bar';
+	});
+	
+	app.directive('myDirective', function(){
+		return {
+			controller: function($scope){
+			}
+		};
+	});
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;在上面的例子里，myDirective 自定义命令将会共享包围在directive 周围的controller中的作用域。不对scope属性赋值等同于我们设置scope:false。上面这个例子我们可以发现，我们在input 中对foo值的修改会直接影响到父级scope中的foo值。
+[在线查看实例](http://codepen.io/Chevex/pen/ncrhL)
+
+
+#### 2.建立自己的scope但是继承自父级scope
+
+&nbsp;&nbsp;&nbsp;&nbsp; 上面第一种情况基本是不符合我们的一般设置的，因为我们并不希望我们的自定义命令会污染controller的变量。我们不希望我们directive 中的scope污染到父级scope, 因此我们会设置scope:true 属性。
+
+html:
+
+```
+	<div ng-app="app">
+		<div ng-controller='mainController'>
+    		<h3>Controller: {{ foo }}</h3>
+    		<input type="text" ng-model="foo" />
+    		<br /><br />
+	   		<my-directive></my-directive>
+  		</div>
+	</div>
+
+```
+
+
+js:
+
+```
+	var app = angular.module('app', []);
+
+	var controllerScope;
+
+	app.controller('mainController', function ($scope) {
+  		$scope.foo = "bar";
+	});
+
+	app.directive('myDirective', function () {
+   		return {
+    		restrict: 'E',
+    		scope: true,
+    		template: '<div><h3>Directive: {{ foo }}</h3><input type="text" ng-						model="foo" /></div>'
+  		};
+	});
+```
+&nbsp;&nbsp;&nbsp;&nbsp;因为我们directive中的scope默认继承自了父级的controller所以自定义的directive 中的值默认是继承自父级scope, 但是我们在directive 中所做的修改并不会影响到父级。[在线查看实例](http://codepen.io/Chevex/pen/lEcAD)
+
+
+### 3.注意directive中使用ng-transclude 或者是在directive 中混入其他子集元素
+
+&nbsp;&nbsp;&nbsp;&nbsp;子集元素有自己的scope,这个scope 是受谁控制的呢？ 我认为是受到父级元素进行控制的，所以我们对子集元素进行修改的话，我们需要通过我们的scope去调用到父级的scope 才能修改其中的元素的值。
+
+看下面这个实例，就可以明白具体的道理：[在线例子查看](http://jsbin.com/nikipoyota/edit?html,css,output)
+
+```
+
+  <style>
+    button {
+        margin: 10px;
+    }
+    
+   .sonScope {
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid blue;
+      background: lightgreen;
+   }
+
+    .directiveScope {
+      margin-top: 10px;
+      padding: 10px;
+      border:1px solid red;
+      background: pink;
+    }
+
+    .parentScope {
+      padding: 10px;
+      border: 1px solid green;
+      background: lightgreen;
+    }
+  </style>
+
+....
+
+
+  <div ng-app = "testApp">
+    <div ng-controller="testCtrl" class="parentScope">
+      <div>Parent Scope:</div>
+      <div>isHide: {{isHide}}</div>
+          <test-dir isHide="{{isHide}}">
+            <div class="sonScope">
+              <div>Son Scope:</div>
+              <div>isHide: {{isHide}}</div>
+              <button ng-click="changeState()">son in directive change state</button>
+            </div>
+          </test-dir>
+    </div>
+  </div>
+  
+  
+  <script>
+      var app = angular.module('testApp', []);
+      
+      app.controller('testCtrl', ['$scope', function($scope){
+          $scope.isHide = false;
+      }]);
+    
+      app.directive('testDir', function(){
+          return {
+              restrict: 'E',
+              template: '<div class="directiveScope"><div>Directive Scope:<br/>isHide: {{isHide}}</div><button ng-click="changeState()">Directive Change</button><ng-transclude></ng-transclude></div>',
+              transclude: true,
+              scope: {
+                isHide: '@'
+              },
+              link: function($scope, elem, attrs){
+                  $scope.isHide = true;
+                   
+                    
+                  $scope.changeState = function(){
+                      alert('change directive state');
+                      if($scope.isHide){
+                        $scope.isHide = false;
+                      }else{
+                        $scope.isHide = true;
+                      }
+                  };
+                  
+                
+                  $scope.$parent.changeState = function(){
+                      //如果要控制directive 的scope
+                      //使用$scope.变量名
+                      //这里我们希望改变son scope里面的isHide的状态,注意我们从上面也可以看出son是和parent一个层级的，所以我们需要使用 $scope.$parent
+                    
+                     $scope.$parent.isHide = false;
+                  };
+              }
+          };
+      });
+</script>
+
+```
+
+
+
+
+
+
+
+
+
+
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="isolatescopesexplained">Isolate Scopes Explained</h2>
+
+<h3 id="angular">Angular 隔离作用域详解</h3>
+
+<h3 id="directivescopes">Directive Scopes 分类</h3>
+
+<h4 id="1noscopescopescopefalse">1.no scope (默认情况，即不设置scope属性或者scope:false)</h4>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; 默认情况下，directives 分享任何在其上的scope.即与父级共用scope,像下面这种情况：</p>
+
+<pre><code>    &lt;div ng-controller = 'mainController'&gt;
+        &lt;my-directive&gt;&lt;/my-directive&gt;
+    &lt;/div&gt;
+</code></pre>
+
+<pre><code>    app.controller('mainController', function($scope){
+        $scope.foo = 'bar';
+    });
+
+    app.directive('myDirective', function(){
+        return {
+            controller: function($scope){
+            }
+        };
+    });
+</code></pre>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;在上面的例子里，myDirective 自定义命令将会共享包围在directive 周围的controller中的作用域。不对scope属性赋值等同于我们设置scope:false。上面这个例子我们可以发现，我们在input 中对foo值的修改会直接影响到父级scope中的foo值。
+<a href="http://codepen.io/Chevex/pen/ncrhL">在线查看实例</a></p>
+
+<h4 id="2scopescope">2.建立自己的scope但是继承自父级scope</h4>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; 上面第一种情况基本是不符合我们的一般设置的，因为我们并不希望我们的自定义命令会污染controller的变量。我们不希望我们directive 中的scope污染到父级scope, 因此我们会设置scope:true 属性。</p>
+
+<p>html:</p>
+
+<pre><code>    &lt;div ng-app="app"&gt;
+        &lt;div ng-controller='mainController'&gt;
+            &lt;h3&gt;Controller: {{ foo }}&lt;/h3&gt;
+            &lt;input type="text" ng-model="foo" /&gt;
+            &lt;br /&gt;&lt;br /&gt;
+            &lt;my-directive&gt;&lt;/my-directive&gt;
+          &lt;/div&gt;
+    &lt;/div&gt;
+</code></pre>
+
+<p>js:</p>
+
+<pre><code>    var app = angular.module('app', []);
+
+    var controllerScope;
+
+    app.controller('mainController', function ($scope) {
+          $scope.foo = "bar";
+    });
+
+    app.directive('myDirective', function () {
+           return {
+            restrict: 'E',
+            scope: true,
+            template: '&lt;div&gt;&lt;h3&gt;Directive: {{ foo }}&lt;/h3&gt;&lt;input type="text" ng-                     model="foo" /&gt;&lt;/div&gt;'
+          };
+    });
+</code></pre>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;因为我们directive中的scope默认继承自了父级的controller所以自定义的directive 中的值默认是继承自父级scope, 但是我们在directive 中所做的修改并不会影响到父级。<a href="http://codepen.io/Chevex/pen/lEcAD">在线查看实例</a></p>
+
+<h3 id="3directivengtranscludedirective">3.注意directive中使用ng-transclude 或者是在directive 中混入其他子集元素</h3>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;子集元素有自己的scope,这个scope 是受谁控制的呢？ 我认为是受到父级元素进行控制的，所以我们对子集元素进行修改的话，我们需要通过我们的scope去调用到父级的scope 才能修改其中的元素的值。</p>
+
+<p>看下面这个实例，就可以明白具体的道理：<a href="http://jsbin.com/nikipoyota/edit?html,css,output">在线例子查看</a></p>
+
+<pre><code>  &lt;style&gt;
+    button {
+        margin: 10px;
+    }
+
+   .sonScope {
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid blue;
+      background: lightgreen;
+   }
+
+    .directiveScope {
+      margin-top: 10px;
+      padding: 10px;
+      border:1px solid red;
+      background: pink;
+    }
+
+    .parentScope {
+      padding: 10px;
+      border: 1px solid green;
+      background: lightgreen;
+    }
+  &lt;/style&gt;
+
+....
+
+
+  &lt;div ng-app = "testApp"&gt;
+    &lt;div ng-controller="testCtrl" class="parentScope"&gt;
+      &lt;div&gt;Parent Scope:&lt;/div&gt;
+      &lt;div&gt;isHide: {{isHide}}&lt;/div&gt;
+          &lt;test-dir isHide="{{isHide}}"&gt;
+            &lt;div class="sonScope"&gt;
+              &lt;div&gt;Son Scope:&lt;/div&gt;
+              &lt;div&gt;isHide: {{isHide}}&lt;/div&gt;
+              &lt;button ng-click="changeState()"&gt;son in directive change state&lt;/button&gt;
+            &lt;/div&gt;
+          &lt;/test-dir&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+
+  &lt;script&gt;
+      var app = angular.module('testApp', []);
+
+      app.controller('testCtrl', ['$scope', function($scope){
+          $scope.isHide = false;
+      }]);
+
+      app.directive('testDir', function(){
+          return {
+              restrict: 'E',
+              template: '&lt;div class="directiveScope"&gt;&lt;div&gt;Directive Scope:&lt;br/&gt;isHide: {{isHide}}&lt;/div&gt;&lt;button ng-click="changeState()"&gt;Directive Change&lt;/button&gt;&lt;ng-transclude&gt;&lt;/ng-transclude&gt;&lt;/div&gt;',
+              transclude: true,
+              scope: {
+                isHide: '@'
+              },
+              link: function($scope, elem, attrs){
+                  $scope.isHide = true;
+
+
+                  $scope.changeState = function(){
+                      alert('change directive state');
+                      if($scope.isHide){
+                        $scope.isHide = false;
+                      }else{
+                        $scope.isHide = true;
+                      }
+                  };
+
+
+                  $scope.$parent.changeState = function(){
+                      //如果要控制directive 的scope
+                      //使用$scope.变量名
+                      //这里我们希望改变son scope里面的isHide的状态,注意我们从上面也可以看出son是和parent一个层级的，所以我们需要使用 $scope.$parent
+
+                     $scope.$parent.isHide = false;
+                  };
+              }
+          };
+      });
+&lt;/script&gt;
+</code></pre>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "isolateScope.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
