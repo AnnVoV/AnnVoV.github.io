@@ -1,0 +1,290 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+
+参考资料：[Your directive is an API 部分](http://codetunnel.io/isolate-scopes-explained/)
+
+
+### 案例：(上一篇我们用jquery plugin的方式实现了下面的需求，现在我们尝试通过使用angular directive 的方式去实现)
+
+
+&nbsp;&nbsp;&nbsp;&nbsp; 假设现在的需求如下，我们有一个textarea, 当用户进行输入时，每次间隔750s 对用户所输入的内容需要进行自动保存到某个url中。并且在textarea 的上方会有一个显示当前保存状态的div. div中会显示3中状态： 1.no change...  pending... 和 save...。 现在我们需要在jquery 上拓展出这个autoSave(options，callback) 方法。
+
+
+html：
+
+```
+<body ng-app="testApp">
+	<div ng-controller="testCtrl">
+    	<h3 style="color: 	{{status.color}}">{{status.text}}</h3>
+   		 <auto-save save-url="api/list.json" save-status="status"></auto-save>
+	</div>
+</body>
+```
+
+
+js:
+
+```
+	var app = angular.module('testApp', []);
+
+    app
+            .controller('testCtrl', ['$scope', function ($scope) {
+
+            }])
+            .directive('autoSave',['$http', '$timeout',function ($http, $timeout) {
+                return {
+                    restrict: 'E',
+                    scope: {
+                        saveUrl: '=',
+                        saveStatus: '='
+                    },
+                    template: '<div id="status">no change:</div>' +
+                    '<textarea id="content" ng-keyup="keyup()"></textarea>',
+                    link: function($scope, elem, attrs){
+                        //默认的样式配置
+                        $scope.saveStatus = {
+                            text: 'no changes',
+                            color: '#009'
+                        };
+
+                        //注意这里和find 一样，查找到的是一个元素的数组集合
+                        var $textarea = elem.find('textarea')[0];
+                        var url = $scope.saveUrl;
+                        /*保存内容的方法*/
+                        var save = function(){
+                            //通过这个clearTimeout 可以保证saving 只执行一次！
+                            console.log('is saving...', $textarea.value);
+                            $http({
+                                method: 'get',
+                                url: $scope.saveUrl,
+                                data: $textarea.value
+                            }).then(function(){
+                                //sucess callback....（正确响应的回调）
+                                $scope.saveStatus = {
+                                    text: 'saved',
+                                    color: '#090'
+                                };
+                            }, function(){
+                                //error callback....（出错响应的回调）
+                                $scope.saveStatus = {
+                                    text: 'error saving',
+                                    color: '#f00'
+                                };
+                            });
+                        };
+
+                        var timeoutPromise;
+                        
+                        //keyup 事件对应的方法，将事件绑定在ng-keyup上
+                        $scope.keyup = function(){
+                            if(timeoutPromise){
+                                console.log('cancel...');
+
+                                //$timeout(fn, delay) return promise obj
+                                //$timeout.cancel(promise)
+                                $timeout.cancel(timeoutPromise);
+                            }
+
+                            $scope.saveStatus = {
+                                text: 'pending save...',
+                                color: '#990'
+                            };
+                            timeoutPromise = $timeout(save, 750);
+                        };
+                    }
+                };
+            }]);
+
+```
+
+
+
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<p>参考资料：<a href="http://codetunnel.io/isolate-scopes-explained/">Your directive is an API 部分</a></p>
+
+<h3 id="jquerypluginangulardirective">案例：(上一篇我们用jquery plugin的方式实现了下面的需求，现在我们尝试通过使用angular directive 的方式去实现)</h3>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; 假设现在的需求如下，我们有一个textarea, 当用户进行输入时，每次间隔750s 对用户所输入的内容需要进行自动保存到某个url中。并且在textarea 的上方会有一个显示当前保存状态的div. div中会显示3中状态： 1.no change...  pending... 和 save...。 现在我们需要在jquery 上拓展出这个autoSave(options，callback) 方法。</p>
+
+<p>html：</p>
+
+<pre><code>&lt;body ng-app="testApp"&gt;
+    &lt;div ng-controller="testCtrl"&gt;
+        &lt;h3 style="color:   {{status.color}}"&gt;{{status.text}}&lt;/h3&gt;
+            &lt;auto-save save-url="api/list.json" save-status="status"&gt;&lt;/auto-save&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+</code></pre>
+
+<p>js:</p>
+
+<pre><code>    var app = angular.module('testApp', []);
+
+    app
+            .controller('testCtrl', ['$scope', function ($scope) {
+
+            }])
+            .directive('autoSave',['$http', '$timeout',function ($http, $timeout) {
+                return {
+                    restrict: 'E',
+                    scope: {
+                        saveUrl: '=',
+                        saveStatus: '='
+                    },
+                    template: '&lt;div id="status"&gt;no change:&lt;/div&gt;' +
+                    '&lt;textarea id="content" ng-keyup="keyup()"&gt;&lt;/textarea&gt;',
+                    link: function($scope, elem, attrs){
+                        //默认的样式配置
+                        $scope.saveStatus = {
+                            text: 'no changes',
+                            color: '#009'
+                        };
+
+                        //注意这里和find 一样，查找到的是一个元素的数组集合
+                        var $textarea = elem.find('textarea')[0];
+                        var url = $scope.saveUrl;
+                        /*保存内容的方法*/
+                        var save = function(){
+                            //通过这个clearTimeout 可以保证saving 只执行一次！
+                            console.log('is saving...', $textarea.value);
+                            $http({
+                                method: 'get',
+                                url: $scope.saveUrl,
+                                data: $textarea.value
+                            }).then(function(){
+                                //sucess callback....（正确响应的回调）
+                                $scope.saveStatus = {
+                                    text: 'saved',
+                                    color: '#090'
+                                };
+                            }, function(){
+                                //error callback....（出错响应的回调）
+                                $scope.saveStatus = {
+                                    text: 'error saving',
+                                    color: '#f00'
+                                };
+                            });
+                        };
+
+                        var timeoutPromise;
+
+                        //keyup 事件对应的方法，将事件绑定在ng-keyup上
+                        $scope.keyup = function(){
+                            if(timeoutPromise){
+                                console.log('cancel...');
+
+                                //$timeout(fn, delay) return promise obj
+                                //$timeout.cancel(promise)
+                                $timeout.cancel(timeoutPromise);
+                            }
+
+                            $scope.saveStatus = {
+                                text: 'pending save...',
+                                color: '#990'
+                            };
+                            timeoutPromise = $timeout(save, 750);
+                        };
+                    }
+                };
+            }]);
+</code></pre>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "directivePlugin.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
