@@ -1,0 +1,203 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## ngRoute &lt;base href=""&gt; 使用注意事项
+
+### 问题描述：
+
+&nbsp;&nbsp;&nbsp;&nbsp;我们知道，当我们使用 Angular 的ngRoute 的时候，我们同时需要使用 locationProvider来帮助我们优化我们的url，使得我们的url转换为html5模式。 使用 $locationProvider.html5Mode(true) 的同时，需要我们在&lt;head&gt;处设置一个&lt;base&gt;路径，作为所有路由的基础路径。
+
+&nbsp;&nbsp;&nbsp;&nbsp;但是，问题来了，我发现，我设置的<base> 路径都没有起作用，这是为什么呢？
+
+&nbsp;&nbsp;&nbsp;&nbsp;问题在于`我们设置base 的时候，必须有后面的/`, 举个例子，如果我们要设置所有的route 都是基于/public的：
+
+* 如果我们写成&lt;base href="/public" &gt; 是起不到任何效果的，会发现还是基于根路径
+
+* 如果我们写成&lt;base href="/public/" &gt; 才会有效果！
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;下面给个完整的路由判断的例子:
+
+html:
+
+```
+	<head>
+		<base href="/public/"/>
+	</head>
+	
+	<body>
+		<!-- 实际上阅读的路径相当于是 /public/Read -->
+		<a href="Read">阅读</a>
+		<a href="Video">视听</a>
+		<a href="Find">发现</a>
+	</body>
+	
+```
+
+js:
+
+```
+	app.
+		config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider){
+			$routeProvider
+				.when('/Read', {
+					/*  这个templateUrl完整的也是: /public/partials/read.html */
+					templateUrl: '/partials/read.html'
+				})
+				.when('/Video', {
+					templateUrl: '/partials/video.html'
+				})
+				.when('/Find', {
+					templateUrl: '/partials/find.html'
+				})
+		}])
+		
+```
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="ngrouteltbasehrefgt">ngRoute &lt;base href=""&gt; 使用注意事项</h2>
+
+<h3 id="">问题描述：</h3>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;我们知道，当我们使用 Angular 的ngRoute 的时候，我们同时需要使用 locationProvider来帮助我们优化我们的url，使得我们的url转换为html5模式。 使用 $locationProvider.html5Mode(true) 的同时，需要我们在&lt;head&gt;处设置一个&lt;base&gt;路径，作为所有路由的基础路径。</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;但是，问题来了，我发现，我设置的<base> 路径都没有起作用，这是为什么呢？</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;问题在于<code>我们设置base 的时候，必须有后面的/</code>, 举个例子，如果我们要设置所有的route 都是基于/public的：</p>
+
+<ul>
+<li><p>如果我们写成&lt;base href="/public" &gt; 是起不到任何效果的，会发现还是基于根路径</p></li>
+<li><p>如果我们写成&lt;base href="/public/" &gt; 才会有效果！</p></li>
+</ul>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;下面给个完整的路由判断的例子:</p>
+
+<p>html:</p>
+
+<pre><code>    &lt;head&gt;
+        &lt;base href="/public/"/&gt;
+    &lt;/head&gt;
+
+    &lt;body&gt;
+        &lt;!-- 实际上阅读的路径相当于是 /public/Read --&gt;
+        &lt;a href="Read"&gt;阅读&lt;/a&gt;
+        &lt;a href="Video"&gt;视听&lt;/a&gt;
+        &lt;a href="Find"&gt;发现&lt;/a&gt;
+    &lt;/body&gt;
+</code></pre>
+
+<p>js:</p>
+
+<pre><code>    app.
+        config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider){
+            $routeProvider
+                .when('/Read', {
+                    /*  这个templateUrl完整的也是: /public/partials/read.html */
+                    templateUrl: '/partials/read.html'
+                })
+                .when('/Video', {
+                    templateUrl: '/partials/video.html'
+                })
+                .when('/Find', {
+                    templateUrl: '/partials/find.html'
+                })
+        }])
+</code></pre>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "ngRouteBase.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
