@@ -1,0 +1,355 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## Webpack 中使用 css sprites
+
+&nbsp;&nbsp;&nbsp;&nbsp;在 webpack 中使用 css-sprites 模块 和普通的 gulp 或者 grunt 中使用css sprites 是一样的。
+
+* 先 npm install css-sprite 模块
+* 然后我们在webpack.config.js 文件中使用该模块
+* 我们使用该模块生成拼接图片对应的scss样式文件
+
+
+```
+	var sprite = require('css-sprite');
+	
+	//使用下面这段语句，将多个png图片拼成一幅图
+	sprite.create({
+		//这个路径下的待拼接的图片
+		src: ['./public/img/sprites/*.png'],
+		//拼图后生成图片的路径
+		out: './build/img',
+		//生成的最后拼接图片的图片名
+		name: 'sprite',
+		//被拼接图片的各自的位置和样式
+		style: './public/scss_sprites.scss',
+		cssPath: '../../build/img',
+		processor: 'scss'
+	}, function(){
+		console.log('done');
+	});
+
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;然后在webpack下面对scss文件的处理，还是按照原来的写法。
+放一个完整的webpack.config.js 的demo:
+
+
+```
+//执行webpack -p 得到的build文件是经过压缩的
+var webpack = require('webpack'),
+//利用ExtractTextPlugin 生成css 文件夹
+    ExtractTextPlugin = require("extract-text-webpack-plugin"),
+    path = require('path'),
+    libDir = path.join(__dirname, 'public/js/comm'),
+    sprite = require('css-sprite');
+
+sprite.create({
+    src: ['./public/img/sprites/*.png'],
+    out: './build/img',
+    name: 'sprite',
+    style: './public/scss/_sprites.scss',
+    cssPath: '../../build/img',
+    processor: 'scss'
+}, function () {
+    console.log('done');
+});
+
+
+module.exports = {
+    context: __dirname + '/public',
+    entry: {
+        index: './js/app.js'
+    },
+    output: {
+        //这个output的path是相对于根目录的
+        path: 'build/js',
+        //这里的[name] 对应 entry 里面的键
+        filename: '[name].bundle.js',
+        /* 指资源文件的部署路径 我们的项目的html部署在b.alibaba-inc.com/path/to/project/index.html
+         * 我们的js有可能部署在CDN上，比如b.alibaba-inc.com/assets/下
+         * 那么这里的publicPath应该是'/assets'
+         * 这里的publicPath 会影响css中图片引用路径
+         */
+        publicPath: 'http://127.0.0.1:8088/build/'
+    },
+    module: {
+        loaders: [
+            {
+                //scss 文件编译并且生成css 文件块而不是直接Include到js文件里面
+                test: /\.scss$/, loader: ExtractTextPlugin.extract(
+                'css?sourceMap!' +
+                'autoprefixer!' +
+                'sass?sourceMap!'
+                ,
+                {
+                    //我们通过在这里设置publicPath 来覆盖之前我们在output中写的publicPath
+                    //我们在output 中设置的publicPath 会影响我们的hot-module的监听
+                    publicPath: ''
+                }
+            )
+            },
+            {
+                //css 中图片资源的src和url
+                //file-loader 后面的参数会根据 ?name=[path][name].[ext]来拷贝对应的文件夹
+                //这个参数后面的路径也是基于output 里面写的路径来写的
+                test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.eot$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
+                //这个路径是基于js文件的路径去写的
+                loader: "file-loader?name=../img/[name].[ext]"
+            }
+        ]
+    },
+    plugins: [
+        //插件
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'vendor',
+            filename: 'vendor.js',
+            minChunks: 2
+        }),
+        //通过使用ExtractTextPlugin插件，就可以使得js 中require的css 独立出来
+        new ExtractTextPlugin(
+            '../css/[name].css',
+            {
+                allChunks: true
+            }
+        )
+    ],
+    devtool: "sourcemap",
+    resolve: {
+        extensions: ['', '.js', '.html'],
+        alias: {
+            jquery: libDir + '/jquery.min.js',
+            angular: libDir + '/angular.js',
+            angularAnimation: libDir + '/angular-animate.js',
+            route: libDir + '/angular-route.js',
+            bootstrap: libDir + '/bootstrap.min.js'
+        }
+    }
+};
+
+
+
+```
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="webpackcsssprites">Webpack 中使用 css sprites</h2>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;在 webpack 中使用 css-sprites 模块 和普通的 gulp 或者 grunt 中使用css sprites 是一样的。</p>
+
+<ul>
+<li>先 npm install css-sprite 模块</li>
+<li>然后我们在webpack.config.js 文件中使用该模块</li>
+<li>我们使用该模块生成拼接图片对应的scss样式文件</li>
+</ul>
+
+<pre><code>    var sprite = require('css-sprite');
+
+    //使用下面这段语句，将多个png图片拼成一幅图
+    sprite.create({
+        //这个路径下的待拼接的图片
+        src: ['./public/img/sprites/*.png'],
+        //拼图后生成图片的路径
+        out: './build/img',
+        //生成的最后拼接图片的图片名
+        name: 'sprite',
+        //被拼接图片的各自的位置和样式
+        style: './public/scss_sprites.scss',
+        cssPath: '../../build/img',
+        processor: 'scss'
+    }, function(){
+        console.log('done');
+    });
+</code></pre>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;然后在webpack下面对scss文件的处理，还是按照原来的写法。
+放一个完整的webpack.config.js 的demo:</p>
+
+<pre><code>//执行webpack -p 得到的build文件是经过压缩的
+var webpack = require('webpack'),
+//利用ExtractTextPlugin 生成css 文件夹
+    ExtractTextPlugin = require("extract-text-webpack-plugin"),
+    path = require('path'),
+    libDir = path.join(__dirname, 'public/js/comm'),
+    sprite = require('css-sprite');
+
+sprite.create({
+    src: ['./public/img/sprites/*.png'],
+    out: './build/img',
+    name: 'sprite',
+    style: './public/scss/_sprites.scss',
+    cssPath: '../../build/img',
+    processor: 'scss'
+}, function () {
+    console.log('done');
+});
+
+
+module.exports = {
+    context: __dirname + '/public',
+    entry: {
+        index: './js/app.js'
+    },
+    output: {
+        //这个output的path是相对于根目录的
+        path: 'build/js',
+        //这里的[name] 对应 entry 里面的键
+        filename: '[name].bundle.js',
+        /* 指资源文件的部署路径 我们的项目的html部署在b.alibaba-inc.com/path/to/project/index.html
+         * 我们的js有可能部署在CDN上，比如b.alibaba-inc.com/assets/下
+         * 那么这里的publicPath应该是'/assets'
+         * 这里的publicPath 会影响css中图片引用路径
+         */
+        publicPath: 'http://127.0.0.1:8088/build/'
+    },
+    module: {
+        loaders: [
+            {
+                //scss 文件编译并且生成css 文件块而不是直接Include到js文件里面
+                test: /\.scss$/, loader: ExtractTextPlugin.extract(
+                'css?sourceMap!' +
+                'autoprefixer!' +
+                'sass?sourceMap!'
+                ,
+                {
+                    //我们通过在这里设置publicPath 来覆盖之前我们在output中写的publicPath
+                    //我们在output 中设置的publicPath 会影响我们的hot-module的监听
+                    publicPath: ''
+                }
+            )
+            },
+            {
+                //css 中图片资源的src和url
+                //file-loader 后面的参数会根据 ?name=[path][name].[ext]来拷贝对应的文件夹
+                //这个参数后面的路径也是基于output 里面写的路径来写的
+                test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.eot$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
+                //这个路径是基于js文件的路径去写的
+                loader: "file-loader?name=../img/[name].[ext]"
+            }
+        ]
+    },
+    plugins: [
+        //插件
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'vendor',
+            filename: 'vendor.js',
+            minChunks: 2
+        }),
+        //通过使用ExtractTextPlugin插件，就可以使得js 中require的css 独立出来
+        new ExtractTextPlugin(
+            '../css/[name].css',
+            {
+                allChunks: true
+            }
+        )
+    ],
+    devtool: "sourcemap",
+    resolve: {
+        extensions: ['', '.js', '.html'],
+        alias: {
+            jquery: libDir + '/jquery.min.js',
+            angular: libDir + '/angular.js',
+            angularAnimation: libDir + '/angular-animate.js',
+            route: libDir + '/angular-route.js',
+            bootstrap: libDir + '/bootstrap.min.js'
+        }
+    }
+};
+</code></pre>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "webpackCssSprites.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
