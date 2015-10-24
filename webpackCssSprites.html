@@ -27,12 +27,16 @@
 <!-- markdown -->
 ## Webpack 中使用 css sprites
 
+参考资料：[css-sprite 模块github地址 ](https://github.com/aslansky/css-sprite)
+
+
 &nbsp;&nbsp;&nbsp;&nbsp;在 webpack 中使用 css-sprites 模块 和普通的 gulp 或者 grunt 中使用css sprites 是一样的。
 
 * 先 npm install css-sprite 模块
 * 然后我们在webpack.config.js 文件中使用该模块
 * 我们使用该模块生成拼接图片对应的scss样式文件
 
+`【注意】： 我们应该注意webpack.config.js文件中 cssPath指向的位置，它指的是拼图所使用的img的相对位置 是基于生成的样式文件的位置为参考的。`
 
 ```
 	var sprite = require('css-sprite');
@@ -45,19 +49,39 @@
 		out: './build/img',
 		//生成的最后拼接图片的图片名
 		name: 'sprite',
-		//被拼接图片的各自的位置和样式
-		style: './public/scss_sprites.scss',
-		cssPath: '../../build/img',
+		//被拼接图片的各自的位置生成了一个样式文件sprite.scss文件
+		style: './public/scss/sprites.scss',
+                //这是基于scss文件所在的位置去查找Img文件的位置
+               //一般，我们的sprite要拼图的图片，放置的位置是与scss文件放在同一级目录下的
+		cssPath: '../img',
 		processor: 'scss'
 	}, function(){
 		console.log('done');
 	});
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;然后我们得到了我们拼图后生成的样式文件，sprite.scss我们在我们的index.scss文件中引入这个样式文件，并且去找我们要使用的小图片的位置.
+
+```
+  /* 引入生成的拼图后的样式文件 */
+ @import './sprite.css';
+
+// camera icon (camera.png in src directory)
+.icon-camera {
+ //根据文件名获取到对应图片的位置
+  @include sprite($camera);
+}
+
+// cart icon (cart.png in src directory)
+.icon-cart {
+  @include sprite($cart);
+}
 
 ```
 
+
 &nbsp;&nbsp;&nbsp;&nbsp;然后在webpack下面对scss文件的处理，还是按照原来的写法。
 放一个完整的webpack.config.js 的demo:
-
 
 ```
 //执行webpack -p 得到的build文件是经过压缩的
@@ -154,12 +178,13 @@ module.exports = {
 
 
 ```
-
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
 <!-- content -->
 <h2 id="webpackcsssprites">Webpack 中使用 css sprites</h2>
+
+<p>参考资料：<a href="https://github.com/aslansky/css-sprite">css-sprite 模块github地址 </a></p>
 
 <p>&nbsp;&nbsp;&nbsp;&nbsp;在 webpack 中使用 css-sprites 模块 和普通的 gulp 或者 grunt 中使用css sprites 是一样的。</p>
 
@@ -168,6 +193,8 @@ module.exports = {
 <li>然后我们在webpack.config.js 文件中使用该模块</li>
 <li>我们使用该模块生成拼接图片对应的scss样式文件</li>
 </ul>
+
+<p><code>【注意】： 我们应该注意webpack.config.js文件中 cssPath指向的位置，它指的是拼图所使用的img的相对位置 是基于生成的样式文件的位置为参考的。</code></p>
 
 <pre><code>    var sprite = require('css-sprite');
 
@@ -179,13 +206,32 @@ module.exports = {
         out: './build/img',
         //生成的最后拼接图片的图片名
         name: 'sprite',
-        //被拼接图片的各自的位置和样式
-        style: './public/scss_sprites.scss',
-        cssPath: '../../build/img',
+        //被拼接图片的各自的位置生成了一个样式文件sprite.scss文件
+        style: './public/scss/sprites.scss',
+                //这是基于scss文件所在的位置去查找Img文件的位置
+               //一般，我们的sprite要拼图的图片，放置的位置是与scss文件放在同一级目录下的
+        cssPath: '../img',
         processor: 'scss'
     }, function(){
         console.log('done');
     });
+</code></pre>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;然后我们得到了我们拼图后生成的样式文件，sprite.scss我们在我们的index.scss文件中引入这个样式文件，并且去找我们要使用的小图片的位置.</p>
+
+<pre><code>  /* 引入生成的拼图后的样式文件 */
+ @import './sprite.css';
+
+// camera icon (camera.png in src directory)
+.icon-camera {
+ //根据文件名获取到对应图片的位置
+  @include sprite($camera);
+}
+
+// cart icon (cart.png in src directory)
+.icon-cart {
+  @include sprite($cart);
+}
 </code></pre>
 
 <p>&nbsp;&nbsp;&nbsp;&nbsp;然后在webpack下面对scss文件的处理，还是按照原来的写法。
