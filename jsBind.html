@@ -1,0 +1,273 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## js 中我们一般什么时候去使用apply或者call或者Bind
+
+&nbsp;&nbsp;&nbsp;&nbsp;我们知道，一般我们使用apply或者call是为了改变我们函数中this的指向，让它重新绑定到我们想要让它指向的对象上。但是我们为什么要这么做呢？ 有什么目的呢？ 什么时候需要我们去用到apply 或者 call 方法呢？
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;我的想法:   
+&nbsp;&nbsp;&nbsp;&nbsp;假设情境是这样的，我们有一个绘制树状图的方法，当我们鼠标点击了叶子的时候，会触发回调函数callback , 这个callback 会去操作一个data, 但是这个data 呢是需要在我们主函数里面写callback 具体方法的时候才能拿到的。这么说有些抽象，下面给出具体的实例。
+
+
+* 在tree.js 这个绘制树形图的库里面，我们有这样的事件,这是一个工具函数：
+
+```
+	//callback 是个回调函数
+	
+	var drawTree = function(callback){
+		var r = Raphael('canvas', 300, 400);
+	
+		r.circle(30,30,50)
+	 	 .mouseover(function(){
+	 	 		//因为我们写这个工具函数的时候，并不知道用户去调用这个callback需要哪些参数，	
+	 	 		//那我们怎么去填入其他不是在此处获得的参数呢，比如通过$http拿到的Json？
+	 	 		var id = this.data('id');
+	 	 		callback(id);
+	     });
+	};
+	
+	module.exports = drawTree;
+```
+
+
+* 在main.js 里面我们会require这个tree函数，调用它提供的api方法
+
+```
+	var  TreeAPI = require('./comm/tree.js');
+	var category_name = "keyName";
+	
+	//设置我们的回调函数
+	var callbackHandler = function(key){
+			//假设我们需要打出json_data[key]的值
+			//我们怎么才能把json传进去？
+	};	
+	
+	listModel.getItems(url)
+		.then(function(data){
+			var json_data = data.data;
+			//这里我们要调用callback 如何处理呢？
+			
+			//这里我们应该要去调用回调函数callback了 怎么处理？？？？
+			
+		}, function(err){
+			console.log('err.....');
+		})
+	
+	TreeAPI.drawTree();
+
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;我们应该这么去写:
+
+我们把我们传递不进去的参数写成一个对象，然后通过bind去绑定
+
+```
+	 var callBackHandler = function(key){
+	 	//这个key的值在库函数里面已经传递了
+        console.log(key);
+        console.log(this.jsonData);
+    };
+    
+    
+    listModel.getItems(url)
+    	.then(function(data){
+    		var json_data = data.data;
+		   //调用TreeAPI 中的内容
+		   
+		   //我们自己创建一个需要传递的参数的对象
+		   var param = {
+		   		jsonData: json_data
+		   };
+		   //通过使用Bind我们就可以把我们想要的参数传递进去了
+		   TreeAPI.drawTree(callBackHandler.bind(param));
+		   
+    	}, function(err){
+			console.log('err...');
+    	})
+
+```
+
+
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="jsapplycallbind">js 中我们一般什么时候去使用apply或者call或者Bind</h2>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;我们知道，一般我们使用apply或者call是为了改变我们函数中this的指向，让它重新绑定到我们想要让它指向的对象上。但是我们为什么要这么做呢？ 有什么目的呢？ 什么时候需要我们去用到apply 或者 call 方法呢？</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;我的想法: <br>
+&nbsp;&nbsp;&nbsp;&nbsp;假设情境是这样的，我们有一个绘制树状图的方法，当我们鼠标点击了叶子的时候，会触发回调函数callback , 这个callback 会去操作一个data, 但是这个data 呢是需要在我们主函数里面写callback 具体方法的时候才能拿到的。这么说有些抽象，下面给出具体的实例。</p>
+
+<ul>
+<li>在tree.js 这个绘制树形图的库里面，我们有这样的事件,这是一个工具函数：</li>
+</ul>
+
+<pre><code>    //callback 是个回调函数
+
+    var drawTree = function(callback){
+        var r = Raphael('canvas', 300, 400);
+
+        r.circle(30,30,50)
+         .mouseover(function(){
+                //因为我们写这个工具函数的时候，并不知道用户去调用这个callback需要哪些参数， 
+                //那我们怎么去填入其他不是在此处获得的参数呢，比如通过$http拿到的Json？
+                var id = this.data('id');
+                callback(id);
+         });
+    };
+
+    module.exports = drawTree;
+</code></pre>
+
+<ul>
+<li>在main.js 里面我们会require这个tree函数，调用它提供的api方法</li>
+</ul>
+
+<pre><code>    var  TreeAPI = require('./comm/tree.js');
+    var category_name = "keyName";
+
+    //设置我们的回调函数
+    var callbackHandler = function(key){
+            //假设我们需要打出json_data[key]的值
+            //我们怎么才能把json传进去？
+    };  
+
+    listModel.getItems(url)
+        .then(function(data){
+            var json_data = data.data;
+            //这里我们要调用callback 如何处理呢？
+
+            //这里我们应该要去调用回调函数callback了 怎么处理？？？？
+
+        }, function(err){
+            console.log('err.....');
+        })
+
+    TreeAPI.drawTree();
+</code></pre>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;我们应该这么去写:</p>
+
+<p>我们把我们传递不进去的参数写成一个对象，然后通过bind去绑定</p>
+
+<pre><code>     var callBackHandler = function(key){
+        //这个key的值在库函数里面已经传递了
+        console.log(key);
+        console.log(this.jsonData);
+    };
+
+
+    listModel.getItems(url)
+        .then(function(data){
+            var json_data = data.data;
+           //调用TreeAPI 中的内容
+
+           //我们自己创建一个需要传递的参数的对象
+           var param = {
+                jsonData: json_data
+           };
+           //通过使用Bind我们就可以把我们想要的参数传递进去了
+           TreeAPI.drawTree(callBackHandler.bind(param));
+
+        }, function(err){
+            console.log('err...');
+        })
+</code></pre>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "jsBind.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
