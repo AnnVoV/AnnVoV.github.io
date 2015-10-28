@@ -1,0 +1,322 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## 如何在canvas的元素上添加相关的事件
+
+### 参考资料：
+* google search: bind event to shape on canvas
+* stackoverflow [get click event of each rectangle inside canvas?](http://stackoverflow.com/questions/5014851/get-click-event-of-each-rectangle-inside-canvas)
+* stackoverflow [how do I add a simple onClick event han](http://stackoverflow.com/questions/5014851/get-click-event-of-each-rectangle-inside-canvas)
+
+
+
+### 给canvas 上元素绑定事件的思路
+&nbsp;&nbsp;&nbsp;&nbsp;我们给canvas绑定click 事件，因为它相当于是最顶层的元素，我们让canvas作为事件代理的角色。 我们的核心思路主要是通过比较发生点击时鼠标的位置和元素的位置坐标是否有重合，如果有重合就返回.  
+&nbsp;&nbsp;&nbsp;&nbsp;[jsbin在线 demo 查看地址](http://jsfiddle.net/9WWqG/2/)
+
+
+html:
+
+```
+	<canvas id="canvas" width="300" height="150"></canvas>
+```
+
+js:
+
+```
+	 //绘制矩形
+    var drawRect = function (rects, elem) {
+        if (elem && elem.getContext) {
+            //将要渲染的矩形图案的数组
+            var ctx = elem.getContext('2d');
+            if (ctx) {
+                for (var i = 0; i < rects.length; i++) {
+                    //根据数组中设置的位置来绘制矩形
+                    ctx.fillRect(rects[i].x, rects[i].y, rects[i].w, rects[i].h);
+                }
+            }
+        }
+    };
+
+    //判断rects 数组与鼠标之间是否发生了碰撞
+    var isCollide = function (rects, x, y) {
+        //是否发生了碰撞设置为false
+        var isCollision = false;
+        for (var i = 0; i < rects.length; i++) {
+             var left = rects[i].x;
+             var right = rects[i].x + rects[i].w;
+             var top = rects[i].y;
+             var bottom  = rects[i].y + rects[i].h;
+
+             if(x>=left && x<=right && y>=top && y<=top+bottom){
+                console.log(rects[i]);
+                isCollision = rects[i];
+             }
+            //我原来把return isCollision 写在这里了这是不对的！简直傻！
+        }
+        return isCollision;
+    };
+
+    //主函数
+    var main = function () {
+        var elem = document.getElementById("canvas");
+        var rects = [
+            {id: 0, x: 0, y: 0, w: 50, h: 50},
+            {id: 1, x: 75, y: 0, w: 50, h: 50}
+        ];
+
+        drawRect(rects, elem);
+        //给画布加上事件代理绑定相关的点击事件
+        elem.addEventListener('click', function(e){
+            var mouseX = e.offsetX;
+            var mouseY = e.offsetY;
+
+            var rect = isCollide(rects, mouseX, mouseY);
+            if(rect)
+            alert(rect.id + 'is be clicked now!');
+        });
+    };
+
+    main();
+
+```
+
+### 2.我们通过借助第三方库去实现画图与相关元素的交互，比如Raphael,它是一个轻量的库，我们可以通过使用它来创建我们自己想要的特殊的表和图片。
+
+参考资料：
+
+* [Rapheal.js  的官网地址](http://raphaeljs.com/)
+
+* [利用Raphael实现上面功能的在线地址](http://jsfiddle.net/9WWqG/491/)
+
+
+源码:
+
+
+```
+	var raphTest = function () {
+        var r = Raphael(100, 100, 300, 150);
+
+        r.rect(0, 0, 50, 50)
+                .attr({fill: '#000'})
+                .click(function () {
+                    alert('click this first react');
+                });
+
+        r.rect(60, 0, 50, 50)
+                .attr({fill: '#000'})
+                .click(function () {
+                    alert('click this second react');
+                });
+    };
+
+    raphTest();
+```
+
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="canvas">如何在canvas的元素上添加相关的事件</h2>
+
+<h3 id="">参考资料：</h3>
+
+<ul>
+<li>google search: bind event to shape on canvas</li>
+<li>stackoverflow <a href="http://stackoverflow.com/questions/5014851/get-click-event-of-each-rectangle-inside-canvas">get click event of each rectangle inside canvas?</a></li>
+<li>stackoverflow <a href="http://stackoverflow.com/questions/5014851/get-click-event-of-each-rectangle-inside-canvas">how do I add a simple onClick event han</a></li>
+</ul>
+
+<h3 id="canvas">给canvas 上元素绑定事件的思路</h3>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;我们给canvas绑定click 事件，因为它相当于是最顶层的元素，我们让canvas作为事件代理的角色。 我们的核心思路主要是通过比较发生点击时鼠标的位置和元素的位置坐标是否有重合，如果有重合就返回. <br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://jsfiddle.net/9WWqG/2/">jsbin在线 demo 查看地址</a></p>
+
+<p>html:</p>
+
+<pre><code>    &lt;canvas id="canvas" width="300" height="150"&gt;&lt;/canvas&gt;
+</code></pre>
+
+<p>js:</p>
+
+<pre><code>     //绘制矩形
+    var drawRect = function (rects, elem) {
+        if (elem &amp;&amp; elem.getContext) {
+            //将要渲染的矩形图案的数组
+            var ctx = elem.getContext('2d');
+            if (ctx) {
+                for (var i = 0; i &lt; rects.length; i++) {
+                    //根据数组中设置的位置来绘制矩形
+                    ctx.fillRect(rects[i].x, rects[i].y, rects[i].w, rects[i].h);
+                }
+            }
+        }
+    };
+
+    //判断rects 数组与鼠标之间是否发生了碰撞
+    var isCollide = function (rects, x, y) {
+        //是否发生了碰撞设置为false
+        var isCollision = false;
+        for (var i = 0; i &lt; rects.length; i++) {
+             var left = rects[i].x;
+             var right = rects[i].x + rects[i].w;
+             var top = rects[i].y;
+             var bottom  = rects[i].y + rects[i].h;
+
+             if(x&gt;=left &amp;&amp; x&lt;=right &amp;&amp; y&gt;=top &amp;&amp; y&lt;=top+bottom){
+                console.log(rects[i]);
+                isCollision = rects[i];
+             }
+            //我原来把return isCollision 写在这里了这是不对的！简直傻！
+        }
+        return isCollision;
+    };
+
+    //主函数
+    var main = function () {
+        var elem = document.getElementById("canvas");
+        var rects = [
+            {id: 0, x: 0, y: 0, w: 50, h: 50},
+            {id: 1, x: 75, y: 0, w: 50, h: 50}
+        ];
+
+        drawRect(rects, elem);
+        //给画布加上事件代理绑定相关的点击事件
+        elem.addEventListener('click', function(e){
+            var mouseX = e.offsetX;
+            var mouseY = e.offsetY;
+
+            var rect = isCollide(rects, mouseX, mouseY);
+            if(rect)
+            alert(rect.id + 'is be clicked now!');
+        });
+    };
+
+    main();
+</code></pre>
+
+<h3 id="2raphael">2.我们通过借助第三方库去实现画图与相关元素的交互，比如Raphael,它是一个轻量的库，我们可以通过使用它来创建我们自己想要的特殊的表和图片。</h3>
+
+<p>参考资料：</p>
+
+<ul>
+<li><p><a href="http://raphaeljs.com/">Rapheal.js  的官网地址</a></p></li>
+<li><p><a href="http://jsfiddle.net/9WWqG/491/">利用Raphael实现上面功能的在线地址</a></p></li>
+</ul>
+
+<p>源码:</p>
+
+<pre><code>    var raphTest = function () {
+        var r = Raphael(100, 100, 300, 150);
+
+        r.rect(0, 0, 50, 50)
+                .attr({fill: '#000'})
+                .click(function () {
+                    alert('click this first react');
+                });
+
+        r.rect(60, 0, 50, 50)
+                .attr({fill: '#000'})
+                .click(function () {
+                    alert('click this second react');
+                });
+    };
+
+    raphTest();
+</code></pre>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "canvasEvent.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
