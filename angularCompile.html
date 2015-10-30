@@ -1,0 +1,254 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## Angular $compile 相关使用
+
+
+&nbsp;&nbsp;&nbsp;&nbsp; 指令的处理过程是ng的Compile过程的一部分，ng对页面的处理过程主要包括下面三个方面：
+
+* 浏览器把html字符串解析成DOM结构
+* ng 把DOM结构传给 $compile, 返回一个link函数 //dom 结构是一段html结构字符串
+* 传入具体的scope调用这个link函数
+* 得到处理后的DOM,这个DOM处理了指令，连接了数据。
+
+
+`$compile 最基本的使用方式如下：`
+
+```
+	var link = $compile('<p>{{ text }}</p>');
+	var node = link($scope);
+	console.log(node);
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;我们一般使用compile 指令去编译我们自己创建的一段html模板，最实际的例子就是比如，我们有个按钮，每按这个按钮一次，我们就会创建一个新的button，并且当我们点击这个新创建的button时，它会alert出它的编号。 该例子的[在线查看地址](https://jsbin.com/xezelo/edit?html,css,js,console,output)
+
+html:
+
+```
+	<section ng-app="myApp" ng-controller="MainCtrl">
+    	<addbuttonsbutton></addbuttonsbutton>
+    	<div id="space-for-buttons"></section>
+	</section>
+```
+
+css:
+
+```
+section{
+    padding: 2em;   
+}
+button{
+    padding:0.3em;
+    margin: 0.3em;
+}
+	
+```
+
+
+js:
+
+```
+var myApp = angular.module('myApp', []);
+
+function MainCtrl($scope) {
+	$scope.count = 0;
+}
+
+//Directive that returns an element which adds buttons on click which show an alert on click
+
+myApp.directive("addbuttonsbutton", function(){
+	return {
+		restrict: "E",
+		template: "<button addbuttons>Click to add buttons</button>"
+	}
+});
+
+//Directive for adding buttons on click that show an alert on click
+
+myApp.directive("addbuttons", function($compile){
+	return function(scope, element, attrs){
+		element.bind("click", function(){
+			scope.count++;
+			//编译
+			var link = $compile("<div><button class='btn btn-default' data-alert="+scope.count+">Show alert #"+scope.count+"</button></div>");
+			//生成node
+			var node = link(scope);
+			//在容器中添加该node
+			angular.element(document.getElementById('space-for-buttons')).append(node);
+		});
+	};
+});
+```
+
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="angulardcompile">Angular $compile 相关使用</h2>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; 指令的处理过程是ng的Compile过程的一部分，ng对页面的处理过程主要包括下面三个方面：</p>
+
+<ul>
+<li>浏览器把html字符串解析成DOM结构</li>
+<li>ng 把DOM结构传给 $compile, 返回一个link函数 //dom 结构是一段html结构字符串</li>
+<li>传入具体的scope调用这个link函数</li>
+<li>得到处理后的DOM,这个DOM处理了指令，连接了数据。</li>
+</ul>
+
+<p><code>$compile 最基本的使用方式如下：</code></p>
+
+<pre><code>    var link = $compile('&lt;p&gt;{{ text }}&lt;/p&gt;');
+    var node = link($scope);
+    console.log(node);
+</code></pre>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;我们一般使用compile 指令去编译我们自己创建的一段html模板，最实际的例子就是比如，我们有个按钮，每按这个按钮一次，我们就会创建一个新的button，并且当我们点击这个新创建的button时，它会alert出它的编号。 该例子的<a href="https://jsbin.com/xezelo/edit?html,css,js,console,output">在线查看地址</a></p>
+
+<p>html:</p>
+
+<pre><code>    &lt;section ng-app="myApp" ng-controller="MainCtrl"&gt;
+        &lt;addbuttonsbutton&gt;&lt;/addbuttonsbutton&gt;
+        &lt;div id="space-for-buttons"&gt;&lt;/section&gt;
+    &lt;/section&gt;
+</code></pre>
+
+<p>css:</p>
+
+<pre><code>section{
+    padding: 2em;   
+}
+button{
+    padding:0.3em;
+    margin: 0.3em;
+}
+</code></pre>
+
+<p>js:</p>
+
+<pre><code>var myApp = angular.module('myApp', []);
+
+function MainCtrl($scope) {
+    $scope.count = 0;
+}
+
+//Directive that returns an element which adds buttons on click which show an alert on click
+
+myApp.directive("addbuttonsbutton", function(){
+    return {
+        restrict: "E",
+        template: "&lt;button addbuttons&gt;Click to add buttons&lt;/button&gt;"
+    }
+});
+
+//Directive for adding buttons on click that show an alert on click
+
+myApp.directive("addbuttons", function($compile){
+    return function(scope, element, attrs){
+        element.bind("click", function(){
+            scope.count++;
+            //编译
+            var link = $compile("&lt;div&gt;&lt;button class='btn btn-default' data-alert="+scope.count+"&gt;Show alert #"+scope.count+"&lt;/button&gt;&lt;/div&gt;");
+            //生成node
+            var node = link(scope);
+            //在容器中添加该node
+            angular.element(document.getElementById('space-for-buttons')).append(node);
+        });
+    };
+});
+</code></pre>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "angularCompile.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
