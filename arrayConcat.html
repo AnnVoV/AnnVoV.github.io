@@ -1,0 +1,204 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## 如何拼接两个数组arr1 和 arr2 并且去掉重复内容
+
+### [参考资源 stackoverflow](http://stackoverflow.com/questions/1584370/how-to-merge-two-arrays-in-javascript-and-de-duplicate-items)
+
+### 1.先拼接两个数组内容 利用array1.concat(array2)
+
+```
+	var arr1 = [1,2,3];
+	var arr2 = [3,4,5];
+	
+	var arr3 = arr1.concat(arr2);
+	console.log(arr3);//[1,2,3,3,4,5]
+	//得到的是两个数组的直接拼接组成的新的数组
+```
+
+
+
+### 2.如何处理两个数组中的相同内容部分
+
+&nbsp;&nbsp;&nbsp;&nbsp;通过使用js 的Array.prototype.filter() 方法.
+
+&nbsp;&nbsp;&nbsp;&nbsp;首先看下filter的用法 arr.filter(callback[, thisArg])   
+&nbsp;&nbsp;&nbsp;&nbsp;其中callback用法:   
+&nbsp;&nbsp;&nbsp;&nbsp;Function to test each element of the array.    
+&nbsp;&nbsp;&nbsp;&nbsp;Invokedwith arguments (element, index, array). Return true to keep the element, false otherwise.
+
+&nbsp;&nbsp;&nbsp;&nbsp;中文解释下： callback 是指一个用于验证数组中每个元素的匹配方法，这个callback有三个参数element,index,array. 如果这个正则的返回结果为true表示保留该元素，如果返回为false则删掉该元素。
+
+&nbsp;&nbsp;&nbsp;&nbsp;那我们怎么判断元素是否重复了呢？利用js 的Array.prototype.indexOf() 方法
+
+
+#### Array.prototype.indexOf(searchElem) 返回的是第一次出现的该元素的位置
+
+&nbsp;&nbsp;&nbsp;&nbsp;如果我们先得到混合的数组中的内容，然后遍历每一个元素的IndexOf与当前的位置是否一样，如果一样保留（说明只出现了一次），如果不一样，删掉，说明该元素是重复的.
+
+```
+	var arr1 = [1,2,3];
+	var arr2 = [3,4,5];
+	var arr3 = arr1.concat(arr2);// [1,2,3,3,4,5];
+	
+	var result_arr = arr3.filter(function(elem,pos){
+		return arr3.indexOf(elem) == pos;
+	});//[1,2,3,4,5]
+```
+
+
+&nbsp;&nbsp;&nbsp;&nbsp; 非常棒并且简介的解决思路，同时也说明了一个问题，对Array相关的api并不熟悉，应该把Array部分的api过一遍！
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="arr1arr2">如何拼接两个数组arr1 和 arr2 并且去掉重复内容</h2>
+
+<h3 id="stackoverflowhttpstackoverflowcomquestions1584370howtomergetwoarraysinjavascriptanddeduplicateitems"><a href="http://stackoverflow.com/questions/1584370/how-to-merge-two-arrays-in-javascript-and-de-duplicate-items">参考资源 stackoverflow</a></h3>
+
+<h3 id="1array1concatarray2">1.先拼接两个数组内容 利用array1.concat(array2)</h3>
+
+<pre><code>    var arr1 = [1,2,3];
+    var arr2 = [3,4,5];
+
+    var arr3 = arr1.concat(arr2);
+    console.log(arr3);//[1,2,3,3,4,5]
+    //得到的是两个数组的直接拼接组成的新的数组
+</code></pre>
+
+<h3 id="2">2.如何处理两个数组中的相同内容部分</h3>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;通过使用js 的Array.prototype.filter() 方法.</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;首先看下filter的用法 arr.filter(callback[, thisArg]) <br>
+&nbsp;&nbsp;&nbsp;&nbsp;其中callback用法: <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Function to test each element of the array. <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Invokedwith arguments (element, index, array). Return true to keep the element, false otherwise.</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;中文解释下： callback 是指一个用于验证数组中每个元素的匹配方法，这个callback有三个参数element,index,array. 如果这个正则的返回结果为true表示保留该元素，如果返回为false则删掉该元素。</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;那我们怎么判断元素是否重复了呢？利用js 的Array.prototype.indexOf() 方法</p>
+
+<h4 id="arrayprototypeindexofsearchelem">Array.prototype.indexOf(searchElem) 返回的是第一次出现的该元素的位置</h4>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;如果我们先得到混合的数组中的内容，然后遍历每一个元素的IndexOf与当前的位置是否一样，如果一样保留（说明只出现了一次），如果不一样，删掉，说明该元素是重复的.</p>
+
+<pre><code>    var arr1 = [1,2,3];
+    var arr2 = [3,4,5];
+    var arr3 = arr1.concat(arr2);// [1,2,3,3,4,5];
+
+    var result_arr = arr3.filter(function(elem,pos){
+        return arr3.indexOf(elem) == pos;
+    });//[1,2,3,4,5]
+</code></pre>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; 非常棒并且简介的解决思路，同时也说明了一个问题，对Array相关的api并不熟悉，应该把Array部分的api过一遍！</p>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "arrayConcat.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
