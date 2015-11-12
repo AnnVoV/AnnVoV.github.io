@@ -1,0 +1,242 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## node.js 文件的读写
+
+
+参考资料：[Accessing the file system in node.js](http://www.sitepoint.com/accessing-the-file-system-in-node-js/)
+
+```
+//测试 先读取文件内容并且将得到的内容存储到jsonObj对象中
+app.get('/test3', function (req, res) {
+    //文件读取数据的相关过程
+    filename = baseUrl + req.query.title;
+
+    fs.exists(filename, function (exists) {
+        if (exists) {
+            //如果文件是存在的我们通过stat 方法拿到file相关信息
+            //ToDO: 为什么使用了w+ 读取数据后，文件内容全没了改成了a+ 就好了
+            
+            fs.stat(filename, function (err, stats) {
+                fs.open(filename, "a+", function (err, fd) {
+                    //这里注意 如果stats.size=0 表示是一个死循环
+                    if (stats.size == 0) {
+                        //说明是一个空文件
+                        jsonObj = {};
+                        return;
+                    }
+
+                    var buffer = new Buffer(stats.size);
+                    //fs.read(fd, buffer, offset, length, position, callback);
+                    //fd 指的是文档标识符
+                    fs.read(fd, buffer, 0, buffer.length, null, function (err, bytesRead, buffer) {
+                        //buffer.toString(encoding, start, end);
+                        var data_str = buffer.toString('utf8', 0, buffer.length);
+                        //读取到了所有的文件内容得到的是字符串
+                        //Todo: 字符串和json 对象的相互转换 JSON.parse(string) JSON.stringify(obj) 注意这里的json要全大写
+                        jsonObj = JSON.parse(data_str);
+                        fs.close(fd);
+                    });
+                });
+            });
+        }
+    });
+
+    res.status(200).jsonp("Hello");
+});
+
+```
+* 1.fs.open(path, flags[, mode], callback) 这里我们要注意如果我们的mode 选择的是w  模式，它是会把原先的文件先删除掉，再创建新的文件。[^1]
+
+* 2.我们在File System相关的 api 里面会看到一个fd 的东西，什么是fd，file description 文档标识符     
+什么是文档标识符？      
+简而言之，当你打开一个文件的时候，操作系统会打开一个入口去存储那个打开文件的相关信息。如果你同时打开了100个文件。你将会有100个入口文件在你的操作系统中。fd是一个整数，代表着操作系统中独一无二的一个打开的文件。   
+what is file description?      
+In simple words, when you open a file, the operating system creates an entry to represent that file and store the information about that opened file. So if there are 100 files opened in your OS then there will be 100 entries in OS (somewhere in kernel). These entries are represented by integers like (...100, 101, 102....). This entry number is the file descriptor. So it is just an integer number that uniquely represents an opened file in operating system. If your process opens 10 files then your Process table will have 10 entries for file descriptors.         
+Similarly when you open a network socket, it is also represented by an integer and it is called Socket Descriptor. I hope you understand.
+
+ * 3.注意fs.read() 和 fs.write() 对应的api的细节   
+ fs.read(fd, buffer, offset, length, position, callback)  
+ read data from the file specified by fd. ----->
+ 很自然想到我们read之前要先open file ------>
+ fs.open(path, flags,[mode], callback)其中callback(err, fd) ------>   
+ 然后回去看fs.read 参数中的Buffer buffer is the buffer that the data will be written to.  去查找buffer -------->     
+ 发现Buffer 有一个构造函数new Buffer(str[, encoding]) 这里有一个对Buffer的理解，如何更好地理解Buffer 参考[What is buffer? stackoverflow](http://stackoverflow.com/questions/648309/what-does-it-mean-by-buffer) [^2]  
+Imagine that you're eating candy out of a bowl. You take one piece regularly. To prevent the bowl from running out, someone might refill the bowl before it gets empty, so that when you want to take another piece, there's candy in the bowl.   
+The bowl acts as a buffer between you and the candy bag.   
+If you're watching a movie online, the web service will continually download the next 5 minutes or so into a buffer, that way your computer doesn't have to download the movie as you're watching it (which would cause hanging). ----->   
+同理可得到fs.write 相关的使用
+      
+   
+#### 参考资料：
+
+[^1]: [fs.open() api](https://nodejs.org/api/fs.html#fs_fs_write_fd_buffer_offset_length_position_callback)
+
+[^2]: [What is Buffer?](http://stackoverflow.com/questions/648309/what-does-it-mean-by-buffer)
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="nodejs">node.js 文件的读写</h2>
+
+<p>参考资料：<a href="http://www.sitepoint.com/accessing-the-file-system-in-node-js/">Accessing the file system in node.js</a></p>
+
+<pre><code>//测试 先读取文件内容并且将得到的内容存储到jsonObj对象中
+app.get('/test3', function (req, res) {
+    //文件读取数据的相关过程
+    filename = baseUrl + req.query.title;
+
+    fs.exists(filename, function (exists) {
+        if (exists) {
+            //如果文件是存在的我们通过stat 方法拿到file相关信息
+            //ToDO: 为什么使用了w+ 读取数据后，文件内容全没了改成了a+ 就好了
+
+            fs.stat(filename, function (err, stats) {
+                fs.open(filename, "a+", function (err, fd) {
+                    //这里注意 如果stats.size=0 表示是一个死循环
+                    if (stats.size == 0) {
+                        //说明是一个空文件
+                        jsonObj = {};
+                        return;
+                    }
+
+                    var buffer = new Buffer(stats.size);
+                    //fs.read(fd, buffer, offset, length, position, callback);
+                    //fd 指的是文档标识符
+                    fs.read(fd, buffer, 0, buffer.length, null, function (err, bytesRead, buffer) {
+                        //buffer.toString(encoding, start, end);
+                        var data_str = buffer.toString('utf8', 0, buffer.length);
+                        //读取到了所有的文件内容得到的是字符串
+                        //Todo: 字符串和json 对象的相互转换 JSON.parse(string) JSON.stringify(obj) 注意这里的json要全大写
+                        jsonObj = JSON.parse(data_str);
+                        fs.close(fd);
+                    });
+                });
+            });
+        }
+    });
+
+    res.status(200).jsonp("Hello");
+});
+</code></pre>
+
+<ul>
+<li><p>1.fs.open(path, flags[, mode], callback) 这里我们要注意如果我们的mode 选择的是w  模式，它是会把原先的文件先删除掉，再创建新的文件。<a href="[fs.open" title=") api](https://nodejs.org/api/fs.html#fs_fs_write_fd_buffer_offset_length_position_callback">^1</a></p></li>
+<li><p>2.我们在File System相关的 api 里面会看到一个fd 的东西，什么是fd，file description 文档标识符 <br>
+什么是文档标识符？ <br>
+简而言之，当你打开一个文件的时候，操作系统会打开一个入口去存储那个打开文件的相关信息。如果你同时打开了100个文件。你将会有100个入口文件在你的操作系统中。fd是一个整数，代表着操作系统中独一无二的一个打开的文件。 <br>
+what is file description? <br>
+In simple words, when you open a file, the operating system creates an entry to represent that file and store the information about that opened file. So if there are 100 files opened in your OS then there will be 100 entries in OS (somewhere in kernel). These entries are represented by integers like (...100, 101, 102....). This entry number is the file descriptor. So it is just an integer number that uniquely represents an opened file in operating system. If your process opens 10 files then your Process table will have 10 entries for file descriptors. <br>
+Similarly when you open a network socket, it is also represented by an integer and it is called Socket Descriptor. I hope you understand.</p>
+
+<ul><li>3.注意fs.read() 和 fs.write() 对应的api的细节 <br>
+fs.read(fd, buffer, offset, length, position, callback) <br>
+read data from the file specified by fd. -----&gt;
+很自然想到我们read之前要先open file ------&gt;
+fs.open(path, flags,[mode], callback)其中callback(err, fd) ------&gt; <br>
+然后回去看fs.read 参数中的Buffer buffer is the buffer that the data will be written to.  去查找buffer --------&gt; <br>
+发现Buffer 有一个构造函数new Buffer(str[, encoding]) 这里有一个对Buffer的理解，如何更好地理解Buffer 参考<a href="http://stackoverflow.com/questions/648309/what-does-it-mean-by-buffer">What is buffer? stackoverflow</a> [^2] <br>
+Imagine that you're eating candy out of a bowl. You take one piece regularly. To prevent the bowl from running out, someone might refill the bowl before it gets empty, so that when you want to take another piece, there's candy in the bowl. <br>
+The bowl acts as a buffer between you and the candy bag. <br>
+If you're watching a movie online, the web service will continually download the next 5 minutes or so into a buffer, that way your computer doesn't have to download the movie as you're watching it (which would cause hanging). -----&gt; <br>
+同理可得到fs.write 相关的使用</li></ul></li>
+</ul>
+
+<h4 id="">参考资料：</h4>
+
+<p>[^2]: <a href="http://stackoverflow.com/questions/648309/what-does-it-mean-by-buffer">What is Buffer?</a></p>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "nodeFile.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
