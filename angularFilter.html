@@ -1,0 +1,207 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## AnuglarJs 中的自定义Filters
+
+### 前言
+
+&nbsp;&nbsp;&nbsp;&nbsp; 在Angualr中，filters 给我们提供了格式化数据的方式。下面我们来看如何进行过滤器的自定义。
+
+### 创建  
+
+&nbsp;&nbsp;&nbsp;&nbsp;如果我们要创建一个过滤器，我们通常把过滤器加在一个module身上， 命名这个过滤器， 并且返回录入后处理的数据。
+
+&nbsp;&nbsp;&nbsp;&nbsp;<b>注意：</b> 我们最好不要直接在我们的主模块上添加过滤器，而是给主模块重创建一个模块，在创建的模块上添加过滤器。
+
+```
+	angular.module('myApp')
+		.filter('slug', function(){
+			return function(input){
+				//处理input
+				return input;
+			}
+		})
+
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;例如，当我们要使模板可以正常解析带有html标签的字符串时候，我们需要使用$sce模块，所以我们可以像下面这么写：
+
+```
+	angular.module('myApp')
+			.filter('to_trusted', ['$sce', function($sce){
+				return function(text){
+					return $sce.trustAsHtml(text);
+				};
+			}]);
+```
+
+### 调用
+
+#### 调用方式一： 使用html
+
+&nbsp;&nbsp;&nbsp;&nbsp;接下来，我们如何调用我们自定义的filter. 在模板后面直接使用 filter {{ content_html | to_trusted }}
+
+#### 调用方式二： 使用js
+
+&nbsp;&nbsp;&nbsp;&nbsp;通过使用js 的方式，通过注入$filter 模块，并且使用$filter模块
+
+```
+	angular.module('myApp')
+		.controller('myCtrl', function($scope, $filter){
+			var userName = 'Rob Stingole';
+			//在这里调用上面我们注册的filter('slug')方法
+			$scope.userSlug = $filter('slug')(userName);
+			console.log($scope.userSlug);
+		})
+
+```
+
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="anuglarjsfilters">AnuglarJs 中的自定义Filters</h2>
+
+<h3 id="">前言</h3>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; 在Angualr中，filters 给我们提供了格式化数据的方式。下面我们来看如何进行过滤器的自定义。</p>
+
+<h3 id="">创建</h3>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;如果我们要创建一个过滤器，我们通常把过滤器加在一个module身上， 命名这个过滤器， 并且返回录入后处理的数据。</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;<b>注意：</b> 我们最好不要直接在我们的主模块上添加过滤器，而是给主模块重创建一个模块，在创建的模块上添加过滤器。</p>
+
+<pre><code>    angular.module('myApp')
+        .filter('slug', function(){
+            return function(input){
+                //处理input
+                return input;
+            }
+        })
+</code></pre>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;例如，当我们要使模板可以正常解析带有html标签的字符串时候，我们需要使用$sce模块，所以我们可以像下面这么写：</p>
+
+<pre><code>    angular.module('myApp')
+            .filter('to_trusted', ['$sce', function($sce){
+                return function(text){
+                    return $sce.trustAsHtml(text);
+                };
+            }]);
+</code></pre>
+
+<h3 id="">调用</h3>
+
+<h4 id="html">调用方式一： 使用html</h4>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;接下来，我们如何调用我们自定义的filter. 在模板后面直接使用 filter {{ content<em>html | to</em>trusted }}</p>
+
+<h4 id="js">调用方式二： 使用js</h4>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;通过使用js 的方式，通过注入$filter 模块，并且使用$filter模块</p>
+
+<pre><code>    angular.module('myApp')
+        .controller('myCtrl', function($scope, $filter){
+            var userName = 'Rob Stingole';
+            //在这里调用上面我们注册的filter('slug')方法
+            $scope.userSlug = $filter('slug')(userName);
+            console.log($scope.userSlug);
+        })
+</code></pre>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "angularFilter.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
