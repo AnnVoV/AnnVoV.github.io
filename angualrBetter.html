@@ -12,256 +12,71 @@
 <body>
 <div class="main">
     <div class="header">
-    	<ul id="pages">
+        <ul id="pages">
             <li><a href="/">home</a></li>
             <li><a href="/#/tags">tags</a></li>
             <li><a href="/#/archive">archive</a></li>
-    	</ul>
+        </ul>
     </div>
-	<div class="wrap-header">
-	<h1>
-    <a href="/" id="title"></a>
-	</h1>
-	</div>
-<div id="md" style="display: none;">
-<!-- markdown -->
-## Anuglar 应用的性能优化
-参考文献：   
-[Speeding up AngularJs apps with simple optimizations](https://www.binpress.com/tutorial/speeding-up-angular-js-with-simple-optimizations/135)
+    <div class="wrap-header">
+        <h1>
+            <a href="/" id="title"></a>
+        </h1>
+    </div>
+    <div id="md" style="display: none;">
+        <!-- markdown -->
+        ## angular js ——事件学习
 
-ps: markdown 里面，&#036;要使用转义字符，转义字符为
+        ## 1.angularjs 事件的发送有两种方式
 
-```
-	&#036;
-	
-```
+        &nbsp;&nbsp;&nbsp;&nbsp;$scope.$boradcast 和 $scope.$emit
 
-### 一次性绑定语法{{::value}}
-AngularJs 1.3.0版本以后有了一个新的语法，可以使得数据的渲染只进行一次，并且不会受未来数据更新的影响。我们通过 {{::title}}实现。
+        &nbsp;&nbsp;&nbsp;&nbsp;$scope.$boradcast( ‘传递的事件名 ‘，’传递的值’);
+        //$broadcast 是向着下层，即son层进行传播的
 
-这种情况下，Angular会去除这个DOM结构身上的&#036;&#036;watchers列表，这对性能表现来说意味着什么？这意味着可以更好地构建我们的应用。
+        &nbsp;&nbsp;&nbsp;&nbsp;$scope.$emite(‘传递的事件名’， ‘传递的值’)
+        //$emit 是向着上层，即parent层进行传播的
 
-### &#036;scope 的apply方法与digest方法对比
-&#036;scope的apply方法是用来告诉Angulary一个数据模型的变化发生在了Anuglar的生命周期之外。（即与数据改变相关的内容绑定在了非Angular提供的默认事件上）
+        ## 2.angularjs 接收事件的方式只有一种，就是通过使用$on
+        ```
+        app.controller('myctrl', ['$scope',  function($scope){
+        $scope.$on( '事件名'， function( e,d ){
+        //console.log( ' 接收到相关的事件并且进行处理 ' );
+        });
+        }]);
+        ```
+        <!-- markdown end -->
+    </div>
+    <div class="entry" id="main">
+        <!-- content -->
+        <h2 id="angularjs">angular js ——事件学习</h2>
 
-当&#036;scope的apply()被调用时，它会使整个应用进入digest 循环，同时会导致开始执行&#036;rootScope.&#036;digest()，因为它触发的是从根节点开始的循环检查，一开始它的处理速度会很快，但是随着应用程序规模的增长，处理的时间会变得越来越长。
+        <h2 id="1angularjs">1.angularjs 事件的发送有两种方式</h2>
 
-但是如果我们使用&#036;scope.&#036;digest,它是从当前的作用域&#036;scope向下查询它的子节点，消耗的性能更少。
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;<span class="MathJax_Preview" style="color: inherit;"></span><span class="MathJax" id="MathJax-Element-1347-Frame"><nobr><span class="math" id="MathJax-Span-9417" role="math" style="width: 3.153em; display: inline-block;"><span style="display: inline-block; position: relative; width: 2.543em; height: 0px; font-size: 123%;"><span style="position: absolute; clip: rect(1.933em 1000em 2.899em -999.997em); top: -2.538em; left: 0.003em;"><span class="mrow" id="MathJax-Span-9418"><span class="mi" id="MathJax-Span-9419" style="font-family: STIXGeneral-Italic;">s</span><span class="mi" id="MathJax-Span-9420" style="font-family: STIXGeneral-Italic;">c</span><span class="mi" id="MathJax-Span-9421" style="font-family: STIXGeneral-Italic;">o</span><span class="mi" id="MathJax-Span-9422" style="font-family: STIXGeneral-Italic;">p</span><span class="mi" id="MathJax-Span-9423" style="font-family: STIXGeneral-Italic;">e</span><span class="mo" id="MathJax-Span-9424" style="font-family: STIXGeneral-Regular;">.</span></span><span style="display: inline-block; width: 0px; height: 2.543em;"></span></span></span><span style="border-left-width: 0.003em; border-left-style: solid; display: inline-block; overflow: hidden; width: 0px; height: 0.941em; vertical-align: -0.309em;"></span></span></nobr></span><script type="math/tex" id="MathJax-Element-1347">scope.</script>boradcast 和 <span class="MathJax_Preview" style="color: inherit;"></span><span class="MathJax" id="MathJax-Element-1348-Frame"><nobr><span class="math" id="MathJax-Span-9425" role="math" style="width: 3.153em; display: inline-block;"><span style="display: inline-block; position: relative; width: 2.543em; height: 0px; font-size: 123%;"><span style="position: absolute; clip: rect(1.933em 1000em 2.899em -999.997em); top: -2.538em; left: 0.003em;"><span class="mrow" id="MathJax-Span-9426"><span class="mi" id="MathJax-Span-9427" style="font-family: STIXGeneral-Italic;">s</span><span class="mi" id="MathJax-Span-9428" style="font-family: STIXGeneral-Italic;">c</span><span class="mi" id="MathJax-Span-9429" style="font-family: STIXGeneral-Italic;">o</span><span class="mi" id="MathJax-Span-9430" style="font-family: STIXGeneral-Italic;">p</span><span class="mi" id="MathJax-Span-9431" style="font-family: STIXGeneral-Italic;">e</span><span class="mo" id="MathJax-Span-9432" style="font-family: STIXGeneral-Regular;">.</span></span><span style="display: inline-block; width: 0px; height: 2.543em;"></span></span></span><span style="border-left-width: 0.003em; border-left-style: solid; display: inline-block; overflow: hidden; width: 0px; height: 0.941em; vertical-align: -0.309em;"></span></span></nobr></span><script type="math/tex" id="MathJax-Element-1348">scope.</script>emit</p>
 
-对于使用这种方式的一个警告是：如果你使用的是双向绑定并且希望更新到父级作用域的数据，父级的&#036;scope 直到 &#036;rootScope进行了完整的&#036;digest循环才会得到修改。
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;<span class="MathJax_Preview" style="color: inherit;"></span><span class="MathJax" id="MathJax-Element-1349-Frame"><nobr><span class="math" id="MathJax-Span-9433" role="math" style="width: 3.153em; display: inline-block;"><span style="display: inline-block; position: relative; width: 2.543em; height: 0px; font-size: 123%;"><span style="position: absolute; clip: rect(1.933em 1000em 2.899em -999.997em); top: -2.538em; left: 0.003em;"><span class="mrow" id="MathJax-Span-9434"><span class="mi" id="MathJax-Span-9435" style="font-family: STIXGeneral-Italic;">s</span><span class="mi" id="MathJax-Span-9436" style="font-family: STIXGeneral-Italic;">c</span><span class="mi" id="MathJax-Span-9437" style="font-family: STIXGeneral-Italic;">o</span><span class="mi" id="MathJax-Span-9438" style="font-family: STIXGeneral-Italic;">p</span><span class="mi" id="MathJax-Span-9439" style="font-family: STIXGeneral-Italic;">e</span><span class="mo" id="MathJax-Span-9440" style="font-family: STIXGeneral-Regular;">.</span></span><span style="display: inline-block; width: 0px; height: 2.543em;"></span></span></span><span style="border-left-width: 0.003em; border-left-style: solid; display: inline-block; overflow: hidden; width: 0px; height: 0.941em; vertical-align: -0.309em;"></span></span></nobr></span><script type="math/tex" id="MathJax-Element-1349">scope.</script>boradcast( ‘传递的事件名 ‘，’传递的值’);
+            //$broadcast 是向着下层，即son层进行传播的</p>
 
-### 避免直接使用ng-repeat,通过使用“track by”提高性能
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;<span class="MathJax_Preview" style="color: inherit;"></span><span class="MathJax" id="MathJax-Element-1350-Frame"><nobr><span class="math" id="MathJax-Span-9441" role="math" style="width: 3.153em; display: inline-block;"><span style="display: inline-block; position: relative; width: 2.543em; height: 0px; font-size: 123%;"><span style="position: absolute; clip: rect(1.933em 1000em 2.899em -999.997em); top: -2.538em; left: 0.003em;"><span class="mrow" id="MathJax-Span-9442"><span class="mi" id="MathJax-Span-9443" style="font-family: STIXGeneral-Italic;">s</span><span class="mi" id="MathJax-Span-9444" style="font-family: STIXGeneral-Italic;">c</span><span class="mi" id="MathJax-Span-9445" style="font-family: STIXGeneral-Italic;">o</span><span class="mi" id="MathJax-Span-9446" style="font-family: STIXGeneral-Italic;">p</span><span class="mi" id="MathJax-Span-9447" style="font-family: STIXGeneral-Italic;">e</span><span class="mo" id="MathJax-Span-9448" style="font-family: STIXGeneral-Regular;">.</span></span><span style="display: inline-block; width: 0px; height: 2.543em;"></span></span></span><span style="border-left-width: 0.003em; border-left-style: solid; display: inline-block; overflow: hidden; width: 0px; height: 0.941em; vertical-align: -0.309em;"></span></span></nobr></span><script type="math/tex" id="MathJax-Element-1350">scope.</script>emite(‘传递的事件名’， ‘传递的值’)
+            //$emit 是向着上层，即parent层进行传播的</p>
 
-[Improving ng-repeat Performance with "track by"](http://www.codelord.net/2014/04/15/improving-ng-repeat-performance-with-track-by/)
+        <h2 id="2angularjsdon">2.angularjs 接收事件的方式只有一种，就是通过使用$on</h2>
 
-我们使用ng-repeat 的一般方式
-
-```
-	<ul class="tasks">
-		<li ng-repeat="task in tasks" ng-class="{done:task.done}">
-			{{task.id}} : {{task.title}}
-		</li>
-	</ul>
-```
-
-我们知道我们更新这整个ul最常用的方式是：
-
-```
-&#036;scope.tasks = newTasksFromTheServer;   
-
-```
-
-这是一段非常简洁的代码，但是当我们进行数据更新时，它会移除所有已经存在的li元素，然后再重新创建他们，这样的代价是高昂的（例如：我们有很多个li元素，并且每个li元素的模板是十分复杂的）。这意味着这一个过程包含了很多的DOM操作。
-
-
-ngRepeat为每一项任务都添加了&#036;&#036;hashKey 属性用来追踪这每一项任务。如果你用新的任务对象去替换原先的任务对象，即使他们俩一模一样，因为新的对象并不存在&#036;&#036;hashKey 属性，所以ngRepeat并不知道他们代表着相同的元素内容。
-
-<b>解决方案</b>
-自Angular 1.2开始，新增加了一个track by 条款在ngRepeat语法中，它允许你为你的ngRepeat自定义key,而非使用由angualr自动生成的唯一IDs。
-
-这意味着你可以使用这样的句法  `ng-repeat = "task in tasks track by task.id"`  因为无论原先的tasks和更新的tasks，ID都是一致的 ———— 这样ngRepeat会知道不需要创建新的DOM元素并且会复用他们。
-下面我们来看个例子：
-
-html:
-```
-	<div ng-controller="TasksCtrl">
-    	<button ng-click="refresh()">Refresh Tasks</button>
-    	<ul>
-        <li ng-repeat="task in tasks track by task.title">{{::task.title}}{{::task.date}}</li>
-    	</ul>
-	</div>
-```
-
-js:
-
-```
-	 var app = angular.module('testApp', []);
-
-    app
-            .controller('TasksCtrl', ['&#036;scope', function (&#036;scope) {
-                var date = new Date().toISOString();
-                var newArr = [];
-                &#036;scope.tasks = [];
-
-                for (var i = 0; i < 301; i++) {
-                    &#036;scope.tasks.push({
-                        id: i,
-                        title: 'Task' + i,
-                        date: date
-                    });
-                }
-
-
-                &#036;scope.refresh = function(){
-                    var testNewArr = [];
-                    var date = new Date().toISOString();
-
-                    for(var i=0; i<301;i++){
-                        testNewArr.push({
-                            id: i,
-                            title: 'Task' + i,
-                            date: date
-                        });
-                    }
-
-                    &#036;scope.tasks = testNewArr;
-                }
-            }]);
-
-```
-
-这里注意，我们在ng-repeat上面写了 track by task.title 意味着，如果 task.title 的值发生了改变我们的dom结构是会重排的，如果我们的task.title 相对于之前一次并没有发生改变，那么不会重排整个dom,你也会发现 date 没有更新。
-
-可以尝一下不使用track by 语句而是直接使用 ng-repeat 的效果。你会发现，如果不使用track by 每一次更新，时间都发生了变化，但是如果我们使用了track by,我们可以看到如果track by后面根据的内容没有发生变化，数据是不会变化的，时间也没有刷新。
-
-
-
- 
-
-
-
-
-
-
-
-
-
-
-<!-- markdown end -->
-</div>
-<div class="entry" id="main">
-<!-- content -->
-<h2 id="anuglar">Anuglar 应用的性能优化</h2>
-
-<p>参考文献： <br>
-<a href="https://www.binpress.com/tutorial/speeding-up-angular-js-with-simple-optimizations/135">Speeding up AngularJs apps with simple optimizations</a></p>
-
-<p>ps: markdown 里面，$要使用转义字符，转义字符为</p>
-
-<pre><code>    &amp;#036;
+<pre><code>     app.controller('myctrl', ['$scope',  function($scope){
+    $scope.$on( '事件名'， function( e,d ){
+    //console.log( ' 接收到相关的事件并且进行处理 ' );
+    });
+    }]);
 </code></pre>
-
-<h3 id="value">一次性绑定语法{{::value}}</h3>
-
-<p>AngularJs 1.3.0版本以后有了一个新的语法，可以使得数据的渲染只进行一次，并且不会受未来数据更新的影响。我们通过 {{::title}}实现。</p>
-
-<p>这种情况下，Angular会去除这个DOM结构身上的$$watchers列表，这对性能表现来说意味着什么？这意味着可以更好地构建我们的应用。</p>
-
-<h3 id="036scopeapplydigest">$scope 的apply方法与digest方法对比</h3>
-
-<p>$scope的apply方法是用来告诉Angulary一个数据模型的变化发生在了Anuglar的生命周期之外。（即与数据改变相关的内容绑定在了非Angular提供的默认事件上）</p>
-
-<p>当<span class="MathJax_Preview" style="color: inherit;"></span><span class="MathJax" id="MathJax-Element-1714-Frame"><nobr><span class="math" id="MathJax-Span-61626" role="math" style="width: 36.334em; display: inline-block;"><span style="display: inline-block; position: relative; width: 29.525em; height: 0px; font-size: 123%;"><span style="position: absolute; clip: rect(1.578em 1000em 2.899em -999.997em); top: -2.538em; left: 0.003em;"><span class="mrow" id="MathJax-Span-61627"><span class="mi" id="MathJax-Span-61628" style="font-family: STIXGeneral-Italic;">s</span><span class="mi" id="MathJax-Span-61629" style="font-family: STIXGeneral-Italic;">c</span><span class="mi" id="MathJax-Span-61630" style="font-family: STIXGeneral-Italic;">o</span><span class="mi" id="MathJax-Span-61631" style="font-family: STIXGeneral-Italic;">p</span><span class="mi" id="MathJax-Span-61632" style="font-family: STIXGeneral-Italic;">e</span><span class="texatom" id="MathJax-Span-61633"><span class="mrow" id="MathJax-Span-61634"><span class="mo" id="MathJax-Span-61635"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">的</span></span></span></span><span class="mi" id="MathJax-Span-61636" style="font-family: STIXGeneral-Italic;">a</span><span class="mi" id="MathJax-Span-61637" style="font-family: STIXGeneral-Italic;">p</span><span class="mi" id="MathJax-Span-61638" style="font-family: STIXGeneral-Italic;">p</span><span class="mi" id="MathJax-Span-61639" style="font-family: STIXGeneral-Italic;">l<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.003em;"></span></span><span class="mi" id="MathJax-Span-61640" style="font-family: STIXGeneral-Italic;">y</span><span class="mo" id="MathJax-Span-61641" style="font-family: STIXGeneral-Regular;">(</span><span class="mo" id="MathJax-Span-61642" style="font-family: STIXGeneral-Regular;">)</span><span class="texatom" id="MathJax-Span-61643"><span class="mrow" id="MathJax-Span-61644"><span class="mo" id="MathJax-Span-61645"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">被</span></span></span></span><span class="texatom" id="MathJax-Span-61646"><span class="mrow" id="MathJax-Span-61647"><span class="mo" id="MathJax-Span-61648"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">调</span></span></span></span><span class="texatom" id="MathJax-Span-61649"><span class="mrow" id="MathJax-Span-61650"><span class="mo" id="MathJax-Span-61651"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">用</span></span></span></span><span class="texatom" id="MathJax-Span-61652"><span class="mrow" id="MathJax-Span-61653"><span class="mo" id="MathJax-Span-61654"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">时</span></span></span></span><span class="texatom" id="MathJax-Span-61655"><span class="mrow" id="MathJax-Span-61656"><span class="mo" id="MathJax-Span-61657"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">，</span></span></span></span><span class="texatom" id="MathJax-Span-61658"><span class="mrow" id="MathJax-Span-61659"><span class="mo" id="MathJax-Span-61660"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">它</span></span></span></span><span class="texatom" id="MathJax-Span-61661"><span class="mrow" id="MathJax-Span-61662"><span class="mo" id="MathJax-Span-61663"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">会</span></span></span></span><span class="texatom" id="MathJax-Span-61664"><span class="mrow" id="MathJax-Span-61665"><span class="mo" id="MathJax-Span-61666"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">使</span></span></span></span><span class="texatom" id="MathJax-Span-61667"><span class="mrow" id="MathJax-Span-61668"><span class="mo" id="MathJax-Span-61669"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">整</span></span></span></span><span class="texatom" id="MathJax-Span-61670"><span class="mrow" id="MathJax-Span-61671"><span class="mo" id="MathJax-Span-61672"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">个</span></span></span></span><span class="texatom" id="MathJax-Span-61673"><span class="mrow" id="MathJax-Span-61674"><span class="mo" id="MathJax-Span-61675"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">应</span></span></span></span><span class="texatom" id="MathJax-Span-61676"><span class="mrow" id="MathJax-Span-61677"><span class="mo" id="MathJax-Span-61678"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">用</span></span></span></span><span class="texatom" id="MathJax-Span-61679"><span class="mrow" id="MathJax-Span-61680"><span class="mo" id="MathJax-Span-61681"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">进</span></span></span></span><span class="texatom" id="MathJax-Span-61682"><span class="mrow" id="MathJax-Span-61683"><span class="mo" id="MathJax-Span-61684"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">入</span></span></span></span><span class="mi" id="MathJax-Span-61685" style="font-family: STIXGeneral-Italic;">d<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.053em;"></span></span><span class="mi" id="MathJax-Span-61686" style="font-family: STIXGeneral-Italic;">i</span><span class="mi" id="MathJax-Span-61687" style="font-family: STIXGeneral-Italic;">g</span><span class="mi" id="MathJax-Span-61688" style="font-family: STIXGeneral-Italic;">e</span><span class="mi" id="MathJax-Span-61689" style="font-family: STIXGeneral-Italic;">s</span><span class="mi" id="MathJax-Span-61690" style="font-family: STIXGeneral-Italic;">t<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.003em;"></span></span><span class="texatom" id="MathJax-Span-61691"><span class="mrow" id="MathJax-Span-61692"><span class="mo" id="MathJax-Span-61693"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">循</span></span></span></span><span class="texatom" id="MathJax-Span-61694"><span class="mrow" id="MathJax-Span-61695"><span class="mo" id="MathJax-Span-61696"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">环</span></span></span></span><span class="texatom" id="MathJax-Span-61697"><span class="mrow" id="MathJax-Span-61698"><span class="mo" id="MathJax-Span-61699"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">，</span></span></span></span><span class="texatom" id="MathJax-Span-61700"><span class="mrow" id="MathJax-Span-61701"><span class="mo" id="MathJax-Span-61702"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">同</span></span></span></span><span class="texatom" id="MathJax-Span-61703"><span class="mrow" id="MathJax-Span-61704"><span class="mo" id="MathJax-Span-61705"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">时</span></span></span></span><span class="texatom" id="MathJax-Span-61706"><span class="mrow" id="MathJax-Span-61707"><span class="mo" id="MathJax-Span-61708"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">会</span></span></span></span><span class="texatom" id="MathJax-Span-61709"><span class="mrow" id="MathJax-Span-61710"><span class="mo" id="MathJax-Span-61711"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">导</span></span></span></span><span class="texatom" id="MathJax-Span-61712"><span class="mrow" id="MathJax-Span-61713"><span class="mo" id="MathJax-Span-61714"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">致</span></span></span></span><span class="texatom" id="MathJax-Span-61715"><span class="mrow" id="MathJax-Span-61716"><span class="mo" id="MathJax-Span-61717"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">开</span></span></span></span><span class="texatom" id="MathJax-Span-61718"><span class="mrow" id="MathJax-Span-61719"><span class="mo" id="MathJax-Span-61720"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">始</span></span></span></span><span class="texatom" id="MathJax-Span-61721"><span class="mrow" id="MathJax-Span-61722"><span class="mo" id="MathJax-Span-61723"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">执</span></span></span></span><span class="texatom" id="MathJax-Span-61724"><span class="mrow" id="MathJax-Span-61725"><span class="mo" id="MathJax-Span-61726"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">行</span></span></span></span></span><span style="display: inline-block; width: 0px; height: 2.543em;"></span></span></span><span style="border-left-width: 0.003em; border-left-style: solid; display: inline-block; overflow: hidden; width: 0px; height: 1.378em; vertical-align: -0.309em;"></span></span></nobr></span><script type="math/tex" id="MathJax-Element-1714">scope的apply()被调用时，它会使整个应用进入digest 循环，同时会导致开始执行</script>rootScope.$digest()，因为它触发的是从根节点开始的循环检查，一开始它的处理速度会很快，但是随着应用程序规模的增长，处理的时间会变得越来越长。</p>
-
-<p>但是如果我们使用<span class="MathJax_Preview" style="color: inherit;"></span><span class="MathJax" id="MathJax-Element-1715-Frame"><nobr><span class="math" id="MathJax-Span-61727" role="math" style="width: 3.153em; display: inline-block;"><span style="display: inline-block; position: relative; width: 2.543em; height: 0px; font-size: 123%;"><span style="position: absolute; clip: rect(1.933em 1000em 2.899em -999.997em); top: -2.538em; left: 0.003em;"><span class="mrow" id="MathJax-Span-61728"><span class="mi" id="MathJax-Span-61729" style="font-family: STIXGeneral-Italic;">s</span><span class="mi" id="MathJax-Span-61730" style="font-family: STIXGeneral-Italic;">c</span><span class="mi" id="MathJax-Span-61731" style="font-family: STIXGeneral-Italic;">o</span><span class="mi" id="MathJax-Span-61732" style="font-family: STIXGeneral-Italic;">p</span><span class="mi" id="MathJax-Span-61733" style="font-family: STIXGeneral-Italic;">e</span><span class="mo" id="MathJax-Span-61734" style="font-family: STIXGeneral-Regular;">.</span></span><span style="display: inline-block; width: 0px; height: 2.543em;"></span></span></span><span style="border-left-width: 0.003em; border-left-style: solid; display: inline-block; overflow: hidden; width: 0px; height: 0.941em; vertical-align: -0.309em;"></span></span></nobr></span><script type="math/tex" id="MathJax-Element-1715">scope.</script>digest,它是从当前的作用域$scope向下查询它的子节点，消耗的性能更少。</p>
-
-<p>对于使用这种方式的一个警告是：如果你使用的是双向绑定并且希望更新到父级作用域的数据，父级的<span class="MathJax_Preview" style="color: inherit;"></span><span class="MathJax" id="MathJax-Element-1716-Frame"><nobr><span class="math" id="MathJax-Span-61735" role="math" style="width: 4.83em; display: inline-block;"><span style="display: inline-block; position: relative; width: 3.915em; height: 0px; font-size: 123%;"><span style="position: absolute; clip: rect(1.578em 1000em 2.899em -999.997em); top: -2.538em; left: 0.003em;"><span class="mrow" id="MathJax-Span-61736"><span class="mi" id="MathJax-Span-61737" style="font-family: STIXGeneral-Italic;">s</span><span class="mi" id="MathJax-Span-61738" style="font-family: STIXGeneral-Italic;">c</span><span class="mi" id="MathJax-Span-61739" style="font-family: STIXGeneral-Italic;">o</span><span class="mi" id="MathJax-Span-61740" style="font-family: STIXGeneral-Italic;">p</span><span class="mi" id="MathJax-Span-61741" style="font-family: STIXGeneral-Italic;">e</span><span class="texatom" id="MathJax-Span-61742"><span class="mrow" id="MathJax-Span-61743"><span class="mo" id="MathJax-Span-61744"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">直</span></span></span></span><span class="texatom" id="MathJax-Span-61745"><span class="mrow" id="MathJax-Span-61746"><span class="mo" id="MathJax-Span-61747"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">到</span></span></span></span></span><span style="display: inline-block; width: 0px; height: 2.543em;"></span></span></span><span style="border-left-width: 0.003em; border-left-style: solid; display: inline-block; overflow: hidden; width: 0px; height: 1.378em; vertical-align: -0.309em;"></span></span></nobr></span><script type="math/tex" id="MathJax-Element-1716">scope 直到 </script>rootScope进行了完整的$digest循环才会得到修改。</p>
-
-<h3 id="ngrepeattrackby">避免直接使用ng-repeat,通过使用“track by”提高性能</h3>
-
-<p><a href="http://www.codelord.net/2014/04/15/improving-ng-repeat-performance-with-track-by/">Improving ng-repeat Performance with "track by"</a></p>
-
-<p>我们使用ng-repeat 的一般方式</p>
-
-<pre><code>    &lt;ul class="tasks"&gt;
-        &lt;li ng-repeat="task in tasks" ng-class="{done:task.done}"&gt;
-            {{task.id}} : {{task.title}}
-        &lt;/li&gt;
-    &lt;/ul&gt;
-</code></pre>
-
-<p>我们知道我们更新这整个ul最常用的方式是：</p>
-
-<pre><code>&amp;#036;scope.tasks = newTasksFromTheServer;   
-</code></pre>
-
-<p>这是一段非常简洁的代码，但是当我们进行数据更新时，它会移除所有已经存在的li元素，然后再重新创建他们，这样的代价是高昂的（例如：我们有很多个li元素，并且每个li元素的模板是十分复杂的）。这意味着这一个过程包含了很多的DOM操作。</p>
-
-<p>ngRepeat为每一项任务都添加了<span class="MathJax_Preview" style="color: inherit;"></span><div class="MathJax_Display" style="text-align: center;"><span class="MathJax" id="MathJax-Element-1717-Frame"><nobr><span class="math" id="MathJax-Span-61748" role="math" style="width: 58.133em; display: inline-block;"><span style="display: inline-block; position: relative; width: 47.259em; height: 0px; font-size: 123%;"><span style="position: absolute; clip: rect(1.578em 1000em 2.899em -999.997em); top: -2.538em; left: 0.003em;"><span class="mrow" id="MathJax-Span-61749"><span class="mi" id="MathJax-Span-61750" style="font-family: STIXGeneral-Italic;">h</span><span class="mi" id="MathJax-Span-61751" style="font-family: STIXGeneral-Italic;">a</span><span class="mi" id="MathJax-Span-61752" style="font-family: STIXGeneral-Italic;">s</span><span class="mi" id="MathJax-Span-61753" style="font-family: STIXGeneral-Italic;">h</span><span class="mi" id="MathJax-Span-61754" style="font-family: STIXGeneral-Italic;">K<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.053em;"></span></span><span class="mi" id="MathJax-Span-61755" style="font-family: STIXGeneral-Italic;">e</span><span class="mi" id="MathJax-Span-61756" style="font-family: STIXGeneral-Italic;">y</span><span class="texatom" id="MathJax-Span-61757"><span class="mrow" id="MathJax-Span-61758"><span class="mo" id="MathJax-Span-61759"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">属</span></span></span></span><span class="texatom" id="MathJax-Span-61760"><span class="mrow" id="MathJax-Span-61761"><span class="mo" id="MathJax-Span-61762"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">性</span></span></span></span><span class="texatom" id="MathJax-Span-61763"><span class="mrow" id="MathJax-Span-61764"><span class="mo" id="MathJax-Span-61765"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">用</span></span></span></span><span class="texatom" id="MathJax-Span-61766"><span class="mrow" id="MathJax-Span-61767"><span class="mo" id="MathJax-Span-61768"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">来</span></span></span></span><span class="texatom" id="MathJax-Span-61769"><span class="mrow" id="MathJax-Span-61770"><span class="mo" id="MathJax-Span-61771"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">追</span></span></span></span><span class="texatom" id="MathJax-Span-61772"><span class="mrow" id="MathJax-Span-61773"><span class="mo" id="MathJax-Span-61774"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">踪</span></span></span></span><span class="texatom" id="MathJax-Span-61775"><span class="mrow" id="MathJax-Span-61776"><span class="mo" id="MathJax-Span-61777"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">这</span></span></span></span><span class="texatom" id="MathJax-Span-61778"><span class="mrow" id="MathJax-Span-61779"><span class="mo" id="MathJax-Span-61780"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">每</span></span></span></span><span class="texatom" id="MathJax-Span-61781"><span class="mrow" id="MathJax-Span-61782"><span class="mo" id="MathJax-Span-61783"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">一</span></span></span></span><span class="texatom" id="MathJax-Span-61784"><span class="mrow" id="MathJax-Span-61785"><span class="mo" id="MathJax-Span-61786"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">项</span></span></span></span><span class="texatom" id="MathJax-Span-61787"><span class="mrow" id="MathJax-Span-61788"><span class="mo" id="MathJax-Span-61789"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">任</span></span></span></span><span class="texatom" id="MathJax-Span-61790"><span class="mrow" id="MathJax-Span-61791"><span class="mo" id="MathJax-Span-61792"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">务</span></span></span></span><span class="texatom" id="MathJax-Span-61793"><span class="mrow" id="MathJax-Span-61794"><span class="mo" id="MathJax-Span-61795"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">。</span></span></span></span><span class="texatom" id="MathJax-Span-61796"><span class="mrow" id="MathJax-Span-61797"><span class="mo" id="MathJax-Span-61798"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">如</span></span></span></span><span class="texatom" id="MathJax-Span-61799"><span class="mrow" id="MathJax-Span-61800"><span class="mo" id="MathJax-Span-61801"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">果</span></span></span></span><span class="texatom" id="MathJax-Span-61802"><span class="mrow" id="MathJax-Span-61803"><span class="mo" id="MathJax-Span-61804"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">你</span></span></span></span><span class="texatom" id="MathJax-Span-61805"><span class="mrow" id="MathJax-Span-61806"><span class="mo" id="MathJax-Span-61807"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">用</span></span></span></span><span class="texatom" id="MathJax-Span-61808"><span class="mrow" id="MathJax-Span-61809"><span class="mo" id="MathJax-Span-61810"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">新</span></span></span></span><span class="texatom" id="MathJax-Span-61811"><span class="mrow" id="MathJax-Span-61812"><span class="mo" id="MathJax-Span-61813"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">的</span></span></span></span><span class="texatom" id="MathJax-Span-61814"><span class="mrow" id="MathJax-Span-61815"><span class="mo" id="MathJax-Span-61816"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">任</span></span></span></span><span class="texatom" id="MathJax-Span-61817"><span class="mrow" id="MathJax-Span-61818"><span class="mo" id="MathJax-Span-61819"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">务</span></span></span></span><span class="texatom" id="MathJax-Span-61820"><span class="mrow" id="MathJax-Span-61821"><span class="mo" id="MathJax-Span-61822"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">对</span></span></span></span><span class="texatom" id="MathJax-Span-61823"><span class="mrow" id="MathJax-Span-61824"><span class="mo" id="MathJax-Span-61825"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">象</span></span></span></span><span class="texatom" id="MathJax-Span-61826"><span class="mrow" id="MathJax-Span-61827"><span class="mo" id="MathJax-Span-61828"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">去</span></span></span></span><span class="texatom" id="MathJax-Span-61829"><span class="mrow" id="MathJax-Span-61830"><span class="mo" id="MathJax-Span-61831"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">替</span></span></span></span><span class="texatom" id="MathJax-Span-61832"><span class="mrow" id="MathJax-Span-61833"><span class="mo" id="MathJax-Span-61834"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">换</span></span></span></span><span class="texatom" id="MathJax-Span-61835"><span class="mrow" id="MathJax-Span-61836"><span class="mo" id="MathJax-Span-61837"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">原</span></span></span></span><span class="texatom" id="MathJax-Span-61838"><span class="mrow" id="MathJax-Span-61839"><span class="mo" id="MathJax-Span-61840"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">先</span></span></span></span><span class="texatom" id="MathJax-Span-61841"><span class="mrow" id="MathJax-Span-61842"><span class="mo" id="MathJax-Span-61843"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">的</span></span></span></span><span class="texatom" id="MathJax-Span-61844"><span class="mrow" id="MathJax-Span-61845"><span class="mo" id="MathJax-Span-61846"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">任</span></span></span></span><span class="texatom" id="MathJax-Span-61847"><span class="mrow" id="MathJax-Span-61848"><span class="mo" id="MathJax-Span-61849"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">务</span></span></span></span><span class="texatom" id="MathJax-Span-61850"><span class="mrow" id="MathJax-Span-61851"><span class="mo" id="MathJax-Span-61852"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">对</span></span></span></span><span class="texatom" id="MathJax-Span-61853"><span class="mrow" id="MathJax-Span-61854"><span class="mo" id="MathJax-Span-61855"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">象</span></span></span></span><span class="texatom" id="MathJax-Span-61856"><span class="mrow" id="MathJax-Span-61857"><span class="mo" id="MathJax-Span-61858"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">，</span></span></span></span><span class="texatom" id="MathJax-Span-61859"><span class="mrow" id="MathJax-Span-61860"><span class="mo" id="MathJax-Span-61861"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">即</span></span></span></span><span class="texatom" id="MathJax-Span-61862"><span class="mrow" id="MathJax-Span-61863"><span class="mo" id="MathJax-Span-61864"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">使</span></span></span></span><span class="texatom" id="MathJax-Span-61865"><span class="mrow" id="MathJax-Span-61866"><span class="mo" id="MathJax-Span-61867"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">他</span></span></span></span><span class="texatom" id="MathJax-Span-61868"><span class="mrow" id="MathJax-Span-61869"><span class="mo" id="MathJax-Span-61870"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">们</span></span></span></span><span class="texatom" id="MathJax-Span-61871"><span class="mrow" id="MathJax-Span-61872"><span class="mo" id="MathJax-Span-61873"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">俩</span></span></span></span><span class="texatom" id="MathJax-Span-61874"><span class="mrow" id="MathJax-Span-61875"><span class="mo" id="MathJax-Span-61876"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">一</span></span></span></span><span class="texatom" id="MathJax-Span-61877"><span class="mrow" id="MathJax-Span-61878"><span class="mo" id="MathJax-Span-61879"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">模</span></span></span></span><span class="texatom" id="MathJax-Span-61880"><span class="mrow" id="MathJax-Span-61881"><span class="mo" id="MathJax-Span-61882"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">一</span></span></span></span><span class="texatom" id="MathJax-Span-61883"><span class="mrow" id="MathJax-Span-61884"><span class="mo" id="MathJax-Span-61885"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">样</span></span></span></span><span class="texatom" id="MathJax-Span-61886"><span class="mrow" id="MathJax-Span-61887"><span class="mo" id="MathJax-Span-61888"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">，</span></span></span></span><span class="texatom" id="MathJax-Span-61889"><span class="mrow" id="MathJax-Span-61890"><span class="mo" id="MathJax-Span-61891"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">因</span></span></span></span><span class="texatom" id="MathJax-Span-61892"><span class="mrow" id="MathJax-Span-61893"><span class="mo" id="MathJax-Span-61894"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">为</span></span></span></span><span class="texatom" id="MathJax-Span-61895"><span class="mrow" id="MathJax-Span-61896"><span class="mo" id="MathJax-Span-61897"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">新</span></span></span></span><span class="texatom" id="MathJax-Span-61898"><span class="mrow" id="MathJax-Span-61899"><span class="mo" id="MathJax-Span-61900"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">的</span></span></span></span><span class="texatom" id="MathJax-Span-61901"><span class="mrow" id="MathJax-Span-61902"><span class="mo" id="MathJax-Span-61903"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">对</span></span></span></span><span class="texatom" id="MathJax-Span-61904"><span class="mrow" id="MathJax-Span-61905"><span class="mo" id="MathJax-Span-61906"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">象</span></span></span></span><span class="texatom" id="MathJax-Span-61907"><span class="mrow" id="MathJax-Span-61908"><span class="mo" id="MathJax-Span-61909"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">并</span></span></span></span><span class="texatom" id="MathJax-Span-61910"><span class="mrow" id="MathJax-Span-61911"><span class="mo" id="MathJax-Span-61912"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">不</span></span></span></span><span class="texatom" id="MathJax-Span-61913"><span class="mrow" id="MathJax-Span-61914"><span class="mo" id="MathJax-Span-61915"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">存</span></span></span></span><span class="texatom" id="MathJax-Span-61916"><span class="mrow" id="MathJax-Span-61917"><span class="mo" id="MathJax-Span-61918"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">在</span></span></span></span></span><span style="display: inline-block; width: 0px; height: 2.543em;"></span></span></span><span style="border-left-width: 0.003em; border-left-style: solid; display: inline-block; overflow: hidden; width: 0px; height: 1.378em; vertical-align: -0.309em;"></span></span></nobr></span></div><script type="math/tex; mode=display" id="MathJax-Element-1717">hashKey 属性用来追踪这每一项任务。如果你用新的任务对象去替换原先的任务对象，即使他们俩一模一样，因为新的对象并不存在</script>hashKey 属性，所以ngRepeat并不知道他们代表着相同的元素内容。</p>
-
-<p><b>解决方案</b>
-自Angular 1.2开始，新增加了一个track by 条款在ngRepeat语法中，它允许你为你的ngRepeat自定义key,而非使用由angualr自动生成的唯一IDs。</p>
-
-<p>这意味着你可以使用这样的句法  <code>ng-repeat = "task in tasks track by task.id"</code>  因为无论原先的tasks和更新的tasks，ID都是一致的 ———— 这样ngRepeat会知道不需要创建新的DOM元素并且会复用他们。
-下面我们来看个例子：</p>
-
-<p>html:</p>
-
-<pre><code>    &lt;div ng-controller="TasksCtrl"&gt;
-        &lt;button ng-click="refresh()"&gt;Refresh Tasks&lt;/button&gt;
-        &lt;ul&gt;
-        &lt;li ng-repeat="task in tasks track by task.title"&gt;{{::task.title}}{{::task.date}}&lt;/li&gt;
-        &lt;/ul&gt;
-    &lt;/div&gt;
-</code></pre>
-
-<p>js:</p>
-
-<pre><code>     var app = angular.module('testApp', []);
-
-    app
-            .controller('TasksCtrl', ['&amp;#036;scope', function (&amp;#036;scope) {
-                var date = new Date().toISOString();
-                var newArr = [];
-                &amp;#036;scope.tasks = [];
-
-                for (var i = 0; i &lt; 301; i++) {
-                    &amp;#036;scope.tasks.push({
-                        id: i,
-                        title: 'Task' + i,
-                        date: date
-                    });
-                }
-
-
-                &amp;#036;scope.refresh = function(){
-                    var testNewArr = [];
-                    var date = new Date().toISOString();
-
-                    for(var i=0; i&lt;301;i++){
-                        testNewArr.push({
-                            id: i,
-                            title: 'Task' + i,
-                            date: date
-                        });
-                    }
-
-                    &amp;#036;scope.tasks = testNewArr;
-                }
-            }]);
-</code></pre>
-
-<p>这里注意，我们在ng-repeat上面写了 track by task.title 意味着，如果 task.title 的值发生了改变我们的dom结构是会重排的，如果我们的task.title 相对于之前一次并没有发生改变，那么不会重排整个dom,你也会发现 date 没有更新。</p>
-
-<p>可以尝一下不使用track by 语句而是直接使用 ng-repeat 的效果。你会发现，如果不使用track by 每一次更新，时间都发生了变化，但是如果我们使用了track by,我们可以看到如果track by后面根据的内容没有发生变化，数据是不会变化的，时间也没有刷新。</p>
-<!-- content end -->
-</div>
-<br>
-<br>
+        <!-- content end -->
+    </div>
+    <br>
+    <br>
     <div id="disqus_thread"></div>
-	<div class="footer">
-		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
-	</div>
+    <div class="footer">
+        <p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+    </div>
 </div>
 <script src="main.js"></script>
 <script id="content" type="text/mustache">
@@ -281,51 +96,47 @@ js:
     {{/pages}}
 </script>
 <script>
-$(document).ready(function() {
-    $.ajax({
-        url: "main.json",
-        type: "GET",
-        dataType: "json",
-        success: function(data) {
-            $("#title").html(data.name);
-            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
-            var pagesHtml = pagesTemplate.render({"pages": data.pages});
-            $("#pages").append(pagesHtml);
-            //path
-            var path = "angualrBetter.html";
-            //path end
-            var now = 0;
-            for (var i = 0; i < data.posts.length; ++i)
-                if (path == data.posts[i].path)
-                    now = i;
-            var post = data.posts[now];
-            var tmp = post.tags.split(" ");
-            var tags = [];
-            for (var i = 0; i < tmp.length; ++i)
-                if (tmp[i].length > 0)
-                    tags.push({"name": tmp[i]});
-            var contentTemplate = Hogan.compile($("#content").html());
-            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
-            $("#main").prepend(contentHtml);
-            if (data.disqus_shortname.length > 0) {
-                var disqus_shortname = data.disqus_shortname;
-                (function() {
-                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-                })();
+    $(document).ready(function() {
+        $.ajax({
+            url: "main.json",
+            type: "GET",
+            dataType: "json",
+            success: function(data) {
+                $("#title").html(data.name);
+                var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+                var pagesHtml = pagesTemplate.render({"pages": data.pages});
+                $("#pages").append(pagesHtml);
+                //path
+                var path = "angular1.html";
+                //path end
+                var now = 0;
+                for (var i = 0; i < data.posts.length; ++i)
+                    if (path == data.posts[i].path)
+                        now = i;
+                var post = data.posts[now];
+                var tmp = post.tags.split(" ");
+                var tags = [];
+                for (var i = 0; i < tmp.length; ++i)
+                    if (tmp[i].length > 0)
+                        tags.push({"name": tmp[i]});
+                var contentTemplate = Hogan.compile($("#content").html());
+                var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+                $("#main").prepend(contentHtml);
+                if (data.disqus_shortname.length > 0) {
+                    var disqus_shortname = data.disqus_shortname;
+                    (function() {
+                        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                    })();
+                }
             }
-        }
+        });
     });
-});
 </script>
 <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 <script type="text/x-mathjax-config">
-    /*MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});*/
-
-    MathJax.Hub.Config({
-  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
-});
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
 </script>
 </body>
 </html>
