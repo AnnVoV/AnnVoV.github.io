@@ -1,0 +1,365 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## js 的内存管理机制
+
+原文：[js中的垃圾回收机制](https://blog.xiaoba.me/2013/05/07/garbage-collection-in-javascript.html)
+
+js 是有垃圾回收(garbage collection)机制的， js解释器会自动分配和回收内存。这样有人觉得我用的是高级语言，就不用关心内存管理了，其实这是不对的。
+
+### 内存的生命周期
+
+尽管语言不尽相同，但每种语言中内存的生命周期都是相似的：
+
+* 1.当需要的时候分配内存
+* 2.对内存进行读写操作
+* 3.当上面分配的内存不再需要的时候，将他们释放掉
+
+
+对于1，2两步骤，几乎所有语言操作起来都是明确地或者说很直观，没什么好说的，而在js一样的高级语言中，第3步操作就显得不那么直观。
+
+### js中分配内存空间
+
+#### 变量初始化
+
+当变量初始化时，js会自动分配相应的内存空间（MDN上有关于Value initialization的相关内容，到底是声明，还是在赋值时候分配空间，还要再学习一下）
+
+```
+	var n = 123;//数字
+	var s = 'test string';//字符串
+	var o = { a: 1, b: null };// 为对象和它包含的属性分配内存空间
+	var a = [1, null, 'abra']; // (类似对象)给数组和它里面的元素分配空间
+	function f(a){ return a+2; } //为函数分配空间
+```
+
+### 函数调用时候分配空间
+
+有的函数调用，会产生上面说的那种为对象分配空间
+
+```
+	var e = document.createElement('div'); // allocates an DOM element
+			
+```
+
+### 内存在不再被使用时，将它们释放掉
+
+`许多内存管理机制的问题都出现在这里。`最麻烦的问题是确认“这块内存空间已经不需要了”。这往往需要程序员告知，这个程序中，这块内存已经不需要了，你们回收吧。而高级语言解释器中嵌入了一个叫做“垃圾回收”（garbage collector）的工具，用来跟踪内存分配和使用情况，以便在它们不需要的时候将其自动回收。然而有个问题，一块内存空间是不是还有用，是具有不确定性的，也就是说，这个是没法用算法精确计算的，
+
+
+### 垃圾回收
+
+如上所述原因，垃圾回收机制采取了一种有限的解决方案来处理上面的不确定性问题，下面介绍集中垃圾回收算法的思想以及相应的局限：
+
+ 
+### 引用
+
+用这种方法，用到了一种<b>引用</b>的思想，当a能访问A时，就说A引用了a(不论是直接还是间接的)。比如：一个js对象会引用他的原型（间接引用）和它的各个属性（直接引用）。这种情形下，对象就被扩展的更广义了，在原生对象的基础上，还包含了函数的作用域链（或者全局的词法作用域）
+
+
+### 引用计数
+
+这种方法是最单纯的垃圾回收计算方法。它把“可以回收”的标准定义为“没有其他人引用这个对象”，也就是说，只有当对象没有被引用的时候，才会被当作垃圾回收掉。
+
+
+### 举个例子
+
+```
+	var o = { //这是个外层对象
+		a: {
+			b: 2 //这是个内层对象
+		}
+	}; //创建了两个对象 内层对象作为外层对象的属性而被引用1   外层对象被变量o引用1
+	//此时，没有人会被垃圾回收
+	var o2 = o; //o2也引用了上面的外层对象，外层对象引用计数为2
+	o = 1; //现在o不再引用外层对象，只有o2在引用，所以外层对象现在的计数为1
+	var oa = o2.a; //oa 开始引用了内层对象，现在内层对象的引用技术也为2
+	//内层对象被o和oa引用，所以计数为2
+	o2 = "yo"; //o2开始不引用外层对象了， 外层对象的引用技术此时变为0
+	//意味着外层对象可以被“垃圾回收”了
+	//然而，内层对象还被oa引用着，因此还是没有被回收
+	oa = null; //现在oa不引用内层对象了
+	//内层对象也被垃圾回收了	
+```
+
+### 局限： 循环引用
+
+看个例子：
+
+```
+	function f(){
+		var o = {};
+		var o2 = {};
+		o.a = o2; //o 引用o2
+		o2.a = o; //o2 引用o
+		.......
+		return 'azerty';
+	}
+	f();
+	//o o2 两个对象构成了循环引用
+	//当函数执行完毕的时候，他们就被关在了f的作用域里面，没有外面的人可以使用他们
+	//所以按理说，他们已经没有存在价值了，需要被垃圾回收，释放内存
+	//然而，他们的引用计数都不为“0”
+	//所以，在这种引用技术的机制下，他们是没有被回收的，所以当有互相引用的时候，即使操作完成了，也不会被回收机制进行回收
+```
+
+
+实际例子:
+
+在IE6,7版本的浏览器中，使用的就是引用机制，因此下面的代码在IE6,7中可以稳稳地发生内存泄露
+
+```
+	var div = document.createElement('div');
+	div.onclick = function(){
+		//div的onclick属性，会引用function
+		var doSomething = function(){
+			div.innerHtml = "xxxx";
+		};
+		//doSomething 这个函数又会使用div做些操作
+		doSomething();
+	};
+	//在这种情况下，div和函数进行了循环引用，导致了内存泄露
+```
+### 标记清除算法
+
+这种算法把“可以回收”定义为“对象不可达”，即访问不到。这种算法，会定义一个“根”，并且定期地从“根”出发，找出“根”下面的所有对象，看能不能从“根”找到一条路径引用到这个对象。从不同的“根”出发（应该是不断变化的“根”），垃圾回收程序就可以区分所有对象是不是“不可达”的，当对象“不可达的时候”，便会被回收。
+
+### 循环引用不再是困惑
+
+此时我们再看上面的循环引用的例子，当函数返回时，o和o2都已经不再被任何人引用了，也就意味着“不可达”了，便顺理成章地被垃圾回收掉了。
+
+
+### 参考
+
+* [Memory leak patterns in JavaScript](http://www.ibm.com/developerworks/web/library/wa-memleak/)
+* [Cross-Browser Event Handling Using Plain ole JavaScript](http://msdn.microsoft.com/en-us/magazine/ff728624.aspx)
+
+
+
+
+
+
+
+
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="js">js 的内存管理机制</h2>
+
+<p>原文：<a href="https://blog.xiaoba.me/2013/05/07/garbage-collection-in-javascript.html">js中的垃圾回收机制</a></p>
+
+<p>js 是有垃圾回收(garbage collection)机制的， js解释器会自动分配和回收内存。这样有人觉得我用的是高级语言，就不用关心内存管理了，其实这是不对的。</p>
+
+<h3 id="">内存的生命周期</h3>
+
+<p>尽管语言不尽相同，但每种语言中内存的生命周期都是相似的：</p>
+
+<ul>
+<li>1.当需要的时候分配内存</li>
+<li>2.对内存进行读写操作</li>
+<li>3.当上面分配的内存不再需要的时候，将他们释放掉</li>
+</ul>
+
+<p>对于1，2两步骤，几乎所有语言操作起来都是明确地或者说很直观，没什么好说的，而在js一样的高级语言中，第3步操作就显得不那么直观。</p>
+
+<h3 id="js">js中分配内存空间</h3>
+
+<h4 id="">变量初始化</h4>
+
+<p>当变量初始化时，js会自动分配相应的内存空间（MDN上有关于Value initialization的相关内容，到底是声明，还是在赋值时候分配空间，还要再学习一下）</p>
+
+<pre><code>    var n = 123;//数字
+    var s = 'test string';//字符串
+    var o = { a: 1, b: null };// 为对象和它包含的属性分配内存空间
+    var a = [1, null, 'abra']; // (类似对象)给数组和它里面的元素分配空间
+    function f(a){ return a+2; } //为函数分配空间
+</code></pre>
+
+<h3 id="">函数调用时候分配空间</h3>
+
+<p>有的函数调用，会产生上面说的那种为对象分配空间</p>
+
+<pre><code>    var e = document.createElement('div'); // allocates an DOM element
+</code></pre>
+
+<h3 id="">内存在不再被使用时，将它们释放掉</h3>
+
+<p><code>许多内存管理机制的问题都出现在这里。</code>最麻烦的问题是确认“这块内存空间已经不需要了”。这往往需要程序员告知，这个程序中，这块内存已经不需要了，你们回收吧。而高级语言解释器中嵌入了一个叫做“垃圾回收”（garbage collector）的工具，用来跟踪内存分配和使用情况，以便在它们不需要的时候将其自动回收。然而有个问题，一块内存空间是不是还有用，是具有不确定性的，也就是说，这个是没法用算法精确计算的，</p>
+
+<h3 id="">垃圾回收</h3>
+
+<p>如上所述原因，垃圾回收机制采取了一种有限的解决方案来处理上面的不确定性问题，下面介绍集中垃圾回收算法的思想以及相应的局限：</p>
+
+<h3 id="">引用</h3>
+
+<p>用这种方法，用到了一种<b>引用</b>的思想，当a能访问A时，就说A引用了a(不论是直接还是间接的)。比如：一个js对象会引用他的原型（间接引用）和它的各个属性（直接引用）。这种情形下，对象就被扩展的更广义了，在原生对象的基础上，还包含了函数的作用域链（或者全局的词法作用域）</p>
+
+<h3 id="">引用计数</h3>
+
+<p>这种方法是最单纯的垃圾回收计算方法。它把“可以回收”的标准定义为“没有其他人引用这个对象”，也就是说，只有当对象没有被引用的时候，才会被当作垃圾回收掉。</p>
+
+<h3 id="">举个例子</h3>
+
+<pre><code>    var o = { //这是个外层对象
+        a: {
+            b: 2 //这是个内层对象
+        }
+    }; //创建了两个对象 内层对象作为外层对象的属性而被引用1   外层对象被变量o引用1
+    //此时，没有人会被垃圾回收
+    var o2 = o; //o2也引用了上面的外层对象，外层对象引用计数为2
+    o = 1; //现在o不再引用外层对象，只有o2在引用，所以外层对象现在的计数为1
+    var oa = o2.a; //oa 开始引用了内层对象，现在内层对象的引用技术也为2
+    //内层对象被o和oa引用，所以计数为2
+    o2 = "yo"; //o2开始不引用外层对象了， 外层对象的引用技术此时变为0
+    //意味着外层对象可以被“垃圾回收”了
+    //然而，内层对象还被oa引用着，因此还是没有被回收
+    oa = null; //现在oa不引用内层对象了
+    //内层对象也被垃圾回收了   
+</code></pre>
+
+<h3 id="">局限： 循环引用</h3>
+
+<p>看个例子：</p>
+
+<pre><code>    function f(){
+        var o = {};
+        var o2 = {};
+        o.a = o2; //o 引用o2
+        o2.a = o; //o2 引用o
+        .......
+        return 'azerty';
+    }
+    f();
+    //o o2 两个对象构成了循环引用
+    //当函数执行完毕的时候，他们就被关在了f的作用域里面，没有外面的人可以使用他们
+    //所以按理说，他们已经没有存在价值了，需要被垃圾回收，释放内存
+    //然而，他们的引用计数都不为“0”
+    //所以，在这种引用技术的机制下，他们是没有被回收的，所以当有互相引用的时候，即使操作完成了，也不会被回收机制进行回收
+</code></pre>
+
+<p>实际例子:</p>
+
+<p>在IE6,7版本的浏览器中，使用的就是引用机制，因此下面的代码在IE6,7中可以稳稳地发生内存泄露</p>
+
+<pre><code>    var div = document.createElement('div');
+    div.onclick = function(){
+        //div的onclick属性，会引用function
+        var doSomething = function(){
+            div.innerHtml = "xxxx";
+        };
+        //doSomething 这个函数又会使用div做些操作
+        doSomething();
+    };
+    //在这种情况下，div和函数进行了循环引用，导致了内存泄露
+</code></pre>
+
+<h3 id="">标记清除算法</h3>
+
+<p>这种算法把“可以回收”定义为“对象不可达”，即访问不到。这种算法，会定义一个“根”，并且定期地从“根”出发，找出“根”下面的所有对象，看能不能从“根”找到一条路径引用到这个对象。从不同的“根”出发（应该是不断变化的“根”），垃圾回收程序就可以区分所有对象是不是“不可达”的，当对象“不可达的时候”，便会被回收。</p>
+
+<h3 id="">循环引用不再是困惑</h3>
+
+<p>此时我们再看上面的循环引用的例子，当函数返回时，o和o2都已经不再被任何人引用了，也就意味着“不可达”了，便顺理成章地被垃圾回收掉了。</p>
+
+<h3 id="">参考</h3>
+
+<ul>
+<li><a href="http://www.ibm.com/developerworks/web/library/wa-memleak/">Memory leak patterns in JavaScript</a></li>
+<li><a href="http://msdn.microsoft.com/en-us/magazine/ff728624.aspx">Cross-Browser Event Handling Using Plain ole JavaScript</a></li>
+</ul>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "jsMemory.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
