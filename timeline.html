@@ -1,0 +1,232 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## 使用chrome devtools 的timeline来分析页面性能
+
+非常好的原文[使用chrome devtools 的timeline来分析页面性能](http://segmentfault.com/a/1190000003991459)
+
+我们需要保持页面的效果能够达到>=60fps（帧）/s的刷新频率以避免出现卡顿，这需要我们使用一些比较直观的方式来分析和衡量页面的性能问题，为优化方案提供依据。
+
+### 为什么要保持60fps？
+
+我们的目标是保证页面要有高于60fps（帧）的刷新频率，这和目前大多数显示器的刷新率相吻合（60HZ）。如果网页动画能够做到每秒60帧，就会跟显示器同步刷新，达到最佳的视觉效果。   
+这意味着一秒之内进行60次重新渲染，每次重新渲染的时间不超过16.66ms
+
+### 找到页面执行过程中的性能瓶颈的地方
+
+Timeline是用来记录和分析应用在运行时，排查应用性能瓶颈的最佳工具。为了避免浏览器插件对分析过程产生影响，建议在`隐身模式`下打开页面进行分析。   
+
+### Timeline 工具栏介绍
+
+![timeline 工具栏介绍图片](http://horve.github.io/images/timeline/timeline-1.png)
+
+在分析页面之前，需要开启录制功能，记录页面的操作和渲染记录。如上图的按钮，点击后变成红色，然后在页面上进行相关的操作后再次按下变成灰色完成录制过程。这样就完成了一次对操作以及加载渲染记录的过程，随后timeline就会开始分析操作过程中的各项性能参数。
+
+Timeline提供了两种查看模式："事件模式"（events mode）和 “帧模式”（frame mode）
+如上图箭头所示。
+
+* 事件模式： 显示重新渲染的各种事件花费的时间
+* 帧模式： 显示每一帧的时间花费情况
+
+#### 事件模式（Event Mode）
+
+如果我们的一个页面执行效率不高，我们要区分是js执行出现了问题，还是页面渲染出现了问题。要了解这里面的执行细节，我们使用`事件模式`来进行分析。   
+首先，我们需要录制一些需要被分析的操作，录制结束后进入事件模式预览timeline。下图：
+
+![事件模式图片](http://horve.github.io/images/timeline/timeline-2.png)
+
+在上图中，不同的颜色表示不同的事件。一种颜色所占面积越大，表示在处理该事件的耗时越长，单击某一区块，可以在下面的Summary概要中看到详细的事件处理过程及耗时分布。
+
+![颜色表示](http://horve.github.io/images/timeline/timeline-3.png)
+
+* 蓝色(Loading): 网络通信和html解析
+* 黄色（Scripting）: js执行
+* 紫色（Rendering）: 样式计算和布局，即重排
+* 绿色（Painting）: 重绘
+* 灰色（other）: 其他事件花费的时间
+* 白色(idle): 空闲时间
+
+在显示的记录中，浏览器也会为在检测过程中发现的一些可能导致性能问题的过程进行标注，在`Mode View`视图区域，可能会出现一些红色的区块段，这些红色的区块段表明，在对应的时间上执行的事件可能存在性能问题，而在对应的`Main Thread`视图区域，事件区块的右上角会出现红色的小三角，点击当前区块，在下面的`Summary`概要区域内会给出详细的警告内容以及脚本可能出现问题的行数，如下图，浏览器提示“强制同步布局可能会导致性能瓶颈”：
+
+
+![实例](http://horve.github.io/images/timeline/timeline-4.png)
+
+#### 帧模式（Frame Mode）
+
+帧模式从页面渲染性能的角度提供了数据支撑，一个柱状“frame”表示渲染过程中的一帧，也就是浏览器为了渲染单个内容块而必须要做的工作，包括：执行js，处理事件，修改DOM，更改样式和布局，绘制页面等。
+
+如前文所述，我们的目标是保证页面要有高于每秒60fps(帧)的刷新频率，这样就能保证页面有高流畅度的渲染。
+
+![图片](http://horve.github.io/images/timeline/timeline-7.png)
+
+中在Frame视图中有两条贯穿该视图的横线，分别标识出60FPS和30FPS的基准，按照前面提到的16.66ms的计算方式，我们可以理解为分别标识了16.6ms和33.3ms两个时间点。下面的一条是60FPS，低于这条线，可以达到每秒60帧；上面的一条是30FPS，低于这条线，可以达到每秒30次渲染。如果色柱都超过30FPS，这个网页就有性能问题了。
+
+图中帧柱的高度表示了该帧的总耗时，帧柱中的颜色分别对应该帧中包含的不停类型的事件。每一帧柱的高度越低越好，上图是艺龙PC首页www.elong.com的帧渲染图，从图中可以看出，在进行某些帧的渲染时，帧的渲染频率低于30FPS/s，第二帧和第三帧就大幅低于30fps(帧柱高度高于30fps标准线)，在实际浏览器渲染中就有可能出现卡顿。对相关的帧进行分析时，可以点击其中某一帧查看渲染详情，也可以选择某个区域的几个帧查看渲染详情。而要找出可能影响性能的原因，点击当前问题帧，在`Summary`面板及`Record Detail`视图中的详细信息中进行逐条分析。
+
+
+
+
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="chromedevtoolstimeline">使用chrome devtools 的timeline来分析页面性能</h2>
+
+<p>非常好的原文<a href="http://segmentfault.com/a/1190000003991459">使用chrome devtools 的timeline来分析页面性能</a></p>
+
+<p>我们需要保持页面的效果能够达到&gt;=60fps（帧）/s的刷新频率以避免出现卡顿，这需要我们使用一些比较直观的方式来分析和衡量页面的性能问题，为优化方案提供依据。</p>
+
+<h3 id="60fps">为什么要保持60fps？</h3>
+
+<p>我们的目标是保证页面要有高于60fps（帧）的刷新频率，这和目前大多数显示器的刷新率相吻合（60HZ）。如果网页动画能够做到每秒60帧，就会跟显示器同步刷新，达到最佳的视觉效果。 <br>
+这意味着一秒之内进行60次重新渲染，每次重新渲染的时间不超过16.66ms</p>
+
+<h3 id="">找到页面执行过程中的性能瓶颈的地方</h3>
+
+<p>Timeline是用来记录和分析应用在运行时，排查应用性能瓶颈的最佳工具。为了避免浏览器插件对分析过程产生影响，建议在<code>隐身模式</code>下打开页面进行分析。   </p>
+
+<h3 id="timeline">Timeline 工具栏介绍</h3>
+
+<p><img src="http://horve.github.io/images/timeline/timeline-1.png" alt="timeline 工具栏介绍图片" title=""></p>
+
+<p>在分析页面之前，需要开启录制功能，记录页面的操作和渲染记录。如上图的按钮，点击后变成红色，然后在页面上进行相关的操作后再次按下变成灰色完成录制过程。这样就完成了一次对操作以及加载渲染记录的过程，随后timeline就会开始分析操作过程中的各项性能参数。</p>
+
+<p>Timeline提供了两种查看模式："事件模式"（events mode）和 “帧模式”（frame mode）
+如上图箭头所示。</p>
+
+<ul>
+<li>事件模式： 显示重新渲染的各种事件花费的时间</li>
+<li>帧模式： 显示每一帧的时间花费情况</li>
+</ul>
+
+<h4 id="eventmode">事件模式（Event Mode）</h4>
+
+<p>如果我们的一个页面执行效率不高，我们要区分是js执行出现了问题，还是页面渲染出现了问题。要了解这里面的执行细节，我们使用<code>事件模式</code>来进行分析。 <br>
+首先，我们需要录制一些需要被分析的操作，录制结束后进入事件模式预览timeline。下图：</p>
+
+<p><img src="http://horve.github.io/images/timeline/timeline-2.png" alt="事件模式图片" title=""></p>
+
+<p>在上图中，不同的颜色表示不同的事件。一种颜色所占面积越大，表示在处理该事件的耗时越长，单击某一区块，可以在下面的Summary概要中看到详细的事件处理过程及耗时分布。</p>
+
+<p><img src="http://horve.github.io/images/timeline/timeline-3.png" alt="颜色表示" title=""></p>
+
+<ul>
+<li>蓝色(Loading): 网络通信和html解析</li>
+<li>黄色（Scripting）: js执行</li>
+<li>紫色（Rendering）: 样式计算和布局，即重排</li>
+<li>绿色（Painting）: 重绘</li>
+<li>灰色（other）: 其他事件花费的时间</li>
+<li>白色(idle): 空闲时间</li>
+</ul>
+
+<p>在显示的记录中，浏览器也会为在检测过程中发现的一些可能导致性能问题的过程进行标注，在<code>Mode View</code>视图区域，可能会出现一些红色的区块段，这些红色的区块段表明，在对应的时间上执行的事件可能存在性能问题，而在对应的<code>Main Thread</code>视图区域，事件区块的右上角会出现红色的小三角，点击当前区块，在下面的<code>Summary</code>概要区域内会给出详细的警告内容以及脚本可能出现问题的行数，如下图，浏览器提示“强制同步布局可能会导致性能瓶颈”：</p>
+
+<p><img src="http://horve.github.io/images/timeline/timeline-4.png" alt="实例" title=""></p>
+
+<h4 id="framemode">帧模式（Frame Mode）</h4>
+
+<p>帧模式从页面渲染性能的角度提供了数据支撑，一个柱状“frame”表示渲染过程中的一帧，也就是浏览器为了渲染单个内容块而必须要做的工作，包括：执行js，处理事件，修改DOM，更改样式和布局，绘制页面等。</p>
+
+<p>如前文所述，我们的目标是保证页面要有高于每秒60fps(帧)的刷新频率，这样就能保证页面有高流畅度的渲染。</p>
+
+<p><img src="http://horve.github.io/images/timeline/timeline-7.png" alt="图片" title=""></p>
+
+<p>中在Frame视图中有两条贯穿该视图的横线，分别标识出60FPS和30FPS的基准，按照前面提到的16.66ms的计算方式，我们可以理解为分别标识了16.6ms和33.3ms两个时间点。下面的一条是60FPS，低于这条线，可以达到每秒60帧；上面的一条是30FPS，低于这条线，可以达到每秒30次渲染。如果色柱都超过30FPS，这个网页就有性能问题了。</p>
+
+<p>图中帧柱的高度表示了该帧的总耗时，帧柱中的颜色分别对应该帧中包含的不停类型的事件。每一帧柱的高度越低越好，上图是艺龙PC首页www.elong.com的帧渲染图，从图中可以看出，在进行某些帧的渲染时，帧的渲染频率低于30FPS/s，第二帧和第三帧就大幅低于30fps(帧柱高度高于30fps标准线)，在实际浏览器渲染中就有可能出现卡顿。对相关的帧进行分析时，可以点击其中某一帧查看渲染详情，也可以选择某个区域的几个帧查看渲染详情。而要找出可能影响性能的原因，点击当前问题帧，在<code>Summary</code>面板及<code>Record Detail</code>视图中的详细信息中进行逐条分析。</p>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "timeline.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
