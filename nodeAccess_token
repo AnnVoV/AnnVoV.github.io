@@ -1,0 +1,210 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## 为什么80被作为http的默认端口，443被作为https的默认端口？
+
+### 有什么特别的理由吗？
+
+在1991年起草的HTTP 0。9 中规定，如果端口没有被特备声明，那么80被作为HTTP的端口。1994年RFC 1700起草，并指出了端口443被用作https协议
+
+所以，就是默认的规定。。。。
+
+
+##  Node里面获取access_token 
+
+微信里面提到，如果我们要获取access_token 的值，我们需要通过GET方式请求，[https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET](https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET)   
+
+正常情况下，微信会返回access_token 的值
+
+```
+	{"access_token":"ACCESS_TOKEN","expires_in":7200} 
+```
+
+#### 如何通过Node实现？
+
+我们需要引入https模块，来发起https请求，我们需要require('https');
+
+通过使用https.request(option, callback);   
+
+[https api](https://nodejs.org/api/https.html)
+
+//注意上面也提到过，https的端口号默认为443， http的端口号默认为80
+
+```
+	var https = require('https');
+	
+	var options = {
+		hostname: 'api.weixin.qq.com',
+		port: 443,
+		//我们在path的后面通过? 的形式加上参数
+		path: '/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET',
+		method: 'GET'
+	}；
+	
+	
+	var req = https.request(options, function(res) {
+    	console.log(res.statusCode);
+    	res.on('data', function(d) {
+        	process.stdout.write(d);
+    	});
+	});
+	
+	req.end();
+
+	req.on('error', function(e) {
+    	console.error(e);
+	});
+```
+这样我们就可以获得有微信服务器返回的access_token 的值
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="80http443https">为什么80被作为http的默认端口，443被作为https的默认端口？</h2>
+
+<h3 id="">有什么特别的理由吗？</h3>
+
+<p>在1991年起草的HTTP 0。9 中规定，如果端口没有被特备声明，那么80被作为HTTP的端口。1994年RFC 1700起草，并指出了端口443被用作https协议</p>
+
+<p>所以，就是默认的规定。。。。</p>
+
+<h2 id="nodeaccess_token">Node里面获取access_token</h2>
+
+<p>微信里面提到，如果我们要获取access<em>token 的值，我们需要通过GET方式请求，<a href="https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&amp;appid=APPID&amp;secret=APPSECRET">https://api.weixin.qq.com/cgi-bin/token?grant</a></em><a href="https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&amp;appid=APPID&amp;secret=APPSECRET">type=client_credential&amp;appid=APPID&amp;secret=APPSECRET</a>   </p>
+
+<p>正常情况下，微信会返回access_token 的值</p>
+
+<pre><code>    {"access_token":"ACCESS_TOKEN","expires_in":7200} 
+</code></pre>
+
+<h4 id="node">如何通过Node实现？</h4>
+
+<p>我们需要引入https模块，来发起https请求，我们需要require('https');</p>
+
+<p>通过使用https.request(option, callback);   </p>
+
+<p><a href="https://nodejs.org/api/https.html">https api</a></p>
+
+<p>//注意上面也提到过，https的端口号默认为443， http的端口号默认为80</p>
+
+<pre><code>    var https = require('https');
+
+    var options = {
+        hostname: 'api.weixin.qq.com',
+        port: 443,
+        //我们在path的后面通过? 的形式加上参数
+        path: '/cgi-bin/token?grant_type=client_credential&amp;appid=APPID&amp;secret=APPSECRET',
+        method: 'GET'
+    }；
+
+
+    var req = https.request(options, function(res) {
+        console.log(res.statusCode);
+        res.on('data', function(d) {
+            process.stdout.write(d);
+        });
+    });
+
+    req.end();
+
+    req.on('error', function(e) {
+        console.error(e);
+    });
+</code></pre>
+
+<p>这样我们就可以获得有微信服务器返回的access_token 的值</p>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "nodeAccess_token";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
