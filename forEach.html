@@ -1,0 +1,246 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## 如何终止forEach的循环遍历
+
+原文参考链接：[How to break out of the forEach](http://www.jsnoob.com/2013/11/26/how-to-break-the-foreach/)
+
+
+### 背景：
+我很喜欢使用Array.prototype.forEach方法，但是有时候我想要break forEach 的循环，好几次我都遇到了这个问题，我无法退出循环！ 所以我只能通过再增加一个变量来控制，知道我看到了这篇文章。
+
+###  Array.prototype.forEach
+我该如何退出forEach循环？
+好吧....你没有办法从forEach中退出循环
+
+
+Example:
+
+```
+	var ary = ["JavaScript", "Java", "CoffeeScript", "TypeScript"];
+
+	ary.forEach(function(value, index, _ary) {
+    	console.log(index + ": " + value);
+    	return false;
+	});	
+```
+
+结果是： 所有的元素内容都被打印出来了，那我该怎么办？
+
+
+### 不要使用`"forEach"`方法，使用`“some”`或者`"every"`方法
+
+#### Array.prototype.some
+
+`some方法和forEach方法很相似，但是当return值为true的时候，它会终止遍历`
+
+Example:
+
+```
+	var ary = ["JavaScript", "Java", "CoffeeScript", "TypeScript"];
+
+	ary.some(function (value, index, _ary) {
+    	console.log(index + ": " + value);
+    	return value === "CoffeeScript";
+	});
+```
+
+结果是: 
+
+```
+	0: Javascript
+	1: Java
+	2: CoffeeScript
+```
+#### Array.prototype.every
+
+every 是一个和some差不多的方法，但是它是当返回值为false的时候退出循环
+
+Example:
+
+```
+	var ary = ["JavaScript", "Java", "CoffeeScript", "TypeScript"];
+
+	ary.every(function(value, index, _ary) {
+    	console.log(index + ": " + value);
+    	return value.indexOf("Script") > -1;
+	});
+```
+
+结果是:
+
+```
+	0: JavaScript
+	1: Java
+```
+
+### 总结： 抛弃forEach 投向some了！ O(∩_∩)O哈哈哈~
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="foreach">如何终止forEach的循环遍历</h2>
+
+<p>原文参考链接：<a href="http://www.jsnoob.com/2013/11/26/how-to-break-the-foreach/">How to break out of the forEach</a></p>
+
+<h3 id="">背景：</h3>
+
+<p>我很喜欢使用Array.prototype.forEach方法，但是有时候我想要break forEach 的循环，好几次我都遇到了这个问题，我无法退出循环！ 所以我只能通过再增加一个变量来控制，知道我看到了这篇文章。</p>
+
+<h3 id="arrayprototypeforeach">Array.prototype.forEach</h3>
+
+<p>我该如何退出forEach循环？
+好吧....你没有办法从forEach中退出循环</p>
+
+<p>Example:</p>
+
+<pre><code>    var ary = ["JavaScript", "Java", "CoffeeScript", "TypeScript"];
+
+    ary.forEach(function(value, index, _ary) {
+        console.log(index + ": " + value);
+        return false;
+    }); 
+</code></pre>
+
+<p>结果是： 所有的元素内容都被打印出来了，那我该怎么办？</p>
+
+<h3 id="foreachsomeevery">不要使用<code>"forEach"</code>方法，使用<code>“some”</code>或者<code>"every"</code>方法</h3>
+
+<h4 id="arrayprototypesome">Array.prototype.some</h4>
+
+<p><code>some方法和forEach方法很相似，但是当return值为true的时候，它会终止遍历</code></p>
+
+<p>Example:</p>
+
+<pre><code>    var ary = ["JavaScript", "Java", "CoffeeScript", "TypeScript"];
+
+    ary.some(function (value, index, _ary) {
+        console.log(index + ": " + value);
+        return value === "CoffeeScript";
+    });
+</code></pre>
+
+<p>结果是: </p>
+
+<pre><code>    0: Javascript
+    1: Java
+    2: CoffeeScript
+</code></pre>
+
+<h4 id="arrayprototypeevery">Array.prototype.every</h4>
+
+<p>every 是一个和some差不多的方法，但是它是当返回值为false的时候退出循环</p>
+
+<p>Example:</p>
+
+<pre><code>    var ary = ["JavaScript", "Java", "CoffeeScript", "TypeScript"];
+
+    ary.every(function(value, index, _ary) {
+        console.log(index + ": " + value);
+        return value.indexOf("Script") &gt; -1;
+    });
+</code></pre>
+
+<p>结果是:</p>
+
+<pre><code>    0: JavaScript
+    1: Java
+</code></pre>
+
+<h3 id="foreachsomeo_ot">总结： 抛弃forEach 投向some了！ O(∩_∩)O哈哈哈~</h3>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "forEach.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
