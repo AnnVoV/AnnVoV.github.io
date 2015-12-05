@@ -192,6 +192,15 @@ module.exports = {
 };
 ```
 
+注意： 虽然我们的文件最后是生成到output文件夹下面的，但是，我们配置了publicPath, 所以要实现实时刷新的时候，我们的页面上的脚本路径应该写为:
+
+```
+ <script src="/build/vendor.js"></script>
+ <script src="/build/index.bundle.js"></script>
+```
+
+我们不能写成output路径设置的文件，这样实时修改，实时刷新的效果会失效.但是我好想知道有什么办法，可以做到让修改直接改动到output的位置上。
+
 
 
 
@@ -373,6 +382,14 @@ module.exports = {
     }
 };
 </code></pre>
+
+<p>注意： 虽然我们的文件最后是生成到output文件夹下面的，但是，我们配置了publicPath, 所以要实现实时刷新的时候，我们的页面上的脚本路径应该写为:</p>
+
+<pre><code> &lt;script src="/build/vendor.js"&gt;&lt;/script&gt;
+ &lt;script src="/build/index.bundle.js"&gt;&lt;/script&gt;
+</code></pre>
+
+<p>我们不能写成output路径设置的文件，这样实时修改，实时刷新的效果会失效.但是我好想知道有什么办法，可以做到让修改直接改动到output的位置上。</p>
 <!-- content end -->
 </div>
 <br>
