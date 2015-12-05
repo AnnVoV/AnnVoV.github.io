@@ -27,133 +27,105 @@
 <!-- markdown -->
 ## webpack hot module 奇怪点解决办法
 
-## 1. 问题回顾
- &nbsp; &nbsp; &nbsp; &nbsp;之前遇到的情况是我们在webpack.config.js 中output 里面配置的publicPath 会影响到我们hot modules 对文件的监听，如果写的不对会导致autorefresh 并没有生效。 github 上有对于这个问题的说明，意思是我们在webpack.config.js 中output里面设置的publicpath 的指向可能不对，所以如果我们如果在开发过程中，想要实现实时刷新，我们可以设置output 的publicPath 为绝对路径，比如我写的：
+## webpack-dev-server 的hot module replacement 奇怪点解决
+
+### 主要遇到的问题
+
+我主要遇到的问题是，我的webpack.config.js 里面配置了entry入口和output生成位置，但是我每次修改我entry入口中的脚本，output生成的脚本内容实际上并没有被修改，并我配置的publicPath会影响到我的页面是否进行了自动刷新的功能
+
+
+### 解决方案
+
+终于，在很多次失败以后，我才发现，我一直错误的原因是我并没有看官方文档中对webpack dev server 的介绍，导致了我的理解一直是错误的，好吧orz.......
+
+
+#### webpack-dev-server 官方说明
+
+[webpack dev server api](http://webpack.github.io/docs/webpack-dev-server.html)
+
+我来翻译一下，我觉得重要的内容：
+
+#### Content Base 内容库
+
+Webpack-dev-server 将基于当前目录开启静态服务，除非你配置了确切的文件内容路径。它将会监听你源文件的变化，并且当变化发生的时候，生成的bundle 文件会重新编译。这个被修改的bundle文件是由内存供应而来，在publicPath 指定的相对路径。新修改后编译的内容并不会输出到你的ouput目录上。新修改后生成的内容是存储在内存中并且通过publicPath 路径访问得到的。
 
 ```
-/* webpack.config.js 文件的相关配置 */
-   var webpack = require('webpack'),
-   //利用ExtractTextPlugin 生成css 文件夹
-    ExtractTextPlugin = require("extract-text-webpack-plugin"),
-    path = require('path'),
-    libDir = path.join(__dirname, 'public/js/comm');
-
-    module.exports = {
-        context: __dirname + '/public',
-        entry: {
-              index: './js/app.js'
-         },
-         output: {
-             //这个output的path是相对于根目录的
-              path: 'build/js',
-             //这里的[name] 对应 entry 里面的键
-              filename: '[name].bundle.js',
-            //这里我们的publicPath 设置为绝对路径，实现autorefresh
-              publicPath: 'http://10.183.12.78:8088/build/'
-         }
-   };
+	$ webpack-dev-server --content-base public/
 ```
 
-## 2.引发了另一个问题
-&nbsp; &nbsp; &nbsp; &nbsp; 因为我们不希望我们的css 文件是写在js里面的，而是希望直接被打包到build 文件夹目录下面的，所以我们引入了extract-text-webpack-plugin 这个loader 帮助我们实现了css 文件的块状载入。
-&nbsp; &nbsp; &nbsp; &nbsp;我们会发现我们在css 里面不可避免的会引入图片，会写到url('../img/test.png')， 如果需要url 正确的引入，我们需要用到file-loader 模块，所以我们在我们的webpack.config.js 中会引入file-loader 模块
+举个例子：
+
 ```
+   var path = require('path');
+   
    module.exports = {
-          context: __dirname + '/public',
-          entry: {
-              index: './js/app.js'
-           },
-          output: {
-               //这个output的path是相对于根目录的
-               path: 'build/js',
-               //这里的[name] 对应 entry 里面的键
-                filename: '[name].bundle.js', 
-                publicPath: 'http://10.183.12.78:8088/build/'
-          },
-         module: {
-            loaders: [ 
-                 {
-                     .... 处理sass 的相关loader  ...
-                 },
-                {
-                 test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.eot$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
-                 loader: 'file-loader?name=../img/[name].[ext]'
-                }
-              ]
-         }
+   		entry: {
+   			app: ['./app/main.js']
+   		},
+   		output: {
+   			path: path.resolve(__dirname, 'build'),
+   			publicPath: '/assets/',
+   			filename: '[name].bundle.js'
+   		}
    };
-
-``` 
-
-## 注意：
-&nbsp;&nbsp;&nbsp;&nbsp; 我们使用file-loader 的时候，我们使用了参数?name=../img/[name].[ext] 这样它会把css里面用到的相关的url() 资源文件拷贝到../img/[name].[ext]下面，这里的.. 是相对于谁而言呢？
-  
-## 切记：file-loader后面的name参数是基于谁的？
-&nbsp;&nbsp;&nbsp;&nbsp; 这里的../的参考位置是基于我们在output 里面设置的path而言的，即对于我上面写的webpack.config.js 来说即是相对于build/js 路径而言的。所以我的url() 引用到的相关资源会被拷贝到build/img 下面。
-
-## 因为设置output的publicPath 引发的问题：
-&nbsp;&nbsp;&nbsp;&nbsp; 我们知道当我们设置了publicPath 以后，会影响我们scss文件编译后生成的css 文件的url() 中的路径。举个例子：
-
-scss 文件里面我们是像下面这么写的：
-index.scss 文件
 ```
-     .test {
-            width: 20px;
-            height: 20px;
-            background: url('../img/test.png');
-      }
-```
-
-因为我们设置了output 的publicpath ，所以我们会发现，我们编译出的css 文件会变成：
-index.css 文件
-```
-   .test {
-        width: 20px;
-        height: 20px;
-        background: url(http://10.183.12.78:8088/build/../img/test.png); 
-   }
+看，我们的publicPath 设置的是一个线上路径的位置，此时我们的实际文件结构中并不存在着这个/assets/文件夹，但是当我们执行:
 
 ```
-我们会发现我们的background 的url 是publicPath 拼接上我们的scss中的url的，我们publicPath 必须这么写，那么我们的css 文件中的url的路径就会不对，如何处理呢？
-
-## 3.修复publicPath 问题：
-我们对scss 文件进行编译我们用到了下面这段相关loader 的配置：
-
-```
-...
-   loaders: [
-            {
-                //scss 文件编译并且生成css 文件块而不是直接Include到js文件里面
-                test: /\.scss$/, loader: ExtractTextPlugin.extract(
-                'css?sourceMap!' +
-                'autoprefixer!' +
-                'sass?sourceMap!'
-                ,
-                {
-                    //我们通过在这里设置publicPath 来覆盖之前我们在output中写的publicPath
-                    //我们在output 中设置的publicPath 会影响我们的hot-module的监听
-                    publicPath: ''
-                }
-            )
-            },
+	webpack-dev-server --hot --inline --port 8089 --host 127.0.0.1 --devtool eval
 ```
 
-我们通过在loader 的后面加上一段{option: 配置} 来实现我们对publicPath 的覆盖，此处，我们设置了publicPath:'', 这样我们的css 文件里面的url 的路径就是background: url('../img/test.png') 就是我们希望使用的url 路径了。
+我们在我们的index.html页面,这样引入我们的脚本，我们不是引入build位置上的脚本，而是publicPath路径上的脚本，这样开启服务以后，我们可以实现实时刷新,例子:   
 
-## 4. 最终完整的值得参考的webpack.config.js 文件：
+index.html
 
 ```
-     ///执行webpack -p 得到的build文件是经过压缩的
+	<!doctype html>
+		<head>
+		</head>
+		<body>
+			<script src="/assets/vendor.js"></script>
+			<script src="/assets/app.bundle.js"></script>
+		</body>
+	</html>
+```
+这样我们就可以实现修改后的实时刷新。
+
+so, 我们需要注意，
+
+* `publicPath`的设置，会直接影响我们是否自动刷新内容的结果。
+*  其次，我们每次修改以后得到的内容都是从内存中读取的，执行接近结束的时候，我们应该先执行一次webpack使得我们的build文件中的内容得到的是最新版本内容
+
+
+下面给个完整的webpack.config.js 的配置的例子:
+
+```
+//执行webpack -p 得到的build文件是经过压缩的
 var webpack = require('webpack'),
 //利用ExtractTextPlugin 生成css 文件夹
     ExtractTextPlugin = require("extract-text-webpack-plugin"),
     path = require('path'),
-    libDir = path.join(__dirname, 'public/js/comm');
+    libDir = path.join(__dirname, 'content/js/comm'),
+    sprite = require('css-sprite');
+
+/* 使用图片拼接精灵 */
+sprite.create({
+    src: ['./content/img/sprites/*.png'],
+    out: './content/img',
+    name: 'sprite',
+    style: './content/scss/sprite.scss',
+    cssPath: '../img/',
+    processor: 'scss'
+}, function () {
+    console.log('done');
+});
 
 module.exports = {
-    context: __dirname + '/public',
+    context: __dirname + '/content',
     entry: {
-        index: './js/app.js'
+        //要build的入口脚本
+       index: './js/app.js',
+       test: './js/test.js'
     },
     output: {
         //这个output的path是相对于根目录的
@@ -165,7 +137,7 @@ module.exports = {
          * 那么这里的publicPath应该是'/assets'
          * 这里的publicPath 会影响css中图片引用路径
          */
-        publicPath: 'http://10.183.12.78:8088/build/'
+        publicPath: '/build/'
     },
     module: {
         loaders: [
@@ -208,159 +180,138 @@ module.exports = {
             }
         )
     ],
-    devtool: "sourcemap",
+    devtool: "sourcecmap",/*这里配置sourcemap*/
     resolve: {
         extensions: ['', '.js', '.html'],
         alias: {
             jquery: libDir + '/jquery.min.js',
             angular: libDir + '/angular.js',
+            angularAnimation: libDir + '/angular-animate.js',
             route: libDir + '/angular-route.js',
             bootstrap: libDir + '/bootstrap.min.js'
         }
     }
 };
 
+
 ```
 
 
 
 
-    
+
+
+
+
+
+
+
+
+
+
+
+
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
 <!-- content -->
 <h2 id="webpackhotmodule">webpack hot module 奇怪点解决办法</h2>
 
-<h2 id="1">1. 问题回顾</h2>
+<h2 id="webpackdevserverhotmodulereplacement">webpack-dev-server 的hot module replacement 奇怪点解决</h2>
 
-<p>&nbsp; &nbsp; &nbsp; &nbsp;之前遇到的情况是我们在webpack.config.js 中output 里面配置的publicPath 会影响到我们hot modules 对文件的监听，如果写的不对会导致autorefresh 并没有生效。 github 上有对于这个问题的说明，意思是我们在webpack.config.js 中output里面设置的publicpath 的指向可能不对，所以如果我们如果在开发过程中，想要实现实时刷新，我们可以设置output 的publicPath 为绝对路径，比如我写的：</p>
+<h3 id="">主要遇到的问题</h3>
 
-<pre><code>/* webpack.config.js 文件的相关配置 */
-   var webpack = require('webpack'),
-   //利用ExtractTextPlugin 生成css 文件夹
-    ExtractTextPlugin = require("extract-text-webpack-plugin"),
-    path = require('path'),
-    libDir = path.join(__dirname, 'public/js/comm');
+<p>我主要遇到的问题是，我的webpack.config.js 里面配置了entry入口和output生成位置，但是我每次修改我entry入口中的脚本，output生成的脚本内容实际上并没有被修改，并我配置的publicPath会影响到我的页面是否进行了自动刷新的功能</p>
 
-    module.exports = {
-        context: __dirname + '/public',
-        entry: {
-              index: './js/app.js'
-         },
-         output: {
-             //这个output的path是相对于根目录的
-              path: 'build/js',
-             //这里的[name] 对应 entry 里面的键
-              filename: '[name].bundle.js',
-            //这里我们的publicPath 设置为绝对路径，实现autorefresh
-              publicPath: 'http://10.183.12.78:8088/build/'
-         }
-   };
+<h3 id="">解决方案</h3>
+
+<p>终于，在很多次失败以后，我才发现，我一直错误的原因是我并没有看官方文档中对webpack dev server 的介绍，导致了我的理解一直是错误的，好吧orz.......</p>
+
+<h4 id="webpackdevserver">webpack-dev-server 官方说明</h4>
+
+<p><a href="http://webpack.github.io/docs/webpack-dev-server.html">webpack dev server api</a></p>
+
+<p>我来翻译一下，我觉得重要的内容：</p>
+
+<h4 id="contentbase">Content Base 内容库</h4>
+
+<p>Webpack-dev-server 将基于当前目录开启静态服务，除非你配置了确切的文件内容路径。它将会监听你源文件的变化，并且当变化发生的时候，生成的bundle 文件会重新编译。这个被修改的bundle文件是由内存供应而来，在publicPath 指定的相对路径。新修改后编译的内容并不会输出到你的ouput目录上。新修改后生成的内容是存储在内存中并且通过publicPath 路径访问得到的。</p>
+
+<pre><code>    $ webpack-dev-server --content-base public/
 </code></pre>
 
-<h2 id="2">2.引发了另一个问题</h2>
+<p>举个例子：</p>
 
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 因为我们不希望我们的css 文件是写在js里面的，而是希望直接被打包到build 文件夹目录下面的，所以我们引入了extract-text-webpack-plugin 这个loader 帮助我们实现了css 文件的块状载入。
-&nbsp; &nbsp; &nbsp; &nbsp;我们会发现我们在css 里面不可避免的会引入图片，会写到url('../img/test.png')， 如果需要url 正确的引入，我们需要用到file-loader 模块，所以我们在我们的webpack.config.js 中会引入file-loader 模块</p>
+<pre><code>   var path = require('path');
 
-<pre><code>   module.exports = {
-          context: __dirname + '/public',
-          entry: {
-              index: './js/app.js'
+   module.exports = {
+           entry: {
+               app: ['./app/main.js']
            },
-          output: {
-               //这个output的path是相对于根目录的
-               path: 'build/js',
-               //这里的[name] 对应 entry 里面的键
-                filename: '[name].bundle.js', 
-                publicPath: 'http://10.183.12.78:8088/build/'
-          },
-         module: {
-            loaders: [ 
-                 {
-                     .... 处理sass 的相关loader  ...
-                 },
-                {
-                 test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.eot$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
-                 loader: 'file-loader?name=../img/[name].[ext]'
-                }
-              ]
-         }
+           output: {
+               path: path.resolve(__dirname, 'build'),
+               publicPath: '/assets/',
+               filename: '[name].bundle.js'
+           }
    };
 </code></pre>
 
-<h2 id="">注意：</h2>
+<p>看，我们的publicPath 设置的是一个线上路径的位置，此时我们的实际文件结构中并不存在着这个/assets/文件夹，但是当我们执行:</p>
 
-<p>&nbsp;&nbsp;&nbsp;&nbsp; 我们使用file-loader 的时候，我们使用了参数?name=../img/[name].[ext] 这样它会把css里面用到的相关的url() 资源文件拷贝到../img/[name].[ext]下面，这里的.. 是相对于谁而言呢？</p>
-
-<h2 id="fileloadername">切记：file-loader后面的name参数是基于谁的？</h2>
-
-<p>&nbsp;&nbsp;&nbsp;&nbsp; 这里的../的参考位置是基于我们在output 里面设置的path而言的，即对于我上面写的webpack.config.js 来说即是相对于build/js 路径而言的。所以我的url() 引用到的相关资源会被拷贝到build/img 下面。</p>
-
-<h2 id="outputpublicpath">因为设置output的publicPath 引发的问题：</h2>
-
-<p>&nbsp;&nbsp;&nbsp;&nbsp; 我们知道当我们设置了publicPath 以后，会影响我们scss文件编译后生成的css 文件的url() 中的路径。举个例子：</p>
-
-<p>scss 文件里面我们是像下面这么写的：
-index.scss 文件</p>
-
-<pre><code>     .test {
-            width: 20px;
-            height: 20px;
-            background: url('../img/test.png');
-      }
+<pre><code>    webpack-dev-server --hot --inline --port 8089 --host 127.0.0.1 --devtool eval
 </code></pre>
 
-<p>因为我们设置了output 的publicpath ，所以我们会发现，我们编译出的css 文件会变成：
-index.css 文件</p>
+<p>我们在我们的index.html页面,这样引入我们的脚本，我们不是引入build位置上的脚本，而是publicPath路径上的脚本，这样开启服务以后，我们可以实现实时刷新,例子:   </p>
 
-<pre><code>   .test {
-        width: 20px;
-        height: 20px;
-        background: url(http://10.183.12.78:8088/build/../img/test.png); 
-   }
+<p>index.html</p>
+
+<pre><code>    &lt;!doctype html&gt;
+        &lt;head&gt;
+        &lt;/head&gt;
+        &lt;body&gt;
+            &lt;script src="/assets/vendor.js"&gt;&lt;/script&gt;
+            &lt;script src="/assets/app.bundle.js"&gt;&lt;/script&gt;
+        &lt;/body&gt;
+    &lt;/html&gt;
 </code></pre>
 
-<p>我们会发现我们的background 的url 是publicPath 拼接上我们的scss中的url的，我们publicPath 必须这么写，那么我们的css 文件中的url的路径就会不对，如何处理呢？</p>
+<p>这样我们就可以实现修改后的实时刷新。</p>
 
-<h2 id="3publicpath">3.修复publicPath 问题：</h2>
+<p>so, 我们需要注意，</p>
 
-<p>我们对scss 文件进行编译我们用到了下面这段相关loader 的配置：</p>
+<ul>
+<li><code>publicPath</code>的设置，会直接影响我们是否自动刷新内容的结果。</li>
+<li>其次，我们每次修改以后得到的内容都是从内存中读取的，执行接近结束的时候，我们应该先执行一次webpack使得我们的build文件中的内容得到的是最新版本内容</li>
+</ul>
 
-<pre><code>...
-   loaders: [
-            {
-                //scss 文件编译并且生成css 文件块而不是直接Include到js文件里面
-                test: /\.scss$/, loader: ExtractTextPlugin.extract(
-                'css?sourceMap!' +
-                'autoprefixer!' +
-                'sass?sourceMap!'
-                ,
-                {
-                    //我们通过在这里设置publicPath 来覆盖之前我们在output中写的publicPath
-                    //我们在output 中设置的publicPath 会影响我们的hot-module的监听
-                    publicPath: ''
-                }
-            )
-            },
-</code></pre>
+<p>下面给个完整的webpack.config.js 的配置的例子:</p>
 
-<p>我们通过在loader 的后面加上一段{option: 配置} 来实现我们对publicPath 的覆盖，此处，我们设置了publicPath:'', 这样我们的css 文件里面的url 的路径就是background: url('../img/test.png') 就是我们希望使用的url 路径了。</p>
-
-<h2 id="4webpackconfigjs">4. 最终完整的值得参考的webpack.config.js 文件：</h2>
-
-<pre><code>     ///执行webpack -p 得到的build文件是经过压缩的
+<pre><code>//执行webpack -p 得到的build文件是经过压缩的
 var webpack = require('webpack'),
 //利用ExtractTextPlugin 生成css 文件夹
     ExtractTextPlugin = require("extract-text-webpack-plugin"),
     path = require('path'),
-    libDir = path.join(__dirname, 'public/js/comm');
+    libDir = path.join(__dirname, 'content/js/comm'),
+    sprite = require('css-sprite');
+
+/* 使用图片拼接精灵 */
+sprite.create({
+    src: ['./content/img/sprites/*.png'],
+    out: './content/img',
+    name: 'sprite',
+    style: './content/scss/sprite.scss',
+    cssPath: '../img/',
+    processor: 'scss'
+}, function () {
+    console.log('done');
+});
 
 module.exports = {
-    context: __dirname + '/public',
+    context: __dirname + '/content',
     entry: {
-        index: './js/app.js'
+        //要build的入口脚本
+       index: './js/app.js',
+       test: './js/test.js'
     },
     output: {
         //这个output的path是相对于根目录的
@@ -372,7 +323,7 @@ module.exports = {
          * 那么这里的publicPath应该是'/assets'
          * 这里的publicPath 会影响css中图片引用路径
          */
-        publicPath: 'http://10.183.12.78:8088/build/'
+        publicPath: '/build/'
     },
     module: {
         loaders: [
@@ -415,12 +366,13 @@ module.exports = {
             }
         )
     ],
-    devtool: "sourcemap",
+    devtool: "sourcecmap",/*这里配置sourcemap*/
     resolve: {
         extensions: ['', '.js', '.html'],
         alias: {
             jquery: libDir + '/jquery.min.js',
             angular: libDir + '/angular.js',
+            angularAnimation: libDir + '/angular-animate.js',
             route: libDir + '/angular-route.js',
             bootstrap: libDir + '/bootstrap.min.js'
         }
