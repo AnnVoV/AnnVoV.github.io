@@ -27,8 +27,6 @@
 <!-- markdown -->
 ## webpack hot module 奇怪点解决办法
 
-## webpack-dev-server 的hot module replacement 奇怪点解决
-
 ### 主要遇到的问题
 
 我主要遇到的问题是，我的webpack.config.js 里面配置了entry入口和output生成位置，但是我每次修改我entry入口中的脚本，output生成的脚本内容实际上并没有被修改，并我配置的publicPath会影响到我的页面是否进行了自动刷新的功能
@@ -39,13 +37,13 @@
 终于，在很多次失败以后，我才发现，我一直错误的原因是我并没有看官方文档中对webpack dev server 的介绍，导致了我的理解一直是错误的，好吧orz.......
 
 
-#### webpack-dev-server 官方说明
+### webpack-dev-server 官方说明
 
 [webpack dev server api](http://webpack.github.io/docs/webpack-dev-server.html)
 
 我来翻译一下，我觉得重要的内容：
 
-#### Content Base 内容库
+### Content Base 内容库
 
 Webpack-dev-server 将基于当前目录开启静态服务，除非你配置了确切的文件内容路径。它将会监听你源文件的变化，并且当变化发生的时候，生成的bundle 文件会重新编译。这个被修改的bundle文件是由内存供应而来，在publicPath 指定的相对路径。新修改后编译的内容并不会输出到你的ouput目录上。新修改后生成的内容是存储在内存中并且通过publicPath 路径访问得到的。
 
@@ -97,7 +95,7 @@ so, 我们需要注意，
 *  其次，我们每次修改以后得到的内容都是从内存中读取的，执行接近结束的时候，我们应该先执行一次webpack使得我们的build文件中的内容得到的是最新版本内容
 
 
-下面给个完整的webpack.config.js 的配置的例子:
+### 下面给个完整的webpack.config.js 的配置的例子:
 
 ```
 //执行webpack -p 得到的build文件是经过压缩的
@@ -192,8 +190,6 @@ module.exports = {
         }
     }
 };
-
-
 ```
 
 
@@ -217,8 +213,6 @@ module.exports = {
 <!-- content -->
 <h2 id="webpackhotmodule">webpack hot module 奇怪点解决办法</h2>
 
-<h2 id="webpackdevserverhotmodulereplacement">webpack-dev-server 的hot module replacement 奇怪点解决</h2>
-
 <h3 id="">主要遇到的问题</h3>
 
 <p>我主要遇到的问题是，我的webpack.config.js 里面配置了entry入口和output生成位置，但是我每次修改我entry入口中的脚本，output生成的脚本内容实际上并没有被修改，并我配置的publicPath会影响到我的页面是否进行了自动刷新的功能</p>
@@ -227,13 +221,13 @@ module.exports = {
 
 <p>终于，在很多次失败以后，我才发现，我一直错误的原因是我并没有看官方文档中对webpack dev server 的介绍，导致了我的理解一直是错误的，好吧orz.......</p>
 
-<h4 id="webpackdevserver">webpack-dev-server 官方说明</h4>
+<h3 id="webpackdevserver">webpack-dev-server 官方说明</h3>
 
 <p><a href="http://webpack.github.io/docs/webpack-dev-server.html">webpack dev server api</a></p>
 
 <p>我来翻译一下，我觉得重要的内容：</p>
 
-<h4 id="contentbase">Content Base 内容库</h4>
+<h3 id="contentbase">Content Base 内容库</h3>
 
 <p>Webpack-dev-server 将基于当前目录开启静态服务，除非你配置了确切的文件内容路径。它将会监听你源文件的变化，并且当变化发生的时候，生成的bundle 文件会重新编译。这个被修改的bundle文件是由内存供应而来，在publicPath 指定的相对路径。新修改后编译的内容并不会输出到你的ouput目录上。新修改后生成的内容是存储在内存中并且通过publicPath 路径访问得到的。</p>
 
@@ -284,7 +278,7 @@ module.exports = {
 <li>其次，我们每次修改以后得到的内容都是从内存中读取的，执行接近结束的时候，我们应该先执行一次webpack使得我们的build文件中的内容得到的是最新版本内容</li>
 </ul>
 
-<p>下面给个完整的webpack.config.js 的配置的例子:</p>
+<h3 id="webpackconfigjs">下面给个完整的webpack.config.js 的配置的例子:</h3>
 
 <pre><code>//执行webpack -p 得到的build文件是经过压缩的
 var webpack = require('webpack'),
