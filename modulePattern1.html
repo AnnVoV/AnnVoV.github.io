@@ -1,0 +1,377 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+原文：[AGAIN WITH THE MODULE PATTERN REVEAL SOMETHING TO THE WORLD](https://www.christianheilmann.com/2007/08/22/again-with-the-module-pattern-reveal-something-to-the-world/)
+
+作者：<b>CHRISTIAN HEILMANN</b>
+
+--------------------------
+
+不久之前,我对Javascript 模块化设计模式（Module Pattern in Javascript）的不优美感到懊恼的，尤其是当我要调用一些公有方法和属性的时候，总是要写很长的命名空间。
+
+
+回顾一下，传统的模块化设计模式意味着你需要定义一个匿名函数，通过使用()使其立即执行。你定义一些私有函数和变量在这个匿名函数之内，如果你想暴露一些公有的变量和方法你则把他们放在匿名对象里面，让它们return出来.
+
+
+```
+	var classicModulePattern = function(){
+		var privateVar = 1;
+		function privateFunction(){
+			alert('private');
+		}
+		
+		return {
+			publicVar: 2,
+			publicFunction: function(){
+				classicModulePattern.anotherPublicFunction();
+			},
+			anotherPublicFunction: function(){
+				privateFunction();
+			}
+		}
+	}();
+	
+	classicModulePattern.publicFunction();
+```
+
+我的牢骚之处在于，你需要不停地重复去写主对象。当你想要调用一个公有方法或者公有变量时。还有一点你需要针对公有方法和私有方法来回切换不同的写法。
+
+然后我受到了一篇在YUI上关于module pattern的博客的启发，我提倡使用一个叫做pub的对象来存放公有方法和公有变量，然后在把pub return出来。
+
+```
+	var namedObjectModulePattern = function(){
+  		var pub = {};
+		var privateVar = 1;
+  		function privateFunction(){
+    		alert('private');
+		};
+  		pub.publicVar = 2;
+  		pub.publicFunction = function(){
+  			pub.anotherPublicFunction();    
+  		};
+  		pub.anotherPublicFunction = function(){
+    		privateFunction();
+  		};
+  		return pub;
+	}();
+	namedObjectModulePattern.publicFunction();
+```
+
+然后在昨天香港的Q&A 训练会上，我把我的想法拿给Douglas Crockford 看，并且咨询他，他是如何思考的。他并不赞同我的想法，并且认为pub对象是多余的。
+
+
+目前，我使用的比较好的一种方式我将其定义为揭示模块模式（Revealing Module Pattern）。这种方式，你只需要简单地定义你所有的方法和变量在你的私有作用域中，然后把公有方法和变量放到匿名对象中return出来，需要设置公有的方法后面直接加上私有方法的指针，即如下所示：
+
+```
+	var revealingModulePattern = function(){
+		var privateVar = 1;
+		function privateFunction(){
+			alert('private');
+		};
+		
+		var publicVar = 2;
+		function publicFunction(){
+			anotherPublicFunction();
+		};
+		
+		function anotherPublicFunction(){
+			privateFunction();
+		};
+		
+		return {
+			publicFunction: publicFunction,
+			publicVar: publicVar,
+			anotherPublicFunction: anotherPublicFunction
+		};
+	}();
+	
+	revealingModulePattern.pubnlicFunction();
+```
+
+这种写法，使得脚本的整体风格是连贯的，并且我们甚至可以重新定义我们暴露出来的方法或者属性的名字。比如下面这个写法。
+
+```
+  var revealingModulePattern = function(){
+  var privateVar = 1;
+  function privateFunction(){
+    alert('private');
+  };
+  var publicVar = 2;
+  function publicFunction(){
+    anotherPublicFunction();    
+  };
+  function anotherPublicFunction(){
+    privateFunction();
+  };
+  function getCurrentState(){
+    return 2;
+  };
+  // reveal all things private by assigning public pointers
+  return {
+    init:publicFunction,
+    count:publicVar,
+    increase:anotherPublicFunction,
+    current:getCurrentState()
+  }
+}();
+alert(revealingModulePattern.current) 
+// => 2
+revealingModulePattern.init();
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<p>原文：<a href="https://www.christianheilmann.com/2007/08/22/again-with-the-module-pattern-reveal-something-to-the-world/">AGAIN WITH THE MODULE PATTERN REVEAL SOMETHING TO THE WORLD</a></p>
+
+<p>作者：<b>CHRISTIAN HEILMANN</b></p>
+
+<hr>
+
+<p>不久之前,我对Javascript 模块化设计模式（Module Pattern in Javascript）的不优美感到懊恼的，尤其是当我要调用一些公有方法和属性的时候，总是要写很长的命名空间。</p>
+
+<p>回顾一下，传统的模块化设计模式意味着你需要定义一个匿名函数，通过使用()使其立即执行。你定义一些私有函数和变量在这个匿名函数之内，如果你想暴露一些公有的变量和方法你则把他们放在匿名对象里面，让它们return出来.</p>
+
+<pre><code>    var classicModulePattern = function(){
+        var privateVar = 1;
+        function privateFunction(){
+            alert('private');
+        }
+
+        return {
+            publicVar: 2,
+            publicFunction: function(){
+                classicModulePattern.anotherPublicFunction();
+            },
+            anotherPublicFunction: function(){
+                privateFunction();
+            }
+        }
+    }();
+
+    classicModulePattern.publicFunction();
+</code></pre>
+
+<p>我的牢骚之处在于，你需要不停地重复去写主对象。当你想要调用一个公有方法或者公有变量时。还有一点你需要针对公有方法和私有方法来回切换不同的写法。</p>
+
+<p>然后我受到了一篇在YUI上关于module pattern的博客的启发，我提倡使用一个叫做pub的对象来存放公有方法和公有变量，然后在把pub return出来。</p>
+
+<pre><code>    var namedObjectModulePattern = function(){
+          var pub = {};
+        var privateVar = 1;
+          function privateFunction(){
+            alert('private');
+        };
+          pub.publicVar = 2;
+          pub.publicFunction = function(){
+              pub.anotherPublicFunction();    
+          };
+          pub.anotherPublicFunction = function(){
+            privateFunction();
+          };
+          return pub;
+    }();
+    namedObjectModulePattern.publicFunction();
+</code></pre>
+
+<p>然后在昨天香港的Q&amp;A 训练会上，我把我的想法拿给Douglas Crockford 看，并且咨询他，他是如何思考的。他并不赞同我的想法，并且认为pub对象是多余的。</p>
+
+<p>目前，我使用的比较好的一种方式我将其定义为揭示模块模式（Revealing Module Pattern）。这种方式，你只需要简单地定义你所有的方法和变量在你的私有作用域中，然后把公有方法和变量放到匿名对象中return出来，需要设置公有的方法后面直接加上私有方法的指针，即如下所示：</p>
+
+<pre><code>    var revealingModulePattern = function(){
+        var privateVar = 1;
+        function privateFunction(){
+            alert('private');
+        };
+
+        var publicVar = 2;
+        function publicFunction(){
+            anotherPublicFunction();
+        };
+
+        function anotherPublicFunction(){
+            privateFunction();
+        };
+
+        return {
+            publicFunction: publicFunction,
+            publicVar: publicVar,
+            anotherPublicFunction: anotherPublicFunction
+        };
+    }();
+
+    revealingModulePattern.pubnlicFunction();
+</code></pre>
+
+<p>这种写法，使得脚本的整体风格是连贯的，并且我们甚至可以重新定义我们暴露出来的方法或者属性的名字。比如下面这个写法。</p>
+
+<pre><code>  var revealingModulePattern = function(){
+  var privateVar = 1;
+  function privateFunction(){
+    alert('private');
+  };
+  var publicVar = 2;
+  function publicFunction(){
+    anotherPublicFunction();    
+  };
+  function anotherPublicFunction(){
+    privateFunction();
+  };
+  function getCurrentState(){
+    return 2;
+  };
+  // reveal all things private by assigning public pointers
+  return {
+    init:publicFunction,
+    count:publicVar,
+    increase:anotherPublicFunction,
+    current:getCurrentState()
+  }
+}();
+alert(revealingModulePattern.current) 
+// =&gt; 2
+revealingModulePattern.init();
+</code></pre>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "modulePattern1.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
