@@ -26,20 +26,17 @@
 <div id="md" style="display: none;">
 <!-- markdown -->
 ## 思考：为什么我们有了apply 与 call还要引入bind?
+你应该明白，如果你需要编写一个大型的复杂的web应用，如果你并没有使用模块化进行开发，那你应该好好地进行反思，因为模块化的代码才是可维护的。
 
-###背景:    
+
+## 背景
 我们为什么需要使用apply，call或者bind修改this的指向？
 
- 
-###主要原因： 
-当我们用面向对象的方法去写我们的组件时，我们经常使用到this,而this的指向在不同的情况下是不一样的，所以我们需要通过apply,call或者bind去修改我们的this的指向。
-
-
-###举个栗子： 
+## 举个例子：
 比如我们有个
 
 ```
-	//组件的构造函数
+//组件的构造函数
 	function Widget(){
 		this.searchText = $('<input type="text"/>');
 	}
@@ -57,18 +54,18 @@
 			}
 		}
 	}
-```
 
+```
 so, 我们应该修改我们的函数中this的指向使其再指向构造函数的实例
 
-###回归正题：
+## 回归正题
 apply,call 与 bind的区别？   
 apply与call 的区别就不用提了，肯定都知道。下面主要看一下bind与apply和call的区别.
 
 apply与call修改this的绑定是立即执行的，而bind是触发事件时才执行的,因为bind返回的是一个function. [Stackoverflow: bind() vs apply() vs call()](http://stackoverflow.com/questions/15455009/js-call-apply-vs-bind)
 
-`Call/apply call the function immediately, whereas bind returns a function that when later executed will have the correct context set for calling the original function. This way you can maintain context in async callbacks, and events.`
-
+`Call/apply call the function immediately, whereas bind returns a function that when later executed will 
+have will have the correct context set for calling the original function`
 
 所以如果我们修改上面的代码：
 （1）使用apply, 我们不仅需要多包裹一层function,还要多引入一个self变量来存储this
@@ -112,7 +109,6 @@ var filter1 = new FilterModule('container1');
 ```
 [jsbin 查看apply](https://jsbin.com/tigeya/edit?html,js,console,output)
 
-
 (2)如果我们使用bind就会很简便,不用嵌套一层也不用再引入一个self
 
 ```
@@ -122,7 +118,8 @@ var filter1 = new FilterModule('container1');
 [jsbin 查看bind](https://jsbin.com/tigeya/edit?html,js,console,output)
 
 
-### 拓展：使用ES6
+## 拓展:ES6写法
+
 ```
 <!doctype html>
 <html lang="en">
@@ -204,13 +201,194 @@ var filter1 = new FilterModule('container1');
 
 
 
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
 <!-- content -->
+<h2 id="applycallbind">思考：为什么我们有了apply 与 call还要引入bind?</h2>
 
+<p>你应该明白，如果你需要编写一个大型的复杂的web应用，如果你并没有使用模块化进行开发，那你应该好好地进行反思，因为模块化的代码才是可维护的。</p>
+
+<h2 id="">背景</h2>
+
+<p>我们为什么需要使用apply，call或者bind修改this的指向？</p>
+
+<h2 id="">举个例子：</h2>
+
+<p>比如我们有个</p>
+
+<pre><code>//组件的构造函数
+    function Widget(){
+        this.searchText = $('&lt;input type="text"/&gt;');
+    }
+
+    Widget.prototype = {
+        init: function(){
+            //这时候我们把一个function绑定到一个事件上
+            this.searchText.on('keyup', this.matchName);
+        },
+        matchName: function(name){
+            //此时函数里面的this 指向的是触发这个事件的对象！即此时为&lt;input type="text"/&gt;
+            //因此我们需要apply 或者call 来修改我们this 的指向
+            if(this.searchText.val().indexOf(name)!=-1){
+                ...
+            }
+        }
+    }
+</code></pre>
+
+<p>so, 我们应该修改我们的函数中this的指向使其再指向构造函数的实例</p>
+
+<h2 id="">回归正题</h2>
+
+<p>apply,call 与 bind的区别？ <br>
+apply与call 的区别就不用提了，肯定都知道。下面主要看一下bind与apply和call的区别.</p>
+
+<p>apply与call修改this的绑定是立即执行的，而bind是触发事件时才执行的,因为bind返回的是一个function. <a href="http://stackoverflow.com/questions/15455009/js-call-apply-vs-bind">Stackoverflow: bind() vs apply() vs call()</a></p>
+
+<p><code>Call/apply call the function immediately, whereas bind returns a function that when later executed will 
+have will have the correct context set for calling the original function</code></p>
+
+<p>所以如果我们修改上面的代码：
+（1）使用apply, 我们不仅需要多包裹一层function,还要多引入一个self变量来存储this</p>
+
+<pre><code>    var FilterModule = (function($){
+    //构造函数
+    function FilterWidget(id){
+        this.ul = $('#'+id);
+        this.text = $('&lt;input type="text" placeholder="请输入姓名"/&gt;');  
+        this.init();
+    }
+
+    FilterWidget.prototype = {
+      init: function(){
+         var self = this;
+         this.text.insertBefore(this.ul)
+                  .on('keyup',function(){
+                             self.filterEvent.apply(self);
+                       }); 
+      },
+      filterEvent: function(){
+        var name = this.text.val().toLowerCase();
+
+        $.each(this.ul.find('li'), function(index,value){
+          var nodename = $(this).html().toLowerCase();
+          if(nodename.indexOf(name)!=-1){
+            $(this).show();
+          }else{
+            $(this).hide();
+          }          
+        });               
+      }
+    };  
+
+    return FilterWidget;
+})(jQuery);
+
+
+var filter1 = new FilterModule('container1');
+</code></pre>
+
+<p><a href="https://jsbin.com/tigeya/edit?html,js,console,output">jsbin 查看apply</a></p>
+
+<p>(2)如果我们使用bind就会很简便,不用嵌套一层也不用再引入一个self</p>
+
+<pre><code>    this.text.insertBefore(this.ul)
+                .on('keyup', this.filterEvent.bind(this));
+</code></pre>
+
+<p><a href="https://jsbin.com/tigeya/edit?html,js,console,output">jsbin 查看bind</a></p>
+
+<h2 id="es6">拓展:ES6写法</h2>
+
+<pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+&lt;!-- 加载Traceur编译器 --&gt;
+&lt;script src="http://google.github.io/traceur-compiler/bin/traceur.js"
+        type="text/javascript"&gt;&lt;/script&gt;
+&lt;!-- 将Traceur编译器用于网页 --&gt;
+&lt;script src="http://google.github.io/traceur-compiler/src/bootstrap.js"
+        type="text/javascript"&gt;&lt;/script&gt;
+&lt;!-- 打开实验选项，否则有些特性可能编译不成功 --&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;使用面向对象的方法重写组件&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;ul id="container1"&gt;
+    &lt;li&gt;&lt;a href="#"&gt;Ann1&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#"&gt;Amber1&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#"&gt;Cloud1&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div&gt;------- 华丽丽的分割线 -------&lt;/div&gt;
+&lt;ul id="container2"&gt;
+    &lt;li&gt;&lt;a href="#"&gt;Ann2&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#"&gt;Amber2&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#"&gt;Cloud2&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div&gt;------- 华丽丽的分割线 -------&lt;/div&gt;
+&lt;ul id="container3"&gt;
+    &lt;li&gt;&lt;a href="#"&gt;Ann3&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#"&gt;Amber3&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#"&gt;Cloud3&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+
+&lt;script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+    'use strict';
+    class FilterModule{
+        constructor(id){
+            this.searchText = $('&lt;input type="text" placeholder="输入姓名"/&gt;');
+            this.ul = $('#'+id);
+            this.init();
+        }
+
+        init(){
+            this.searchText.insertBefore(this.ul)
+                    .on('keyup', ()=&gt;{
+                //这个this 指向FilterModule
+                this.test();
+            });
+        }
+
+
+        test(){
+           //console.log(this);
+           var name = this.searchText.val().toLowerCase();
+           this.ul.find('li').each(function(){
+               if($(this).html().toLowerCase().indexOf(name)!=-1){
+                   $(this).show();
+               }else{
+                   $(this).hide();
+               }
+           })
+        }
+    }
+
+    var filter1 = new FilterModule('container1');
+    var filter2 = new FilterModule('container2');
+    var filter3 = new FilterModule('container3');
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
 <!-- content end -->
 </div>
 <br>
