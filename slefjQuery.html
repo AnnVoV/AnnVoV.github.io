@@ -25,12 +25,213 @@
 	</div>
 <div id="md" style="display: none;">
 <!-- markdown -->
+## 简易的jQuery 自实现
+
+-------------------
+
+### 基本实现思路:
+
+* （1）首先我们定义一个私有类 _$ 然后我们暴露出来的 widnow.$ 返回的是这个私有类的实例
+
+* （2）我们需要实现链式调用 即$().on().addClass() 这样的调用方法，所以我们需要把this return出来 这样每次都可以得到这个实例对象
+
+* （3）我们如果要获得某个节点元素，肯定是通过一个方法，例如：get方法来返回其element属性
+
+
+```
+	(function(){
+		window.$ = function(selector){
+			//返回这个_$类的实例
+			return new _$(selector);	
+		};
+		
+		//_$ 类的构造函数
+		function _$(selector){
+			//配置一些 每个 _$ 类带有的属性
+			
+			if(selector.nodeType == 1){
+				//如果selector 被传进来的是一个node 节点是存储在element属性上的
+				this.element = selector;
+			}else{
+				//如果selector 是一个选择器
+				this.element = document.querySelector(selector);
+			}
+		}
+		
+		
+		//_$ 类的原型 存放一些公有方法
+		//在每一个方法的最后我们把this return 出来，这样可以实现链式调用
+		
+		_$.prototype = {
+			//绑定事件
+			on: function(type, callback){
+				if(window.addEventListener){
+					//Chrome	
+					this.element.addEventListener(type, callback, false);
+					
+				}else if(window.attachEvent){
+					//FF IE
+					this.element.attachEvent('on'+type, callback);
+				}
+				return this;
+			},
+			
+			//获取node 结点
+			get: function(index){
+				//我们获取的有可能是一组节点
+				var nodeArr = this.element;
+				return nodeArr[index];
+			},
+			
+			//假设我们只为一个node节点设置样式
+			addClass: function(className){
+				this.element.className = className;
+				return this;
+			}
+		};
+	})();
+
+```
+
+这样我们就可以实现一些我们想要的效果，比如我们希望实现一个div 的点击事件
+
+html:
+```
+	<div id="test">testDiv</div>
+```
+css:
+
+```
+	<style>
+		#test {
+			background: yellow;
+		}
+		
+		.newClass {
+			background: orange !important;
+		}
+	</style>
+```
+
+
+js:
+
+```
+	(function(){
+		$('#test').on('click', function(){
+			alert('这是一个点击测试！');
+			//这样我们点击后div 的颜色就会变化
+			$(this).addClass('newClass');
+		});
+	})();
+```			
+
+
+
+
 
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
 <!-- content -->
+<h2 id="jquery">简易的jQuery 自实现</h2>
 
+<hr>
+
+<h3 id="">基本实现思路:</h3>
+
+<ul>
+<li><p>（1）首先我们定义一个私有类 _<span class="MathJax_Preview" style="color: inherit;"></span><span class="MathJax" id="MathJax-Element-2-Frame" tabindex="0" data-mathml="<math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot;><mrow class=&quot;MJX-TeXAtom-ORD&quot;><mo>&amp;#x7136;</mo></mrow><mrow class=&quot;MJX-TeXAtom-ORD&quot;><mo>&amp;#x540E;</mo></mrow><mrow class=&quot;MJX-TeXAtom-ORD&quot;><mo>&amp;#x6211;</mo></mrow><mrow class=&quot;MJX-TeXAtom-ORD&quot;><mo>&amp;#x4EEC;</mo></mrow><mrow class=&quot;MJX-TeXAtom-ORD&quot;><mo>&amp;#x66B4;</mo></mrow><mrow class=&quot;MJX-TeXAtom-ORD&quot;><mo>&amp;#x9732;</mo></mrow><mrow class=&quot;MJX-TeXAtom-ORD&quot;><mo>&amp;#x51FA;</mo></mrow><mrow class=&quot;MJX-TeXAtom-ORD&quot;><mo>&amp;#x6765;</mo></mrow><mrow class=&quot;MJX-TeXAtom-ORD&quot;><mo>&amp;#x7684;</mo></mrow><mi>w</mi><mi>i</mi><mi>d</mi><mi>n</mi><mi>o</mi><mi>w</mi><mo>.</mo></math>" role="presentation" style="position: relative;"><nobr aria-hidden="true"><span class="math" id="MathJax-Span-1" role="math" style="width: 13.214em; display: inline-block;"><span style="display: inline-block; position: relative; width: 10.724em; height: 0px; font-size: 123%;"><span style="position: absolute; clip: rect(1.578em 1010.67em 2.899em -999.997em); top: -2.538em; left: 0.003em;"><span class="mrow" id="MathJax-Span-2"><span class="texatom" id="MathJax-Span-3"><span class="mrow" id="MathJax-Span-4"><span class="mo" id="MathJax-Span-5"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">然</span></span></span></span><span class="texatom" id="MathJax-Span-6"><span class="mrow" id="MathJax-Span-7"><span class="mo" id="MathJax-Span-8"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">后</span></span></span></span><span class="texatom" id="MathJax-Span-9"><span class="mrow" id="MathJax-Span-10"><span class="mo" id="MathJax-Span-11"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">我</span></span></span></span><span class="texatom" id="MathJax-Span-12"><span class="mrow" id="MathJax-Span-13"><span class="mo" id="MathJax-Span-14"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">们</span></span></span></span><span class="texatom" id="MathJax-Span-15"><span class="mrow" id="MathJax-Span-16"><span class="mo" id="MathJax-Span-17"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">暴</span></span></span></span><span class="texatom" id="MathJax-Span-18"><span class="mrow" id="MathJax-Span-19"><span class="mo" id="MathJax-Span-20"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">露</span></span></span></span><span class="texatom" id="MathJax-Span-21"><span class="mrow" id="MathJax-Span-22"><span class="mo" id="MathJax-Span-23"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">出</span></span></span></span><span class="texatom" id="MathJax-Span-24"><span class="mrow" id="MathJax-Span-25"><span class="mo" id="MathJax-Span-26"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">来</span></span></span></span><span class="texatom" id="MathJax-Span-27"><span class="mrow" id="MathJax-Span-28"><span class="mo" id="MathJax-Span-29"><span style="font-family: STIXGeneral, 'Arial Unicode MS', serif; font-size: 81%; font-style: normal; font-weight: normal;">的</span></span></span></span><span class="mi" id="MathJax-Span-30" style="font-family: STIXGeneral-Italic;">w</span><span class="mi" id="MathJax-Span-31" style="font-family: STIXGeneral-Italic;">i</span><span class="mi" id="MathJax-Span-32" style="font-family: STIXGeneral-Italic;">d<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.053em;"></span></span><span class="mi" id="MathJax-Span-33" style="font-family: STIXGeneral-Italic;">n</span><span class="mi" id="MathJax-Span-34" style="font-family: STIXGeneral-Italic;">o</span><span class="mi" id="MathJax-Span-35" style="font-family: STIXGeneral-Italic;">w</span><span class="mo" id="MathJax-Span-36" style="font-family: STIXGeneral-Regular;">.</span></span><span style="display: inline-block; width: 0px; height: 2.543em;"></span></span></span><span style="display: inline-block; overflow: hidden; vertical-align: -0.309em; border-left-width: 0px; border-left-style: solid; width: 0px; height: 1.378em;"></span></span></nobr><span class="MJX_Assistive_MathML" role="presentation"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow class="MJX-TeXAtom-ORD"><mo>然</mo></mrow><mrow class="MJX-TeXAtom-ORD"><mo>后</mo></mrow><mrow class="MJX-TeXAtom-ORD"><mo>我</mo></mrow><mrow class="MJX-TeXAtom-ORD"><mo>们</mo></mrow><mrow class="MJX-TeXAtom-ORD"><mo>暴</mo></mrow><mrow class="MJX-TeXAtom-ORD"><mo>露</mo></mrow><mrow class="MJX-TeXAtom-ORD"><mo>出</mo></mrow><mrow class="MJX-TeXAtom-ORD"><mo>来</mo></mrow><mrow class="MJX-TeXAtom-ORD"><mo>的</mo></mrow><mi>w</mi><mi>i</mi><mi>d</mi><mi>n</mi><mi>o</mi><mi>w</mi><mo>.</mo></math></span></span><script type="math/tex" id="MathJax-Element-2"> 然后我们暴露出来的 widnow.</script> 返回的是这个私有类的实例</p></li>
+<li><p>（2）我们需要实现链式调用 即$().on().addClass() 这样的调用方法，所以我们需要把this return出来 这样每次都可以得到这个实例对象</p></li>
+<li><p>（3）我们如果要获得某个节点元素，肯定是通过一个方法，例如：get方法来返回其element属性</p></li>
+</ul>
+
+<pre><code>    (function(){
+        window.$ = function(selector){
+            //返回这个_$类的实例
+            return new _$(selector);   
+        };
+
+        //_$ 类的构造函数
+        function _$(selector){
+            //配置一些 每个 _$ 类带有的属性
+
+            if(selector.nodeType == 1){
+                //如果selector 被传进来的是一个node 节点是存储在element属性上的
+                this.element = selector;
+            }else{
+                //如果selector 是一个选择器
+                this.element = document.querySelector(selector);
+            }
+        }
+
+
+        //_$ 类的原型 存放一些公有方法
+        //在每一个方法的最后我们把this return 出来，这样可以实现链式调用
+
+        _$.prototype = {
+            //绑定事件
+            on: function(type, callback){
+                if(window.addEventListener){
+                    //Chrome    
+                    this.element.addEventListener(type, callback, false);
+
+                }else if(window.attachEvent){
+                    //FF IE
+                    this.element.attachEvent('on'+type, callback);
+                }
+                return this;
+            },
+
+            //获取node 结点
+            get: function(index){
+                //我们获取的有可能是一组节点
+                var nodeArr = this.element;
+                return nodeArr[index];
+            },
+
+            //假设我们只为一个node节点设置样式
+            addClass: function(className){
+                this.element.className = className;
+                return this;
+            }
+        };
+    })();
+</code></pre>
+
+<p>这样我们就可以实现一些我们想要的效果，比如我们希望实现一个div 的点击事件</p>
+
+<p>html:</p>
+
+<pre><code>    &lt;div id="test"&gt;testDiv&lt;/div&gt;
+</code></pre>
+
+<p>css:</p>
+
+<pre><code>    &lt;style&gt;
+        #test {
+            background: yellow;
+        }
+
+        .newClass {
+            background: orange !important;
+        }
+    &lt;/style&gt;
+</code></pre>
+
+<p>js:</p>
+
+<pre><code>    (function(){
+        $('#test').on('click', function(){
+            alert('这是一个点击测试！');
+            //这样我们点击后div 的颜色就会变化
+            $(this).addClass('newClass');
+        });
+    })();
+</code></pre>
+
+<pre><code>        
+</code></pre>
 <!-- content end -->
 </div>
 <br>
