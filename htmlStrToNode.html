@@ -1,0 +1,236 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## js 实现将htmlString 转换为node 的方法
+
+-------------------------------------
+
+### 实现思路：
+//思路： 我们使用createDocumentFragment() 先创建一个空文档片段
+//然后注意   container.appendChild(node) 方法
+
+如果我们要添加的node 已经存在于某一棵dom树上，那么我们如果appendChild的时候，node会从原先的dom树上进行移除
+所以利用这一个特性，我们可以实现htmlString 转换为node 的操作
+
+
+code:
+
+（1）我们把我们要添加的内容存放到一个div容器中   
+（2）然后让i 指向 i= div.firstChild 然后在文档片段中追加i   
+（3）因为追加节点原先存在在div 树上，追加后会从原先的树上移除，然后被添加到新的dom树上  
+
+
+ps:   
+
+`document.createDocumentFragment 通常的使用场景是：创建一个文档片段，然后把我们要插入的dom元素先插入到文档片段中. 
+最后把文档片段插入到dom树中，在dom树中，文档片段会被替换为它的所有子元素（要特别注意这句话）
+.`[document.createDocumentFragment](https://developer.mozilla.org/zh-CN/docs/Web/API/Document/createDocumentFragment)
+
+
+`注意查看`:
+[Node.appendChild 手册](https://developer.mozilla.org/zh-CN/docs/Web/API/Node/)appendChild 那一行有个付注
+
+
+code:
+
+```
+	
+	var htmlStr = [
+		'<div>这是一个测试div</div>',
+		'<ul>',
+		'<li>list 1</li>',
+		'<li>list 2</li>',
+		'<li>list 3</li>',
+		'</ul>'
+	].join('');//先拼接成模板字符串
+	
+	
+	var parseHTMLToNode = function(str){
+		//documentFragment是一个dom文档片段，它不是dom树的一部分
+		var documentFragment = document.createDocumentFragment();
+		//暂时存储我们node节点的容器
+		var tempCon = document.createElement('div');
+		var i;
+	
+		//先把我们的节点存储在tempCon 所在的树上
+		tempCon.innerHTML = htmlStr;
+	
+		//先让我们的i 指向tempCon的firstChild
+		while( i = tempCon.firstChild ){
+			documentFragment.appendChild(i);
+		}
+	
+		return documentFragment;
+	};
+	
+	var newNode = parseHTMLNode(htmlStr);
+	var container = document.getElementById('container');
+	//在容器中添加结点
+	container.appendChild(newNode);
+	
+	//这样appendChild的时候firstChild 自动会从原先的dom 树上移除
+
+```
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="jshtmlstringnode">js 实现将htmlString 转换为node 的方法</h2>
+
+<hr>
+
+<h3 id="">实现思路：</h3>
+
+<p>//思路： 我们使用createDocumentFragment() 先创建一个空文档片段
+//然后注意   container.appendChild(node) 方法</p>
+
+<p>如果我们要添加的node 已经存在于某一棵dom树上，那么我们如果appendChild的时候，node会从原先的dom树上进行移除
+所以利用这一个特性，我们可以实现htmlString 转换为node 的操作</p>
+
+<p>code:</p>
+
+<p>（1）我们把我们要添加的内容存放到一个div容器中 <br>
+（2）然后让i 指向 i= div.firstChild 然后在文档片段中追加i <br>
+（3）因为追加节点原先存在在div 树上，追加后会从原先的树上移除，然后被添加到新的dom树上  </p>
+
+<p>ps:   </p>
+
+<p><code>document.createDocumentFragment 通常的使用场景是：创建一个文档片段，然后把我们要插入的dom元素先插入到文档片段中. 
+最后把文档片段插入到dom树中，在dom树中，文档片段会被替换为它的所有子元素（要特别注意这句话）
+.</code><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Document/createDocumentFragment">document.createDocumentFragment</a></p>
+
+<p><code>注意查看</code>:
+<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Node/">Node.appendChild 手册</a>appendChild 那一行有个付注</p>
+
+<p>code:</p>
+
+<pre><code>    var htmlStr = [
+        '&lt;div&gt;这是一个测试div&lt;/div&gt;',
+        '&lt;ul&gt;',
+        '&lt;li&gt;list 1&lt;/li&gt;',
+        '&lt;li&gt;list 2&lt;/li&gt;',
+        '&lt;li&gt;list 3&lt;/li&gt;',
+        '&lt;/ul&gt;'
+    ].join('');//先拼接成模板字符串
+
+
+    var parseHTMLToNode = function(str){
+        //documentFragment是一个dom文档片段，它不是dom树的一部分
+        var documentFragment = document.createDocumentFragment();
+        //暂时存储我们node节点的容器
+        var tempCon = document.createElement('div');
+        var i;
+
+        //先把我们的节点存储在tempCon 所在的树上
+        tempCon.innerHTML = htmlStr;
+
+        //先让我们的i 指向tempCon的firstChild
+        while( i = tempCon.firstChild ){
+            documentFragment.appendChild(i);
+        }
+
+        return documentFragment;
+    };
+
+    var newNode = parseHTMLNode(htmlStr);
+    var container = document.getElementById('container');
+    //在容器中添加结点
+    container.appendChild(newNode);
+
+    //这样appendChild的时候firstChild 自动会从原先的dom 树上移除
+</code></pre>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "htmlStrToNode.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
