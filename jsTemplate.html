@@ -1,0 +1,211 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+## 简单的前端模板原理
+
+参考文献：[Javascript模板引擎原理](http://div.io/topic/758)
+
+------------------------------
+
+### 前端模板原理：
+
+一般很简单，就是通过一些特殊符号去约束我们想要绑定的变量，举个例子：比如我们的
+"Hello World, my name is <% name %> and age is <% age %>"
+
+
+### 实现方法
+
+主要就是通过使用string.prototype.replace 方法来实现，这里有个很重要的知识点在`String.prototype.replace` 上
+
+
+### String.prototype.replace 用法
+ 
+ ```
+ 	String.prototype.replace(/正则表达式/, function( 正则匹配到的内容， 括号匹配到的内容, 匹配到的内容距离原字符串偏移量， 原始字符串  ){
+ 	
+ 			//默认的参数个数有上面4个
+ 			
+ 			//注意: 当我们的正则表达式中含有多个括号的时候，我们得到的参数可能就不止4个了
+ 			
+ 			//我们将会使用return 出来的值去替换匹配到的值
+ 			
+ 			return XXX;
+ 			
+ 	});
+ ```
+ 
+ 下面我们来举个例子：
+ 
+ ```
+ 	var testStr = 'Hi my name is <%name%>';
+ 	
+ 	var data = {
+ 		name: 'ann'
+ 	};
+ 	
+ 	testStr.replace(function(/<%([^%]+)%>/g, function(res,p1,p2,str){
+			for(var i=0; i<arguments.length; i++){
+				//可以把参数打出来看一下
+				console.log(i);
+				console.log('--------');
+			}
+			//返回data[p1]
+			return data[p1];
+ 	});
+ 	
+ ```
+ 
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id="">简单的前端模板原理</h2>
+
+<p>参考文献：<a href="http://div.io/topic/758">Javascript模板引擎原理</a></p>
+
+<hr>
+
+<h3 id="">前端模板原理：</h3>
+
+<p>一般很简单，就是通过一些特殊符号去约束我们想要绑定的变量，举个例子：比如我们的
+"Hello World, my name is &lt;% name %&gt; and age is &lt;% age %&gt;"</p>
+
+<h3 id="">实现方法</h3>
+
+<p>主要就是通过使用string.prototype.replace 方法来实现，这里有个很重要的知识点在<code>String.prototype.replace</code> 上</p>
+
+<h3 id="stringprototypereplace">String.prototype.replace 用法</h3>
+
+<p>```
+     String.prototype.replace(/正则表达式/, function( 正则匹配到的内容， 括号匹配到的内容, 匹配到的内容距离原字符串偏移量， 原始字符串  ){</p>
+
+<pre><code>         //默认的参数个数有上面4个
+
+         //注意: 当我们的正则表达式中含有多个括号的时候，我们得到的参数可能就不止4个了
+
+         //我们将会使用return 出来的值去替换匹配到的值
+
+         return XXX;
+
+ });
+</code></pre>
+
+<p>```</p>
+
+<p>下面我们来举个例子：</p>
+
+<p>```
+     var testStr = 'Hi my name is &lt;%name%&gt;';</p>
+
+<pre><code> var data = {
+     name: 'ann'
+ };
+
+ testStr.replace(function(/&lt;%([^%]+)%&gt;/g, function(res,p1,p2,str){
+        for(var i=0; i&lt;arguments.length; i++){
+            //可以把参数打出来看一下
+            console.log(i);
+            console.log('--------');
+        }
+        //返回data[p1]
+        return data[p1];
+ });
+</code></pre>
+
+<p>```</p>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "jsTemplate.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
