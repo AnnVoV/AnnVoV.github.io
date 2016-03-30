@@ -1,0 +1,348 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+ 跨域相关知识点复习
+-----------------------
+
+参考资料:  
+[1.浅谈浏览器端JavaScript跨域解决方法](https://segmentfault.com/a/1190000004518374#articleHeader2)   
+[2.iframe 通信实现](http://www.alloyteam.com/2012/08/lightweight-solution-for-an-iframe-cross-domain-communication/)
+
+##背景：
+&nbsp;&nbsp;&nbsp;&nbsp;在一次开发过程中，后端已经设置了可跨域的站点的头部，但是前端在请求的过程中还是出现了报错的内容，后来google 发现是需要在我们的请求的headers里面，设置相关的参数。于是再看一遍与跨域相关的内容
+
+
+
+###(1)JSONP 实现方式：
+
+&nbsp;&nbsp;&nbsp;&nbsp;jsonp 的实现方式，其实与ajax 并没有任何关系，我们使用jsonp实现跨域请求主要使用的原理是src属性是可以实现跨域请求的。比如我们的图片img 和我们的script 脚本。
+
+举个例子:
+
+a.html
+
+      <script>
+          function callback(data){
+              console.log(data.url);
+          }
+      </scrpit>
+      <script src="b.js"></script>
+在b.js 里面我们有
+
+      callback({url: "www.baidu.com"});
+&nbsp;&nbsp;&nbsp;&nbsp;那么跨域请求是如何实现的呢？我们是这样的，我们的callback 是在前端实现的，假设我们的要执行的内容是动态生成的，那么假设我们的数据内容不是一开始就有的，而是动态生成的，这就是jsonp的原理。在解释一下这个的具体原理，在jsonp的模式下，假设我们要请求的内容不是一个url地址，而是一个动态生成的脚本，其实就是我们看到如果是后端jsonp格式的输出我们得到的是：
+
+      callback({"name": "Ann", "age":23, "habbits": "drawing"});
+&nbsp;&nbsp;&nbsp;&nbsp;这样请求得到的函数，就可以进行跨域执行了。因为前端已经在页面上定义好了这个callback函数，所以我们请求到这个脚本的时候便可以执行。
+
+&nbsp;&nbsp;&nbsp;&nbsp;【注意】： 我们的jsonp 方式虽然可以实现很多跨域模式的访问，但是它只支持get模式的跨域请求方式，并且只支持http模式，所以受到了一定的限制
+
+###(2)CORS 模式（Cross-Origin Resource Sharing 跨域资源共享）
+
+&nbsp;&nbsp;&nbsp;&nbsp;同源策略的模式如此变态，即使是同一公司的产品，也不可能所有的资源都在一个域上，所以网络设计者设计了CORS的模式。
+
+&nbsp;&nbsp;&nbsp;&nbsp;CORS模式的原理就是允许我们自定义http头部，让服务器与浏览器之间可以进行一定的沟通，而设置的方式是通过服务器端设置响应头的 Access-Control-Allow-Origin来达到目的，这样XMLHttpRequest 就能跨域了。
+
+&nbsp;&nbsp;&nbsp;&nbsp;一般要通过使用CORS来实现跨域访问的话，需要后端进行相应的跨域头的设置，需要设置我们的Access-Control-Allow-Origin 来自http://m.kaola.com，但是我们前端也要在options里面添加一些头部信息, options 里的headers 参数,如果不加这个参数会报一个无法预发送的错误：
+
+      headers: {
+                  'Content-Type' : 'application/x-www-form-urlencoded; charset=UTF-8'
+              }
+###(3)window.name+iframe 方式实现 其实这种实现方式就是iframe实现方式（还有一个window.postMessage 方法）   
+
+`iframe 相关的参考文献内容 （见 （4）中的内容总结）`
+
+&nbsp;&nbsp;&nbsp;&nbsp;window.name 在一个窗口或者标签的生命周期内是共享的，利用这个特性可以进行一些跨域数据的传输。这个原理可以称为 iframe 实现跨域访问的原理
+
+&nbsp;&nbsp;&nbsp;&nbsp;什么叫window.name 在不同页面中是共享的： window.name 的特征：window.name用户设置当前浏览器窗口的名字，它有一个特点就是浏览器刷新后，该属性会保持不变，所以我们可以使用这个属性进行跨域使用和跨页面使用。当然，这个特性也可能被其他网站所使用。存储在window.name 中的值一般可以存储到几MB左右。 该属性的值只能保存字符串，如果当浏览器窗口关闭以后所保存的值就会消失。window.name 的特征是在一个页面的声明周期内，窗口载入的
+
+&nbsp;&nbsp;&nbsp;&nbsp;具体的流程如下，可以看参考文章中的图片进行理解：
+
+* (1) a.com 下的a.com/request.html 页面上嵌入了一个iframe ,这个iframe 的src 一开始指向b.com/response.html
+
+* (2)b.com/response.html 中的脚本里面通过设置window.name 来设置要跨域存储的资源。比如我们在response.html中设置 window.name = "传递参数";
+
+* (3)然后我们通过js脚本修改iframe 中的资源指向，此时修改为与a.com同一目录下的proxy.html，因为proxy.html与request.html是同一个目录级别的，所以这时候我们创建的request.html是可以与iframe 进行通信的，所以我们可以拿到此时iframe中window.name的值
+
+* (4)将这个跨域得到的值拿到进行一系列callback 操作，然后我们关闭iframe的window并且移除我们body中的iframe 内容。
+
+&nbsp;&nbsp;&nbsp;&nbsp;比如我们将我们跨域实现的方式进行下面的处理:
+
+a.html 中的内容
+
+      var flag = true;
+      var requestUrl = 'http://localhost:8089/b.html'; //要请求的资源地址
+      var iframe = document.createElement(iframe);
+      iframe.src = requestUrl; //iframe 首先指向要跨域请求的资源内容
+
+      iframe.onload = function(){
+          if(flag){
+              //此时设置iframe 为a.html同级目录下的代理文件 此时我们就可以获取到iframe的window
+              iframe.src = 'proxy.html';//因为这里改变了iframe的资源所以我们又会进入一次iframe 的onload 事件
+
+              flag = false;
+          }else{
+              //修改过我们的src后我们进入了这个代码块
+              //然后我们就获取了data中的数据  因为这是第二次载入，已经同源了
+              console.log(iframe.data);
+              document.body.removeChild(iframe);
+              //移除嵌入的iframe
+              iframe.src = '';
+              iframe = null;
+          }
+      }
+b.html 中的内容 只需要存储我们要传递的数据
+
+      window.name = '这是b页面里面的数据';
+
+*（5）iframe 中子页面调用父级页面以及父页面调用子页面的总结 总结如下：
+
+A.在父级iframe 中通过调用iframe.contentWindow 获得子页面中的window
+
+B.在被嵌入iframe中的子页面里，可以通过parent获得父级页面的window对象，然后就可以获取父级元素内容
+
+      //iframe 中获取子iframe的window对象
+      <html>
+          <body>
+              <iframe src="test1.html" id="soniframe"></iframe>
+              <script>
+                  var sonWindow = document.getElementById('soniframe').contentWindow;
+                  var document = sonWindow.document;
+                  //然后我们就可以在document中获取子iframe中的结点内容
+              </script>
+          </body>
+      </html> 
+
+      //然后我们子iframe中可以通过parent来获取父级中的结点的元素和内容
+###（5）使用document.domain 实现跨域
+
+&nbsp;&nbsp;&nbsp;&nbsp;我们最简单的实现跨域的方式使用：document.domain的模式，但这种方式只适合使用与同一个主域，不同子域下的内容。比如foo.com 和 img.foo.com 之间，我们只要通过设置把这两个页面的document.domain都设置指向主域就可以了。eg.document.domain = 'foo.com';
+
+&nbsp;&nbsp;&nbsp;&nbsp;这样设置完成以后，父页面和子页面就可以像同一个域名下的两个页面之间进行访问了，父页面通过ifr.contentWindow就可以访问子页面的window，子页面通过parent.window或parent访问父页面的window，接下来可以进一步获取dom和js。
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h2 id=""> 跨域相关知识点复习</h2>
+
+<p>参考资料: <br>
+<a href="https://segmentfault.com/a/1190000004518374#articleHeader2">1.浅谈浏览器端JavaScript跨域解决方法</a> <br>
+<a href="http://www.alloyteam.com/2012/08/lightweight-solution-for-an-iframe-cross-domain-communication/">2.iframe 通信实现</a></p>
+
+<h2 id="">背景：</h2>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;在一次开发过程中，后端已经设置了可跨域的站点的头部，但是前端在请求的过程中还是出现了报错的内容，后来google 发现是需要在我们的请求的headers里面，设置相关的参数。于是再看一遍与跨域相关的内容</p>
+
+<h3 id="1jsonp">(1)JSONP 实现方式：</h3>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;jsonp 的实现方式，其实与ajax 并没有任何关系，我们使用jsonp实现跨域请求主要使用的原理是src属性是可以实现跨域请求的。比如我们的图片img 和我们的script 脚本。</p>
+
+<p>举个例子:</p>
+
+<p>a.html</p>
+
+<pre><code>  &lt;script&gt;
+      function callback(data){
+          console.log(data.url);
+      }
+  &lt;/scrpit&gt;
+  &lt;script src="b.js"&gt;&lt;/script&gt;
+</code></pre>
+
+<p>在b.js 里面我们有</p>
+
+<pre><code>  callback({url: "www.baidu.com"});
+</code></pre>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;那么跨域请求是如何实现的呢？我们是这样的，我们的callback 是在前端实现的，假设我们的要执行的内容是动态生成的，那么假设我们的数据内容不是一开始就有的，而是动态生成的，这就是jsonp的原理。在解释一下这个的具体原理，在jsonp的模式下，假设我们要请求的内容不是一个url地址，而是一个动态生成的脚本，其实就是我们看到如果是后端jsonp格式的输出我们得到的是：</p>
+
+<pre><code>  callback({"name": "Ann", "age":23, "habbits": "drawing"});
+</code></pre>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;这样请求得到的函数，就可以进行跨域执行了。因为前端已经在页面上定义好了这个callback函数，所以我们请求到这个脚本的时候便可以执行。</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;【注意】： 我们的jsonp 方式虽然可以实现很多跨域模式的访问，但是它只支持get模式的跨域请求方式，并且只支持http模式，所以受到了一定的限制</p>
+
+<h3 id="2corscrossoriginresourcesharing">(2)CORS 模式（Cross-Origin Resource Sharing 跨域资源共享）</h3>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;同源策略的模式如此变态，即使是同一公司的产品，也不可能所有的资源都在一个域上，所以网络设计者设计了CORS的模式。</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;CORS模式的原理就是允许我们自定义http头部，让服务器与浏览器之间可以进行一定的沟通，而设置的方式是通过服务器端设置响应头的 Access-Control-Allow-Origin来达到目的，这样XMLHttpRequest 就能跨域了。</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;一般要通过使用CORS来实现跨域访问的话，需要后端进行相应的跨域头的设置，需要设置我们的Access-Control-Allow-Origin 来自http://m.kaola.com，但是我们前端也要在options里面添加一些头部信息, options 里的headers 参数,如果不加这个参数会报一个无法预发送的错误：</p>
+
+<pre><code>  headers: {
+              'Content-Type' : 'application/x-www-form-urlencoded; charset=UTF-8'
+          }
+</code></pre>
+
+<h3 id="3windownameiframeiframewindowpostmessage">(3)window.name+iframe 方式实现 其实这种实现方式就是iframe实现方式（还有一个window.postMessage 方法）</h3>
+
+<p><code>iframe 相关的参考文献内容 （见 （4）中的内容总结）</code></p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;window.name 在一个窗口或者标签的生命周期内是共享的，利用这个特性可以进行一些跨域数据的传输。这个原理可以称为 iframe 实现跨域访问的原理</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;什么叫window.name 在不同页面中是共享的： window.name 的特征：window.name用户设置当前浏览器窗口的名字，它有一个特点就是浏览器刷新后，该属性会保持不变，所以我们可以使用这个属性进行跨域使用和跨页面使用。当然，这个特性也可能被其他网站所使用。存储在window.name 中的值一般可以存储到几MB左右。 该属性的值只能保存字符串，如果当浏览器窗口关闭以后所保存的值就会消失。window.name 的特征是在一个页面的声明周期内，窗口载入的</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;具体的流程如下，可以看参考文章中的图片进行理解：</p>
+
+<ul>
+<li><p>(1) a.com 下的a.com/request.html 页面上嵌入了一个iframe ,这个iframe 的src 一开始指向b.com/response.html</p></li>
+<li><p>(2)b.com/response.html 中的脚本里面通过设置window.name 来设置要跨域存储的资源。比如我们在response.html中设置 window.name = "传递参数";</p></li>
+<li><p>(3)然后我们通过js脚本修改iframe 中的资源指向，此时修改为与a.com同一目录下的proxy.html，因为proxy.html与request.html是同一个目录级别的，所以这时候我们创建的request.html是可以与iframe 进行通信的，所以我们可以拿到此时iframe中window.name的值</p></li>
+<li><p>(4)将这个跨域得到的值拿到进行一系列callback 操作，然后我们关闭iframe的window并且移除我们body中的iframe 内容。</p></li>
+</ul>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;比如我们将我们跨域实现的方式进行下面的处理:</p>
+
+<p>a.html 中的内容</p>
+
+<pre><code>  var flag = true;
+  var requestUrl = 'http://localhost:8089/b.html'; //要请求的资源地址
+  var iframe = document.createElement(iframe);
+  iframe.src = requestUrl; //iframe 首先指向要跨域请求的资源内容
+
+  iframe.onload = function(){
+      if(flag){
+          //此时设置iframe 为a.html同级目录下的代理文件 此时我们就可以获取到iframe的window
+          iframe.src = 'proxy.html';//因为这里改变了iframe的资源所以我们又会进入一次iframe 的onload 事件
+
+          flag = false;
+      }else{
+          //修改过我们的src后我们进入了这个代码块
+          //然后我们就获取了data中的数据  因为这是第二次载入，已经同源了
+          console.log(iframe.data);
+          document.body.removeChild(iframe);
+          //移除嵌入的iframe
+          iframe.src = '';
+          iframe = null;
+      }
+  }
+</code></pre>
+
+<p>b.html 中的内容 只需要存储我们要传递的数据</p>
+
+<pre><code>  window.name = '这是b页面里面的数据';
+</code></pre>
+
+<p>*（5）iframe 中子页面调用父级页面以及父页面调用子页面的总结 总结如下：</p>
+
+<p>A.在父级iframe 中通过调用iframe.contentWindow 获得子页面中的window</p>
+
+<p>B.在被嵌入iframe中的子页面里，可以通过parent获得父级页面的window对象，然后就可以获取父级元素内容</p>
+
+<pre><code>  //iframe 中获取子iframe的window对象
+  &lt;html&gt;
+      &lt;body&gt;
+          &lt;iframe src="test1.html" id="soniframe"&gt;&lt;/iframe&gt;
+          &lt;script&gt;
+              var sonWindow = document.getElementById('soniframe').contentWindow;
+              var document = sonWindow.document;
+              //然后我们就可以在document中获取子iframe中的结点内容
+          &lt;/script&gt;
+      &lt;/body&gt;
+  &lt;/html&gt; 
+
+  //然后我们子iframe中可以通过parent来获取父级中的结点的元素和内容
+</code></pre>
+
+<h3 id="5documentdomain">（5）使用document.domain 实现跨域</h3>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;我们最简单的实现跨域的方式使用：document.domain的模式，但这种方式只适合使用与同一个主域，不同子域下的内容。比如foo.com 和 img.foo.com 之间，我们只要通过设置把这两个页面的document.domain都设置指向主域就可以了。eg.document.domain = 'foo.com';</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;这样设置完成以后，父页面和子页面就可以像同一个域名下的两个页面之间进行访问了，父页面通过ifr.contentWindow就可以访问子页面的window，子页面通过parent.window或parent访问父页面的window，接下来可以进一步获取dom和js。</p>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "crossDomain.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
