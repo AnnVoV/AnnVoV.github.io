@@ -1,0 +1,193 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+### 函数节流的实现 throttle 和 debounce 方法实现
+
+--------------
+
+#### 一般在我们的window.onscroll 事件里面和我们的onresize 事件里面需要用到
+
+
+#### 1.throttle 函数节流实现（但是这种方式是每） 先执行在触发判断
+
+原理： 我们使用throttle的原理是依据时间间隔来判断是否触发某一个事件
+
+```
+	    //函数节流思路：控制某一个事件段函数的执行 只执行一次事件
+        var lastMousemoveTime = 0, mousemoveTime = 100;
+
+        //一开始的时候 lastMousemoveTime = 0 now = 当前时间
+
+        function mousemoveControl (){
+            //或者使用var now = +new Date;
+            var now = new Date().getTime();
+            if(now-lastMousemoveTime<mousemoveTime){
+                //如果时间间隔 < 规定的时间间隔直接return
+                return;
+            }
+            lastMousemoveTime = now;
+            setTimeout(function(){
+                console.info('业务逻辑');
+            }, mousemoveTime);
+            //说明我们每次间隔100ms 执行了一次函数  也就是10帧触发一次
+        }
+```
+
+#### 2.debounce 实现  判断完成后再执行
+
+原理：我们设置一个依据time 产生的变量，这种与上一种的区别在于我们的函数是在事件完成之后才执行的。比如我们的 onscroll 和onresize 事件.
+
+```
+	var resizeTimer = null;
+        function resizeListener(e){
+            if(resizeTimer){
+                clearTimeout(resizeTimer);
+            }
+            resizeTimer = setTimeout(function(){
+                console.log('业务逻辑在这里....');
+            },100);
+        }
+```
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h3 id="throttledebounce">函数节流的实现 throttle 和 debounce 方法实现</h3>
+
+<hr>
+
+<h4 id="windowonscrollonresize">一般在我们的window.onscroll 事件里面和我们的onresize 事件里面需要用到</h4>
+
+<h4 id="1throttle">1.throttle 函数节流实现（但是这种方式是每） 先执行在触发判断</h4>
+
+<p>原理： 我们使用throttle的原理是依据时间间隔来判断是否触发某一个事件</p>
+
+<pre><code>        //函数节流思路：控制某一个事件段函数的执行 只执行一次事件
+        var lastMousemoveTime = 0, mousemoveTime = 100;
+
+        //一开始的时候 lastMousemoveTime = 0 now = 当前时间
+
+        function mousemoveControl (){
+            //或者使用var now = +new Date;
+            var now = new Date().getTime();
+            if(now-lastMousemoveTime&lt;mousemoveTime){
+                //如果时间间隔 &lt; 规定的时间间隔直接return
+                return;
+            }
+            lastMousemoveTime = now;
+            setTimeout(function(){
+                console.info('业务逻辑');
+            }, mousemoveTime);
+            //说明我们每次间隔100ms 执行了一次函数  也就是10帧触发一次
+        }
+</code></pre>
+
+<h4 id="2debounce">2.debounce 实现  判断完成后再执行</h4>
+
+<p>原理：我们设置一个依据time 产生的变量，这种与上一种的区别在于我们的函数是在事件完成之后才执行的。比如我们的 onscroll 和onresize 事件.</p>
+
+<pre><code>    var resizeTimer = null;
+        function resizeListener(e){
+            if(resizeTimer){
+                clearTimeout(resizeTimer);
+            }
+            resizeTimer = setTimeout(function(){
+                console.log('业务逻辑在这里....');
+            },100);
+        }
+</code></pre>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "throttle.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
